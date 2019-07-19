@@ -4,7 +4,7 @@ This repo provides code for learning and evaluating joint video-text embeddings 
 
 ### Requirements
 
-The code assumes PyTorch 0.4 and Python 3.6 (other versions may work, but have not been tested).
+The code assumes PyTorch 1.1 and Python 3.7 (other versions may work, but have not been tested).
 
 ### Evaluating pretrained video embeddings
 
