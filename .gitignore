@@ -1,0 +1,10 @@
+__pycache__
+
+# nuisance nfs
+.nfs*
+
+# symlinked data
+data/
+
+# local dev files
+scratch/
