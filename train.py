@@ -1,6 +1,6 @@
 import argparse
-import collections
 import torch
+import os
 import data_loader.data_loaders as module_data
 import model.loss as module_loss
 import model.metric as module_metric
@@ -28,6 +28,7 @@ def main(config):
         module=module_arch,
         expert_modality_dim=expert_modality_dim,
         text_dim=config["experts"]["text_dim"],
+        disable_nan_checks=config["disable_nan_checks"],
     )
     logger.info(model)
 
@@ -52,6 +53,7 @@ def main(config):
         data_loaders=data_loaders,
         lr_scheduler=lr_scheduler,
         mini_train=config["mini_train"],
+        disable_nan_checks=config["disable_nan_checks"],
         visualizer=visualizer,
     )
     trainer.train()
@@ -65,5 +67,7 @@ if __name__ == '__main__':
                       help='path to latest checkpoint (default: None)')
     args.add_argument('--device', type=str, help="indices of GPUs to enable")
     args.add_argument('--mini_train', action="store_true")
+    args.add_argument("--dbg", default="ipdb.set_trace")
     args = ConfigParser(args)
+    os.environ["PYTHONBREAKPOINT"] = args._args.dbg
     main(config=args)
