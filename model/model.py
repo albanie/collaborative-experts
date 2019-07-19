@@ -84,7 +84,7 @@ class CENet(BaseModel):
         for mod, expected in expected_feat_sizes.items():
             if mod in expert_modality_dim.keys():
                 feature_size = expert_modality_dim[mod][0] // vlad_clusters[mod]
-                msg = "expected {} for {} features atm".format(expected, mod)
+                msg = f"expected {expected} for {mod} features atm"
                 assert feature_size == expected, msg
                 self.pooling[mod] = NetVLAD(
                     feature_size=feature_size,

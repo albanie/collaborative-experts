@@ -2,6 +2,7 @@
 TODO(samuel): Add attribution to cycle-gan codebase
 """
 import os
+import numpy as np
 from pathlib import Path
 from . import util, html
 
@@ -13,12 +14,13 @@ class Visualizer:
     (wrapped in 'HTML') for creating HTML files with images.
     """
 
-    def __init__(self, exp_name, log_dir, src_video_dir):
+    def __init__(self, exp_name, log_dir, src_video_dir, vis_vid_freq):
         """Initialize the Visualizer class
         Create an HTML object for saveing HTML filters
         """
         self.name = exp_name
         self.web_dir = log_dir
+        self.vis_vid_freq = vis_vid_freq
         self.img_dir = os.path.join(self.web_dir, "images")
         print(f"create web directory {self.web_dir}...")
         util.mkdirs([self.web_dir, self.img_dir])
@@ -28,6 +30,43 @@ class Visualizer:
         if sym_dir.is_symlink():
             os.remove(sym_dir)
         sym_dir.symlink_to(src_dir)
+
+    def visualize_ranking(self, conf_mat, epoch, meta, metric_groups):
+        if not (self.vis_vid_freq and epoch % self.vis_vid_freq == 0):
+            return
+
+        dists = -conf_mat
+        np.random.seed(0)
+        sorted_ranks = np.argsort(dists, axis=1)
+        gt_dists = np.diag(dists)
+        rankings = []
+        vis_top_k = 5
+        hide_gt = False
+        vis_rank_samples = 40
+        # num_indep_samples = 1
+        # random_seeds = np.arange(num_indep_samples)
+        sample = np.random.choice(np.arange(dists.shape[0]), size=vis_rank_samples)
+        for ii in sample:
+            ranked_idx = sorted_ranks[ii][:vis_top_k]
+            gt_captions = meta["raw_captions"][ii]
+            # if args.sample_single_gt_caption:
+            #     gt_captions = np.random.choice(gt_captions, 1).tolist()
+
+            datum = {
+                "gt-sim": -gt_dists[ii],
+                "gt-captions": gt_captions,
+                "gt-rank": np.where(sorted_ranks[ii] == ii)[0][0],
+                "gt-path": meta["paths"][ii],
+                "top-k-sims": -dists[ii][ranked_idx],
+                "top-k-paths": np.array(meta["paths"])[ranked_idx],
+                "hide-gt": hide_gt,
+            }
+            rankings.append(datum)
+        self.visualizer.display_current_results(
+            rankings,
+            epoch=epoch,
+            metrics=metric_groups["t2v_metrics"],
+        )
 
     def display_current_results(self, rankings, epoch, metrics):
         """Display current results on visdom; save current results to an HTML file.

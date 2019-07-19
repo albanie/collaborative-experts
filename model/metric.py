@@ -160,7 +160,7 @@ def v2t_metrics(sims, query_masks=None):
             _, idx = np.unique(rows_old, return_index=True)
             cols_old = cols_old[idx]
         num_diffs = (1 - (cols_old == query_ranks)).sum()
-        msg = "new metric doesn't match in {} places".format(num_diffs)
+        msg = f"new metric doesn't match in {num_diffs} places"
         assert np.array_equal(cols_old, query_ranks), msg
 
         # visualise the distance matrix

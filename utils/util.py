@@ -58,7 +58,7 @@ def np_loader(np_path, l2norm=False):
     tic = time.time()
     print("loading features from {}".format(np_path))
     with open(np_path, "rb") as f:
-        data = np.load(f, encoding="latin1")
+        data = np.load(f, encoding="latin1", allow_pickle=True)
     print("done in {:.3f}s".format(time.time() - tic))
     if isinstance(data, np.ndarray) and data.size == 1:
         data = data[()]  # handle numpy dict storage convnetion
