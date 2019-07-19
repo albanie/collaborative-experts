@@ -12,6 +12,7 @@ class ConfigParser:
     def __init__(self, args, options='', timestamp=True):
         # parse default and custom cli options
         for opt in options:
+            breakpoint()
             args.add_argument(*opt.flags, default=None, type=opt.type)
         args = args.parse_args()
 
@@ -29,17 +30,17 @@ class ConfigParser:
         # load config file and apply custom cli options
         config = read_json(self.cfg_fname)
         self._config = _update_config(config, options, args)
-        self._config["mini_train"] = args.mini_train
 
         # set save_dir where trained model and log will be saved.
         save_dir = Path(self.config['trainer']['save_dir'])
-        timestamp = datetime.now().strftime(r'%m%d_%H%M%S') if timestamp else ''
+        timestamp = datetime.now().strftime(r"%m-%d_%H-%M-%S") if timestamp else ""
 
         exper_name = self.cfg_fname.stem
         self._save_dir = save_dir / 'models' / exper_name / timestamp
         self._log_dir = save_dir / 'log' / exper_name / timestamp
         self._web_log_dir = save_dir / 'web' / exper_name / timestamp
         self._exper_name = exper_name
+        self._args = args
 
         self.save_dir.mkdir(parents=True, exist_ok=True)
         self.log_dir.mkdir(parents=True, exist_ok=True)
@@ -71,7 +72,7 @@ class ConfigParser:
         return self.config[name]
 
     def get_logger(self, name, verbosity=2):
-        msg_verbosity = 'verbosity option {} is invalid. Valid options are {}.'
+        msg_verbosity = "verbosity option {} is invalid. Valid options are {}."
         msg_verbosity = msg_verbosity.format(verbosity, self.log_levels.keys())
         assert verbosity in self.log_levels, msg_verbosity
         logger = logging.getLogger(name)
