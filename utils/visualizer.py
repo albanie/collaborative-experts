@@ -31,11 +31,11 @@ class Visualizer:
             os.remove(sym_dir)
         sym_dir.symlink_to(src_dir)
 
-    def visualize_ranking(self, conf_mat, epoch, meta, metric_groups):
+    def visualize_ranking(self, sims, epoch, meta, nested_metrics):
         if not (self.vis_vid_freq and epoch % self.vis_vid_freq == 0):
             return
 
-        dists = -conf_mat
+        dists = -sims
         np.random.seed(0)
         sorted_ranks = np.argsort(dists, axis=1)
         gt_dists = np.diag(dists)
@@ -62,10 +62,10 @@ class Visualizer:
                 "hide-gt": hide_gt,
             }
             rankings.append(datum)
-        self.visualizer.display_current_results(
+        self.display_current_results(
             rankings,
             epoch=epoch,
-            metrics=metric_groups["t2v_metrics"],
+            metrics=nested_metrics["t2v_metrics"],
         )
 
     def display_current_results(self, rankings, epoch, metrics):

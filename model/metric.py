@@ -178,10 +178,10 @@ def v2t_metrics(sims, query_masks=None):
 
 def cols2metrics(cols, num_queries):
     metrics = {}
-    metrics["R1"] = float(np.sum(cols == 0)) / num_queries
-    metrics["R5"] = float(np.sum(cols < 5)) / num_queries
-    metrics["R10"] = float(np.sum(cols < 10)) / num_queries
-    metrics["R50"] = float(np.sum(cols < 50)) / num_queries
+    metrics["R1"] = 100 * float(np.sum(cols == 0)) / num_queries
+    metrics["R5"] = 100 * float(np.sum(cols < 5)) / num_queries
+    metrics["R10"] = 100 * float(np.sum(cols < 10)) / num_queries
+    metrics["R50"] = 100 * float(np.sum(cols < 50)) / num_queries
     metrics["MedR"] = np.median(cols) + 1
     metrics["MeanR"] = np.mean(cols) + 1
     return metrics

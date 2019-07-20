@@ -21,3 +21,4 @@ def setup_logging(save_dir, log_config='logger/logger_config.json',
     else:
         print(f"Warning: logging configuration file is not found in {log_config}.")
         logging.basicConfig(level=default_level)
+    return config["handlers"]["info_file_handler"]["filename"]
