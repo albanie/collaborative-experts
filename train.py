@@ -12,6 +12,7 @@ from logger.log_parser import log_summary
 import utils.visualizer as module_vis
 from parse_config import ConfigParser
 from trainer import Trainer
+from test import evaluation
 
 
 def main(config):
@@ -68,6 +69,18 @@ def main(config):
             visualizer=visualizer,
         )
         trainer.train()
+        best_ckpt_path = config.save_dir / "trained_model.pth"
+
+        # If the dataset supports separate validation/test splits, the training config
+        # json should specify an `eval_config` entry with the path to the test
+        # configuration
+        if config._config.get("eval_config", False):
+            args = argparse.ArgumentParser()
+            args.add_argument("--config", default=config["eval_config"])
+            args.add_argument("--device", default=config._args.device)
+            args.add_argument("--resume", default=best_ckpt_path)
+            eval_config = ConfigParser(args, ignore_argv=True)
+            evaluation(eval_config)
 
     # If multiple runs were conducted, report relevant statistics
     if len(seeds) > 1:
@@ -77,6 +90,13 @@ def main(config):
             eval_mode=config["eval_mode"],
             fixed_num_epochs=config["trainer"]["epochs"],
         )
+    print(f"Log file stored at {config.log_path}")
+
+    # Report the location of the "best" checkpoint of the final seeded run (here
+    # "best" corresponds to the model with the highest geometric mean over the
+    # R@1, R@5 and R@10 metrics when a validation set is used, or simply the final
+    # epoch of training for fixed-length schedules).
+    print(f"The best performing ckpt can be found at {str(best_ckpt_path)}")
 
 
 if __name__ == '__main__':
@@ -91,4 +111,12 @@ if __name__ == '__main__':
     args.add_argument("--dbg", default="ipdb.set_trace")
     args = ConfigParser(args)
     os.environ["PYTHONBREAKPOINT"] = args._args.dbg
+
+    msg = (f"Expected the number of training epochs ({args['trainer']['epochs']})"
+           f"to exceed the save period ({args['trainer']['save_period']}), otherwise"
+           " no checkpoints will be saved.")
+    assert args["trainer"]["epochs"] >= args["trainer"]["save_period"], msg
+
+    print("Launching experiment with config:")
+    print(args)
     main(config=args)
