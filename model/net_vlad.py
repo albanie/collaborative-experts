@@ -54,6 +54,8 @@ class NetVLAD(nn.Module):
             ipdb.set_trace()
         max_sample = x.size()[1]
         x = x.view(-1, self.feature_size)  # B x N x D -> BN x D
+        if x.device != self.clusters.device:
+            import ipdb; ipdb.set_trace()
         assignment = th.matmul(x, self.clusters)  # (BN x D) x (D x K) -> BN x K
 
         if self.add_batch_norm:

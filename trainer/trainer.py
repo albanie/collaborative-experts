@@ -1,7 +1,42 @@
-import numpy as np
 import torch
+import numpy as np
 from contextlib import contextmanager
 from base import BaseTrainer
+
+
+def verbose(epoch, metrics, mode, name="TEST"):
+    r1, r5, r10, r50 = metrics["R1"], metrics["R5"], metrics["R10"], metrics["R50"]
+    msg = f"[{mode}]{name:s} epoch {epoch}, R@1: {r1:.1f}"
+    msg += f", R@5: {r5:.1f}, R@10 {r10:.1f}, R@50 {r50:.1f}"
+    msg += f"MedR: {metrics['MedR']:g}, MeanR: {metrics['MeanR']:.1f}"
+    print(msg)
+
+
+@contextmanager
+def valid_samples(samples, device, disable_nan_checks):
+    """Provide a context for managing temporary, cloned copies of retrieval
+    sample tensors.
+
+    The rationale here is that to use nan-checking in the model (to validate the
+    positions of missing experts), we need to modify the underlying tensors. This
+    function lets the evaluation code run (and modify) temporary copies, without
+    modifying the originals.
+    """
+    if disable_nan_checks:
+        print("running without nan checks")
+        yield samples
+    else:
+        exp_dict = samples["experts"].items()
+        experts = {key: val.clone().to(device) for key, val in exp_dict}
+        samples_ = {
+            "experts": experts,
+            "ind": samples["ind"],
+            "text": samples["text"].to(device),
+        }
+        try:
+            yield samples_
+        finally:
+            del samples_
 
 
 class Trainer(BaseTrainer):
@@ -12,7 +47,8 @@ class Trainer(BaseTrainer):
         Inherited from BaseTrainer.
     """
     def __init__(self, model, loss, metrics, optimizer, config, data_loaders,
-                 lr_scheduler, visualizer, disable_nan_checks, mini_train=False):
+                 lr_scheduler, visualizer, disable_nan_checks, skip_first_n_saves,
+                 mini_train=False):
         super().__init__(model, loss, metrics, optimizer, config)
         self.config = config
         self.data_loaders = data_loaders
@@ -22,6 +58,7 @@ class Trainer(BaseTrainer):
         self.len_epoch = len(self.data_loaders["train"])
         self.log_step = int(np.sqrt(data_loaders["train"].batch_size))
         self.visualizer = visualizer
+        self.skip_first_n_saves = skip_first_n_saves
 
     def _train_epoch(self, epoch):
         """
@@ -72,44 +109,9 @@ class Trainer(BaseTrainer):
 
         return log
 
-    def verbose(self, epoch, metrics, mode, name="TEST"):
-        r1, r5, r10, r50 = metrics["R1"], metrics["R5"], metrics["R10"], metrics["R50"]
-        msg = f"[{mode}]{name:s} epoch {epoch}, R@1: {r1:.1f}"
-        msg += f", R@5: {r5:.1f}, R@10 {r10:.1f}, R@50 {r50:.1f}"
-        msg += f"MedR: {metrics['MedR']:g}, MeanR: {metrics['MeanR']:.1f}"
-        print(msg)
-        # print(msg.format(mode, name, epoch, 100 * r1, 100 * r5, 100 * r10, 100 * r50,
-        #                  mdr, mnr))
-
     def log_metrics(self, metric_store, epoch, metric_name):
         for key, value in metric_store.items():
             self.writer.add_scalar(f"{metric_name}/{key}", value, epoch)
-
-    @contextmanager
-    def valid_samples(self, retrieval_samples):
-        """Provide a context for managing temporary, cloned copies of retrieval
-        sample tensors.
-
-        The rationale here is that to use nan-checking in the model (to validate the
-        positions of missing experts), we need to modify the underlying tensors. This
-        function lets the evaluation code run (and modify) temporary copies, without
-        modifying the originals.
-        """
-        if self.disable_nan_checks:
-            print("running without nan checks")
-            yield retrieval_samples
-        else:
-            exp_dict = retrieval_samples["experts"].items()
-            experts = {key: val.clone().to(self.device) for key, val in exp_dict}
-            retrieval_samples_ = {
-                "experts": experts,
-                "ind": retrieval_samples["ind"],
-                "text": retrieval_samples["text"].to(self.device),
-            }
-            try:
-                yield retrieval_samples_
-            finally:
-                del retrieval_samples_
 
     def _valid_epoch(self, epoch):
         """Validate model after an epoch of training and store results to disk.
@@ -125,11 +127,11 @@ class Trainer(BaseTrainer):
         self.model.eval()
         self.writer.mode = "val"
         with torch.no_grad():
-            retrieval_samples, meta = self.data_loaders["retrieval"]
+            samples, meta = self.data_loaders["retrieval"]
 
             # To use the nan-checks safely, we need make temporary copies of the data
-            with self.valid_samples(retrieval_samples) as samples:
-                output = self.model(**samples)
+            with valid_samples(samples, self.device, self.disable_nan_checks) as valid:
+                output = self.model(**valid)
 
             sims = output["cross_view_conf_matrix"].data.cpu().float().numpy()
             dataset = self.data_loaders.dataset_name
@@ -137,7 +139,7 @@ class Trainer(BaseTrainer):
             for metric in self.metrics:
                 metric_name = metric.__name__
                 res = metric(sims, query_masks=meta["query_masks"])
-                self.verbose(epoch=epoch, metrics=res, name=dataset, mode=metric_name)
+                verbose(epoch=epoch, metrics=res, name=dataset, mode=metric_name)
                 self.log_metrics(metric_store=res, epoch=epoch, metric_name=metric_name)
                 nested_metrics[metric_name] = res
 

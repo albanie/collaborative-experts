@@ -1,4 +1,5 @@
 import torch
+import scipy.stats
 import numpy as np
 
 
@@ -37,9 +38,11 @@ def t2v_metrics(sims, query_masks=None):
     num_queries, num_vids = sims.shape
     dists = -sims
     sorted_dists = np.sort(dists, axis=1)
+
     if False:
         import sys
         import matplotlib
+        from pathlib import Path
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
         sys.path.insert(0, str(Path.home() / "coding/src/zsvision/python"))
@@ -184,5 +187,7 @@ def cols2metrics(cols, num_queries):
     metrics["R50"] = 100 * float(np.sum(cols < 50)) / num_queries
     metrics["MedR"] = np.median(cols) + 1
     metrics["MeanR"] = np.mean(cols) + 1
+    stats = [metrics[x] for x in ("R1", "R5", "R10")]
+    metrics["geometric_mean_R1-R5-R10"] = scipy.stats.mstats.gmean(stats)
     return metrics
 

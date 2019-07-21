@@ -14,7 +14,7 @@ class Visualizer:
     (wrapped in 'HTML') for creating HTML files with images.
     """
 
-    def __init__(self, exp_name, log_dir, src_video_dir, vis_vid_freq):
+    def __init__(self, exp_name, log_dir, src_video_dir, vis_vid_freq, num_samples=50):
         """Initialize the Visualizer class
         Create an HTML object for saveing HTML filters
         """
@@ -22,6 +22,7 @@ class Visualizer:
         self.web_dir = log_dir
         self.vis_vid_freq = vis_vid_freq
         self.img_dir = os.path.join(self.web_dir, "images")
+        self.num_samples = num_samples
         print(f"create web directory {self.web_dir}...")
         util.mkdirs([self.web_dir, self.img_dir])
         src_dir = Path(src_video_dir).absolute()
@@ -42,10 +43,10 @@ class Visualizer:
         rankings = []
         vis_top_k = 5
         hide_gt = False
-        vis_rank_samples = 40
         # num_indep_samples = 1
         # random_seeds = np.arange(num_indep_samples)
-        sample = np.random.choice(np.arange(dists.shape[0]), size=vis_rank_samples)
+        sample = np.random.choice(np.arange(dists.shape[0]), size=self.num_samples,
+                                  replace=False)
         for ii in sample:
             ranked_idx = sorted_ranks[ii][:vis_top_k]
             gt_captions = meta["raw_captions"][ii]

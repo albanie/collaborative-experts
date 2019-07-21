@@ -1,10 +1,10 @@
-__pycache__
-
-# nuisance nfs
-.nfs*
-
 # symlinked data
-data/
+data
 
 # local dev files
 scratch/
+
+# nuisance files
+*.DS_Store
+.nfs*
+__pycache__

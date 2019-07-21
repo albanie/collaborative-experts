@@ -2,6 +2,9 @@
 modified from this code:
 https://github.com/antoine77340/Mixture-of-Embedding-Experts/blob/master/loss.py
 
+The modification is the `fix_norm` conditional, which removes zero terms from the
+diagonal when performing the averaging calculation.
+
 Original licence below.
 """
 # Copyright 2018 Antoine Miech All Rights Reserved.

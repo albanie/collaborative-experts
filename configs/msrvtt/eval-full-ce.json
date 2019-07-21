@@ -1,0 +1,58 @@
+{
+    "n_gpu": 1,
+    "seed": 0,
+    "disable_nan_checks": false,
+    "experts": {
+        "face_dim": 512,
+        "drop_feats": "",
+        "text_feat": "openai",
+        "text_dim": 768
+    },
+    "arch": {
+        "type": "CENet",
+        "args": {
+            "keep_missing_modalities": false,
+            "test_caption_mode": "indep",
+            "use_ce": true,
+            "l2renorm": false,
+            "randomise_feats": "",
+            "vlad_clusters": {
+                "text": 32,
+                "audio": 16,
+                "speech": 32,
+                "ocr": 32
+            }
+        }
+    },
+
+    "data_loader": {
+        "type": "MSRVTTDataLoader",
+        "args":{
+            "data_dir": "data/MSRVTT",
+            "batch_size": 64,
+            "split_name": "full-test",
+            "num_workers": 4,
+            "num_test_captions": 1,
+            "rgb_model_name": "senet154",
+            "feat_aggregation": {
+                "scene": "avg",
+                "rgb": "avg",
+                "flow": "avg",
+                "face": "avg",
+                "audio": "vlad",
+                "speech": "vlad"
+            }
+        }
+    },
+    "metrics": [
+        "t2v_metrics",
+        "v2t_metrics"
+    ],
+    "visualizer": {
+        "type": "Visualizer",
+        "args":{
+            "src_video_dir": "data/MSRVTT/videos/all",
+            "vis_vid_freq": 1
+        }
+    },
+}

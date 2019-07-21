@@ -1,8 +1,12 @@
 {
     "n_gpu": 1,
     "seed": 0,
+    "disable_nan_checks": false,
+    "log_name": "info.json",
+    "eval_mode": "test_run",
+    "eval_config": "configs/msrvtt/eval-full-split-ce.json",
     "experts": {
-        "face_dim": 128,
+        "face_dim": 512,
         "drop_feats": "",
         "text_feat": "openai",
         "text_dim": 768
@@ -12,9 +16,8 @@
         "args": {
             "keep_missing_modalities": false,
             "test_caption_mode": "indep",
-            "use_ce": false,
+            "use_ce": true,
             "l2renorm": false,
-            "disable_nan_checks": false,
             "randomise_feats": "",
             "vlad_clusters": {
                 "text": 32,
@@ -30,7 +33,7 @@
         "args":{
             "data_dir": "data/MSRVTT",
             "batch_size": 64,
-            "split_name": "miech",
+            "split_name": "full-val",
             "num_workers": 4,
             "num_test_captions": 1,
             "rgb_model_name": "senet154",
@@ -66,7 +69,8 @@
     "visualizer": {
         "type": "Visualizer",
         "args":{
-            "src_video_dir": "data/MSRVTT/videos/all"
+            "src_video_dir": "data/MSRVTT/videos/all",
+            "vis_vid_freq": 10
         }
     },
     "lr_scheduler": {
@@ -77,11 +81,11 @@
         }
     },
     "trainer": {
-        "epochs": 100,
+        "epochs": 2,
         "save_dir": "data/saved/",
-        "save_period": 1,
+        "save_period": 2,
         "verbosity": 2,
         "tensorboard": true,
-        "monitor": "off"
+        "monitor": "max val_t2v_metrics_geometric_mean_R1-R5-R10"
     }
 }

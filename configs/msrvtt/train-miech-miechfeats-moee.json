@@ -1,11 +1,13 @@
 {
     "n_gpu": 1,
     "seed": 0,
+    "disable_nan_checks": false,
+    "eval_mode": "fixed_num_epochs",
     "experts": {
         "face_dim": 128,
-        "drop_feats": "ocr,speech,scene",
-        "text_feat": "openai",
-        "text_dim": 768
+        "drop_feats": "scene,ocr,speech",
+        "text_feat": "w2v",
+        "text_dim": 300
     },
     "arch": {
         "type": "CENet",
@@ -14,7 +16,6 @@
             "test_caption_mode": "indep",
             "use_ce": false,
             "l2renorm": false,
-            "disable_nan_checks": false,
             "randomise_feats": "",
             "vlad_clusters": {
                 "text": 32,
@@ -33,7 +34,7 @@
             "split_name": "miech",
             "num_workers": 4,
             "num_test_captions": 1,
-            "rgb_model_name": "resnet",
+            "rgb_model_name": "senet154",
             "feat_aggregation": {
                 "scene": "avg",
                 "rgb": "avg",
@@ -66,7 +67,9 @@
     "visualizer": {
         "type": "Visualizer",
         "args":{
-            "src_video_dir": "data/MSRVTT/videos/all"
+            "src_video_dir": "data/MSRVTT/videos/all",
+            "vis_vid_freq": 50,
+            "num_samples": 100
         }
     },
     "lr_scheduler": {
@@ -79,9 +82,9 @@
     "trainer": {
         "epochs": 100,
         "save_dir": "data/saved/",
-        "save_period": 1,
+        "save_period": 50,
         "verbosity": 2,
         "tensorboard": true,
-        "monitor": "off"
+        "monitor": "max epoch"
     }
 }

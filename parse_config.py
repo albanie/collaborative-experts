@@ -1,4 +1,5 @@
 import os
+import pprint
 import logging
 from pathlib import Path
 from functools import reduce
@@ -9,12 +10,15 @@ from utils import read_json, write_json
 
 
 class ConfigParser:
-    def __init__(self, args, options='', timestamp=True):
+    def __init__(self, args, options='', timestamp=True, ignore_argv=False):
         # parse default and custom cli options
         for opt in options:
-            breakpoint()
             args.add_argument(*opt.flags, default=None, type=opt.type)
-        args = args.parse_args()
+
+        if ignore_argv:
+            args = args.parse_args(args=[])
+        else:
+            args = args.parse_args()
 
         if args.device:
             os.environ["CUDA_VISIBLE_DEVICES"] = args.device
@@ -49,7 +53,8 @@ class ConfigParser:
         write_json(self.config, self.save_dir / 'config.json')
 
         # configure logging module
-        setup_logging(self.log_dir)
+        self.log_path = setup_logging(self.log_dir)
+
         self.log_levels = {
             0: logging.WARNING,
             1: logging.INFO,
@@ -57,8 +62,7 @@ class ConfigParser:
         }
 
     def init(self, name, module, *args, **kwargs):
-        """
-        finds a function handle with the name given as 'type' in config, and returns
+        """Finds a function handle with the name given as 'type' in config, and returns
         the instance initialized with corresponding keyword args given as 'args'.
         """
         module_name = self[name]['type']
@@ -91,6 +95,9 @@ class ConfigParser:
     @property
     def log_dir(self):
         return self._log_dir
+
+    def __repr__(self):
+        return pprint.PrettyPrinter().pformat(self.__dict__)
 
 
 # helper functions used to update config dict with custom cli options

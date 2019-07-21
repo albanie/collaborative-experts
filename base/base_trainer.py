@@ -1,14 +1,13 @@
 import torch
 from abc import abstractmethod
+import time
 from numpy import inf
 from logger import TensorboardWriter
 
 
 class BaseTrainer:
+    """ Base class for all trainers
     """
-    Base class for all trainers
-    """
-
     def __init__(self, model, loss, metrics, optimizer, config):
         self.config = config
         self.logger = config.get_logger(
@@ -53,16 +52,14 @@ class BaseTrainer:
 
     @abstractmethod
     def _train_epoch(self, epoch):
-        """
-        Training logic for an epoch
+        """Training logic for an epoch
 
         :param epoch: Current epoch number
         """
         raise NotImplementedError
 
     def train(self):
-        """
-        Full training logic
+        """Full training logic
         """
         for epoch in range(self.start_epoch, self.epochs + 1):
             result = self._train_epoch(epoch)
@@ -76,6 +73,11 @@ class BaseTrainer:
                 elif key == 'val_metrics':
                     log.update({'val_' + mtr.__name__: value[i]
                                 for i, mtr in enumerate(self.metrics)})
+                elif key == 'nested_val_metrics':
+                    # NOTE: currently only supports two layers of nesting
+                    for subkey, subval in value.items():
+                        for subsubkey, subsubval in subval.items():
+                            log[f"val_{subkey}_{subsubkey}"] = subsubval
                 else:
                     log[key] = value
 
@@ -83,7 +85,7 @@ class BaseTrainer:
             for key, value in log.items():
                 self.logger.info('    {:15s}: {}'.format(str(key), value))
 
-            # eval model according to configured metric, save best # ckpt as model_best
+            # eval model according to configured metric, save best # ckpt as trained_model
             best = False
             if self.mnt_mode != 'off':
                 try:
@@ -112,7 +114,18 @@ class BaseTrainer:
                                      "Training stops.".format(self.early_stop))
                     break
 
-            if epoch % self.save_period == 0:
+            # If checkpointing is done intermittently, still save models that outperform
+            # the best metric
+            save_best = best and not self.mnt_metric == "epoch"
+
+            # Due to the fast runtime/slow HDD combination, checkpointing can dominate
+            # the total training time, so we optionally skip checkpoints for some of
+            # the first epochs
+            if epoch <= self.skip_first_n_saves:
+                msg = f"Skipping ckpt save at epoch {epoch} <= {self.skip_first_n_saves}"
+                self.logger.info(msg)
+
+            if epoch % self.save_period == 0 or save_best:
                 self._save_checkpoint(epoch, save_best=best)
 
     def _prepare_device(self, n_gpu_use):
@@ -134,12 +147,11 @@ class BaseTrainer:
         return device, list_ids
 
     def _save_checkpoint(self, epoch, save_best=False):
-        """
-        Saving checkpoints
+        """Saving checkpoints
 
         :param epoch: current epoch number
         :param log: logging information of the epoch
-        :param save_best: if True, rename the saved checkpoint to 'model_best.pth'
+        :param save_best: if True, rename the saved checkpoint to 'trained_model.pth'
         """
         arch = type(self.model).__name__
         state = {
@@ -152,16 +164,18 @@ class BaseTrainer:
         }
         filename = str(self.checkpoint_dir /
                        'checkpoint-epoch{}.pth'.format(epoch))
-        torch.save(state, filename)
+        tic = time.time()
         self.logger.info("Saving checkpoint: {} ...".format(filename))
+        torch.save(state, filename)
+        self.logger.info(f"Done in {time.time() - tic:.3f}s")
         if save_best:
-            best_path = str(self.checkpoint_dir / 'model_best.pth')
+            self.logger.info("Updating 'best' checkpoint: {} ...".format(filename))
+            best_path = str(self.checkpoint_dir / 'trained_model.pth')
             torch.save(state, best_path)
-            self.logger.info("Saving current best: model_best.pth ...")
+            self.logger.info(f"Done in {time.time() - tic:.3f}s")
 
     def _resume_checkpoint(self, resume_path):
-        """
-        Resume from saved checkpoints
+        """ Resume from saved checkpoints
 
         :param resume_path: Checkpoint path to be resumed
         """
