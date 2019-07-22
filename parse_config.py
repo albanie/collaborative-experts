@@ -1,4 +1,5 @@
 import os
+import time
 import pprint
 import logging
 from pathlib import Path
@@ -10,19 +11,23 @@ from utils import read_json, write_json
 
 
 class ConfigParser:
-    def __init__(self, args, options='', timestamp=True, ignore_argv=False):
+    def __init__(self, args, options='', timestamp=True, slave_mode=False):
+        # slave_mode - when calling the config parser form an existing process, we
+        # avoid reinitialising the logger and ignore sys.argv when argparsing.
+
         # parse default and custom cli options
         for opt in options:
             args.add_argument(*opt.flags, default=None, type=opt.type)
 
-        if ignore_argv:
+        if slave_mode:
             args = args.parse_args(args=[])
         else:
             args = args.parse_args()
 
         if args.device:
             os.environ["CUDA_VISIBLE_DEVICES"] = args.device
-        if args.resume:
+
+        if args.resume and not slave_mode:
             self.resume = Path(args.resume)
             self.cfg_fname = self.resume.parent / 'config.json'
         else:
@@ -35,16 +40,38 @@ class ConfigParser:
         config = read_json(self.cfg_fname)
         self._config = _update_config(config, options, args)
 
+        if self._config.get("eval_config", False):
+            # validate path to evaluation file
+            eval_cfg_path = self._config.get("eval_config")
+            msg = f"eval_config was specified, but `{eval_cfg_path}` does not exist"
+            assert Path(self._config.get("eval_config")).exists(), msg
+
         # set save_dir where trained model and log will be saved.
         save_dir = Path(self.config['trainer']['save_dir'])
         timestamp = datetime.now().strftime(r"%m-%d_%H-%M-%S") if timestamp else ""
 
-        exper_name = self.cfg_fname.stem
+        if slave_mode:
+            timestamp = f"{timestamp}-eval-worker"
+
+        # We assume that the config files are organised into directories such that
+        # each directory has the name of the dataset.
+        dataset_name = self.cfg_fname.parent.stem
+        exper_name = f"{dataset_name}-{self.cfg_fname.stem}"
         self._save_dir = save_dir / 'models' / exper_name / timestamp
         self._log_dir = save_dir / 'log' / exper_name / timestamp
         self._web_log_dir = save_dir / 'web' / exper_name / timestamp
         self._exper_name = exper_name
         self._args = args
+
+        # if set, remove all previous experiments with the current config
+        if vars(args).get("purge_exp_dir", False):
+            for dirpath in (self._save_dir, self._log_dir, self._web_log_dir):
+                config_dir = dirpath.parent
+                existing = list(config_dir.glob("*"))
+                print(f"purging {len(existing)} directories from config_dir...")
+                tic = time.time()
+                os.system(f"rm -rf {config_dir}")
+                print(f"Finished purge in {time.time() - tic:.3f}s")
 
         self.save_dir.mkdir(parents=True, exist_ok=True)
         self.log_dir.mkdir(parents=True, exist_ok=True)
@@ -53,7 +80,8 @@ class ConfigParser:
         write_json(self.config, self.save_dir / 'config.json')
 
         # configure logging module
-        self.log_path = setup_logging(self.log_dir)
+        if not slave_mode:
+            self.log_path = setup_logging(self.log_dir)
 
         self.log_levels = {
             0: logging.WARNING,

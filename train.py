@@ -1,5 +1,6 @@
 import argparse
 import torch
+import time
 import os
 import numpy as np
 import random
@@ -22,6 +23,7 @@ def main(config):
 
     for seed in seeds:
         # Set the random initial seeds
+        tic = time.time()
         logger.info(f"Setting experiment random seed to {seed}")
         random.seed(seed)
         np.random.seed(seed)
@@ -67,20 +69,24 @@ def main(config):
             mini_train=config._args.mini_train,
             disable_nan_checks=config["disable_nan_checks"],
             visualizer=visualizer,
+            skip_first_n_saves=config["trainer"].get("skip_first_n_saves", 0),
         )
         trainer.train()
         best_ckpt_path = config.save_dir / "trained_model.pth"
+        duration = time.strftime('%H:%M:%S', time.gmtime(time.time() - tic))
+        logger.info(f"Training took {duration}")
 
         # If the dataset supports separate validation/test splits, the training config
         # json should specify an `eval_config` entry with the path to the test
         # configuration
         if config._config.get("eval_config", False):
-            args = argparse.ArgumentParser()
-            args.add_argument("--config", default=config["eval_config"])
-            args.add_argument("--device", default=config._args.device)
-            args.add_argument("--resume", default=best_ckpt_path)
-            eval_config = ConfigParser(args, ignore_argv=True)
-            evaluation(eval_config)
+            eval_args = argparse.ArgumentParser()
+            eval_args.add_argument("--config", default=config["eval_config"])
+            eval_args.add_argument("--device", default=config._args.device)
+            eval_args.add_argument("--resume", default=best_ckpt_path)
+            eval_config = ConfigParser(eval_args, slave_mode=True)
+            import ipdb; ipdb.set_trace()
+            evaluation(eval_config, logger=logger)
 
     # If multiple runs were conducted, report relevant statistics
     if len(seeds) > 1:
@@ -108,6 +114,8 @@ if __name__ == '__main__':
     args.add_argument('--device', type=str, help="indices of GPUs to enable")
     args.add_argument('--mini_train', action="store_true")
     args.add_argument('--seeds', default="0", help="comma separated list of seeds")
+    args.add_argument('--purge_exp_dir', action="store_true",
+                      help="remove all previous experiments with the given config")
     args.add_argument("--dbg", default="ipdb.set_trace")
     args = ConfigParser(args)
     os.environ["PYTHONBREAKPOINT"] = args._args.dbg

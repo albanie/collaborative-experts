@@ -2,10 +2,8 @@
     "n_gpu": 1,
     "seed": 0,
     "disable_nan_checks": false,
-    "log_name": "info.json",
-    "eval_mode": "fixed_num_epochs",
     "experts": {
-        "face_dim": 128,
+        "face_dim": 512,
         "drop_feats": "",
         "text_feat": "openai",
         "text_dim": 768
@@ -28,14 +26,13 @@
     },
 
     "data_loader": {
-        "type": "ExpertDataLoader",
+        "type": "MSVDDataLoader",
         "args":{
-            "dataset_name": "MSRVTT",
-            "data_dir": "data/MSRVTT",
+            "data_dir": "data/MSVD",
             "batch_size": 64,
-            "split_name": "miech",
+            "split_name": "official",
             "num_workers": 4,
-            "num_test_captions": 1,
+            "num_test_captions": 81,
             "rgb_model_name": "senet154",
             "feat_aggregation": {
                 "scene": "avg",
@@ -47,21 +44,6 @@
             }
         }
     },
-    "optimizer": {
-        "type": "Adam",
-        "args":{
-            "lr": 0.0004,
-            "weight_decay": 0,
-            "amsgrad": true
-        }
-    },
-    "loss": {
-        "type": "MaxMarginRankingLoss",
-        "args":{
-            "margin": 0.2,
-            "fix_norm": true
-        }
-    },
     "metrics": [
         "t2v_metrics",
         "v2t_metrics"
@@ -69,23 +51,8 @@
     "visualizer": {
         "type": "Visualizer",
         "args":{
-            "src_video_dir": "data/MSRVTT/videos/all",
-            "vis_vid_freq": 10
+            "src_video_dir": "data/MSVD/videos",
+            "vis_vid_freq": 1
         }
-    },
-    "lr_scheduler": {
-        "type": "StepLR",
-        "args": {
-            "step_size": 1,
-            "gamma": 0.95
-        }
-    },
-    "trainer": {
-        "epochs": 100,
-        "save_dir": "data/saved/",
-        "save_period": 20,
-        "verbosity": 2,
-        "tensorboard": true,
-        "monitor": "max epoch"
     }
 }

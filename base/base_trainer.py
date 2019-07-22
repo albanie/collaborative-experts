@@ -121,9 +121,10 @@ class BaseTrainer:
             # Due to the fast runtime/slow HDD combination, checkpointing can dominate
             # the total training time, so we optionally skip checkpoints for some of
             # the first epochs
-            if epoch <= self.skip_first_n_saves:
+            if epoch < self.skip_first_n_saves:
                 msg = f"Skipping ckpt save at epoch {epoch} <= {self.skip_first_n_saves}"
                 self.logger.info(msg)
+                continue
 
             if epoch % self.save_period == 0 or save_best:
                 self._save_checkpoint(epoch, save_best=best)

@@ -27,8 +27,9 @@
     },
 
     "data_loader": {
-        "type": "MSRVTTDataLoader",
+        "type": "ExpertDataLoader",
         "args":{
+            "dataset_name": "MSRVTT",
             "data_dir": "data/MSRVTT",
             "batch_size": 64,
             "split_name": "miech",

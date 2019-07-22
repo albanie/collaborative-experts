@@ -26,13 +26,14 @@
     },
 
     "data_loader": {
-        "type": "MSRVTTDataLoader",
+        "type": "ExpertDataLoader",
         "args":{
+            "dataset_name": "MSRVTT",
             "data_dir": "data/MSRVTT",
             "batch_size": 64,
             "split_name": "full-test",
             "num_workers": 4,
-            "num_test_captions": 1,
+            "num_test_captions": 20,
             "rgb_model_name": "senet154",
             "feat_aggregation": {
                 "scene": "avg",
@@ -54,5 +55,5 @@
             "src_video_dir": "data/MSRVTT/videos/all",
             "vis_vid_freq": 1
         }
-    },
+    }
 }

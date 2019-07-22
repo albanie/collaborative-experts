@@ -10,7 +10,7 @@ class TensorboardWriter():
         if enabled:
             log_dir = str(log_dir)
 
-            # Retrieve vizualization writer.
+            # Retrieve vizualization writer
             succeeded = False
             for module in ["torch.utils.tensorboard", "tensorboardX"]:
                 try:

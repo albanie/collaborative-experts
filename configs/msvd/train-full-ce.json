@@ -3,9 +3,10 @@
     "seed": 0,
     "disable_nan_checks": false,
     "log_name": "info.json",
-    "eval_mode": "fixed_num_epochs",
+    "eval_mode": "test_run",
+    "eval_config": "configs/msvd/eval-full-ce.json",
     "experts": {
-        "face_dim": 128,
+        "face_dim": 512,
         "drop_feats": "",
         "text_feat": "openai",
         "text_dim": 768
@@ -20,8 +21,6 @@
             "randomise_feats": "",
             "vlad_clusters": {
                 "text": 32,
-                "audio": 16,
-                "speech": 32,
                 "ocr": 32
             }
         }
@@ -30,20 +29,18 @@
     "data_loader": {
         "type": "ExpertDataLoader",
         "args":{
-            "dataset_name": "MSRVTT",
-            "data_dir": "data/MSRVTT",
+            "dataset_name": "MSVD",
+            "data_dir": "data/MSVD",
             "batch_size": 64,
-            "split_name": "miech",
+            "split_name": "dev",
             "num_workers": 4,
-            "num_test_captions": 1,
+            "num_test_captions": 81,
             "rgb_model_name": "senet154",
             "feat_aggregation": {
                 "scene": "avg",
                 "rgb": "avg",
                 "flow": "avg",
-                "face": "avg",
-                "audio": "vlad",
-                "speech": "vlad"
+                "face": "avg"
             }
         }
     },
@@ -69,8 +66,9 @@
     "visualizer": {
         "type": "Visualizer",
         "args":{
-            "src_video_dir": "data/MSRVTT/videos/all",
-            "vis_vid_freq": 10
+            "src_video_dir": "data/MSVD/videos",
+            "vis_vid_freq": 50,
+            "num_samples": 100
         }
     },
     "lr_scheduler": {
@@ -84,8 +82,9 @@
         "epochs": 100,
         "save_dir": "data/saved/",
         "save_period": 20,
+        "skip_first_n_saves": 25,
         "verbosity": 2,
         "tensorboard": true,
-        "monitor": "max epoch"
+        "monitor": "max val_t2v_metrics_geometric_mean_R1-R5-R10"
     }
 }

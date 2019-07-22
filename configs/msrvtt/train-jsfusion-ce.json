@@ -28,7 +28,7 @@
     },
 
     "data_loader": {
-        "type": "MSRVTTDataLoader",
+        "type": "ExpertDataLoader",
         "args":{
             "data_dir": "data/MSRVTT",
             "batch_size": 64,
@@ -69,7 +69,7 @@
         "type": "Visualizer",
         "args":{
             "src_video_dir": "data/MSRVTT/videos/all",
-            "vis_vid_freq": 10
+            "vis_vid_freq": 20
         }
     },
     "lr_scheduler": {
@@ -80,11 +80,11 @@
         }
     },
     "trainer": {
-        "epochs": 2,
+        "epochs": 100,
         "save_dir": "data/saved/",
-        "save_period": 10,
+        "save_period": 25,
         "verbosity": 2,
         "tensorboard": true,
-        "monitor": "max val_t2v_metrics_geometric_mean_R1-R5-R10"
+        "monitor": "max epoch"
     }
 }
