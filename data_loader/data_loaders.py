@@ -3,7 +3,7 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from data_loader.MSRVTT_dataset import MSRVTT
 from data_loader.MSVD_dataset import MSVD
-from utils.util import hashabledict
+from utils.util import HashableDict, HashableOrderedDict
 from base import BaseDataLoader
 
 
@@ -43,8 +43,8 @@ class ExpertDataLoader:
                  text_feat, text_dim):
 
         # Ensure that the dictionaries are hashable to allow use of caching
-        raw_input_dims = hashabledict(raw_input_dims)
-        feat_aggregation = hashabledict(feat_aggregation)
+        raw_input_dims = HashableOrderedDict(raw_input_dims)
+        feat_aggregation = HashableDict(feat_aggregation)
 
         dataset = dataset_loader(
             dataset_name=dataset_name,
@@ -69,7 +69,7 @@ class ExpertDataLoader:
         self.dataloaders = {
             "train": train_loader,
             "dataaset": dataset,
-            "retrieval": dataset.getRetrievalSamples(),
+            "retrieval": dataset.get_retrieval_data(),
         }
         print(f"Loading data loaders with {num_workers} workers")
         self.dataset_name = dataset_name

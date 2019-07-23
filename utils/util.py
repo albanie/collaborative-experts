@@ -78,35 +78,38 @@ def np_loader(np_path, l2norm=False):
     return data
 
 
-class hashabledict(dict):
+class HashableDict(dict):
+    def __hash__(self):
+        return hash(tuple(sorted(self.items())))
+
+
+class HashableOrderedDict(OrderedDict):
     def __hash__(self):
         return hash(tuple(sorted(self.items())))
 
 
 def compute_dims(config, logger):
-    # face_dim = config["experts"]["face_dim"]
-    arch_args = config["arch"]["args"]
-    vlad_clusters = arch_args["vlad_clusters"]
     experts = config["experts"]
-    ce_dim = experts["ce_shared_dim"]
+    # TODO(Samuel): clean up the logic since it's a little convoluted
+    ordered = sorted(config["experts"]["modalities"])
 
     if experts["drop_feats"]:
         to_drop = experts["drop_feats"].split(",")
         logger.info(f"dropping: {to_drop}")
-        experts["ordered"] = [x for x in experts["ordered"] if x not in to_drop]
+        ordered = [x for x in ordered if x not in to_drop]
 
     dims = []
-    for expert in experts["ordered"]:
+    for expert in ordered:
         if expert == "face":
             in_dim, out_dim = experts["face_dim"], experts["face_dim"]
         elif expert == "audio":
-            in_dim, out_dim = 128 * vlad_clusters["audio"], 128
+            in_dim, out_dim = 128 * config["arch"]["args"]["vlad_clusters"]["audio"], 128
         elif expert == "rgb":
             in_dim, out_dim = 2048, 2048
         elif expert == "speech":
-            in_dim, out_dim = 300 * vlad_clusters["speech"], 300
+            in_dim, out_dim = 300 * config["arch"]["args"]["vlad_clusters"]["speech"], 300
         elif expert == "ocr":
-            in_dim, out_dim = 300 * vlad_clusters["ocr"], 300
+            in_dim, out_dim = 300 * config["arch"]["args"]["vlad_clusters"]["ocr"], 300
         elif expert == "flow":
             in_dim, out_dim = 1024, 1024
         elif expert == "scene":
@@ -114,48 +117,23 @@ def compute_dims(config, logger):
 
         # For the CE architecture, we need to project all features to a common
         # dimensionality
-        if arch_args["use_ce"]:
-            out_dim = ce_dim
+        if config["arch"]["args"]["use_ce"]:
+            out_dim = experts["ce_shared_dim"]
 
         dims.append((expert, (in_dim, out_dim)))
-    expert_modality_dim = OrderedDict(dims)
+    expert_dims = OrderedDict(dims)
 
-    # if arch_args["use_ce"]:
-
-    #     expert_modality_dim = OrderedDict([
-    #         ("face", (face_dim, 512)),
-    #         ("audio", (128 * vlad_clusters["audio"], 512)),
-    #         ("rgb", (2048, 512)),
-    #         ("speech", (300 * vlad_clusters["speech"], 512)),
-    #         ("ocr", (300 * vlad_clusters["ocr"], 512)),
-    #         ("flow", (1024, 512)),
-    #         ("scene", (2208, 512)),
-    #     ])
-    # else:
-    #     expert_modality_dim = OrderedDict([
-    #         ("face", (face_dim, face_dim)),
-    #         ("audio", (128 * vlad_clusters["audio"], 128)),
-    #         ("rgb", (2048, 2048)),
-    #         ("speech", (300 * vlad_clusters["speech"], 300)),
-    #         ("ocr", (300 * vlad_clusters["ocr"], 300)),
-    #         ("flow", (1024, 1024)),
-    #         ("scene", (2208, 512)),
-    #     ])
-
-    raw_input_dims = dict()
-    for modality, dim_pair in expert_modality_dim.items():
+    # To remove the dependency of dataloader on the model architecture, we create a
+    # second copy of the expert dimensions which accounts for the number of vlad
+    # clusters
+    raw_input_dims = OrderedDict()
+    for expert, dim_pair in expert_dims.items():
         raw_dim = dim_pair[0]
-        if modality in {"audio", "speech", "ocr"}:
-            raw_dim = raw_dim // vlad_clusters[modality]
-        raw_input_dims[modality] = raw_dim
+        if expert in {"audio", "speech", "ocr"}:
+            raw_dim = raw_dim // config["arch"]["args"]["vlad_clusters"][expert]
+        raw_input_dims[expert] = raw_dim
 
-    if config["experts"]["drop_feats"]:
-        to_drop = config["experts"]["drop_feats"].split(",")
-        print("dropping: {}".format(to_drop))
-        for drop in to_drop:
-            del expert_modality_dim[drop]
-
-    return expert_modality_dim, raw_input_dims
+    return expert_dims, raw_input_dims
 
 
 def ensure_tensor(x):

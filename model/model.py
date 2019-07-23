@@ -60,12 +60,12 @@ def drop_nans(x, ind, validate_missing):
 
 class CENet(BaseModel):
     def __init__(self, text_dim, use_ce, l2renorm, vlad_clusters,
-                 disable_nan_checks, expert_modality_dim,
+                 disable_nan_checks, expert_dims,
                  keep_missing_modalities, test_caption_mode, randomise_feats,
                  freeze_weights=False, verbose=False):
         super().__init__()
 
-        self.expert_modality_dim = expert_modality_dim
+        self.expert_dims = expert_dims
         self.l2renorm = l2renorm
         self.freeze_weights = freeze_weights
         self.disable_nan_checks = disable_nan_checks
@@ -82,8 +82,8 @@ class CENet(BaseModel):
         expected_feat_sizes = {"audio": 128, "speech": 300, "ocr": 300}
         self.pooling = nn.ModuleDict()
         for mod, expected in expected_feat_sizes.items():
-            if mod in expert_modality_dim.keys():
-                feature_size = expert_modality_dim[mod][0] // vlad_clusters[mod]
+            if mod in expert_dims.keys():
+                feature_size = expert_dims[mod][0] // vlad_clusters[mod]
                 msg = f"expected {expected} for {mod} features atm"
                 assert feature_size == expected, msg
                 self.pooling[mod] = NetVLAD(
@@ -99,7 +99,7 @@ class CENet(BaseModel):
             freeze_weights=freeze_weights,
             text_dim=self.text_pooling.out_dim,
             test_caption_mode=test_caption_mode,
-            expert_modality_dim=expert_modality_dim,
+            expert_dims=expert_dims,
             disable_nan_checks=disable_nan_checks,
             keep_missing_modalities=keep_missing_modalities,
         )
@@ -118,18 +118,18 @@ class CENet(BaseModel):
         aggregated_experts = OrderedDict()
 
         for mod in ("face", "flow", "scene"):
-            if mod in self.expert_modality_dim.keys():
+            if mod in self.expert_dims.keys():
                 experts = self.randomise_feats(experts, mod)
                 aggregated_experts[mod] = experts[mod]
 
         for mod in ("audio", "speech", "ocr"):
-            if mod in self.expert_modality_dim.keys():
+            if mod in self.expert_dims.keys():
                 experts[mod] = drop_nans(x=experts[mod], ind=ind[mod],
                                          validate_missing=True)
                 experts = self.randomise_feats(experts, mod)
                 aggregated_experts[mod] = self.pooling[mod](experts[mod])
 
-        if "rgb" in self.expert_modality_dim.keys():
+        if "rgb" in self.expert_dims.keys():
             experts = self.randomise_feats(experts, "rgb")
             # If only average pooling has been performed, we will have an input of the
             # form N x 1 x D, so we need to flatten out the middle dimension to
@@ -148,14 +148,14 @@ class CENet(BaseModel):
 
 
 class CEModule(nn.Module):
-    def __init__(self, expert_modality_dim, text_dim,
+    def __init__(self, expert_dims, text_dim,
                  use_ce, verbose, l2renorm, disable_nan_checks,
                  random_feats, test_caption_mode, same_dim=512,
                  freeze_weights=False, keep_missing_modalities=False):
         super().__init__()
 
-        modalities = list(expert_modality_dim.keys())
-        self.expert_modality_dim = expert_modality_dim
+        modalities = list(expert_dims.keys())
+        self.expert_dims = expert_dims
         self.modalities = modalities
         self.disable_nan_checks = disable_nan_checks
         self.test_caption_mode = test_caption_mode
@@ -165,12 +165,12 @@ class CEModule(nn.Module):
         self.verbose = verbose
         self.keep_missing_modalities = keep_missing_modalities
         self.l2renorm = l2renorm
-        self.moe_fc = nn.Linear(text_dim, len(expert_modality_dim))
-        num_mods = len(expert_modality_dim)
+        self.moe_fc = nn.Linear(text_dim, len(expert_dims))
+        num_mods = len(expert_dims)
         self.moe_weights = th.ones(1, num_mods) / num_mods
 
-        in_dims = [expert_modality_dim[mod][0] for mod in modalities]
-        agg_dims = [expert_modality_dim[mod][1] for mod in modalities]
+        in_dims = [expert_dims[mod][0] for mod in modalities]
+        agg_dims = [expert_dims[mod][1] for mod in modalities]
 
         # The batch size of the face input can vary (due to missing inputs), so we
         # probably shouldn't use BN on this branch. It's probably fine to leave it

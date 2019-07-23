@@ -9,7 +9,9 @@
         "face_dim": 512,
         "drop_feats": "",
         "text_feat": "openai",
-        "text_dim": 768
+        "text_dim": 768,
+        "modalities": ["audio", "face", "flow", "ocr", "rgb",  "scene", "speech"],
+        "ce_shared_dim": 512
     },
     "arch": {
         "type": "CENet",

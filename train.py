@@ -18,7 +18,7 @@ from test import evaluation
 
 def main(config):
     logger = config.get_logger('train')
-    expert_modality_dim, raw_input_dims = compute_dims(config, logger)
+    expert_dims, raw_input_dims = compute_dims(config, logger)
     seeds = [int(x) for x in config._args.seeds.split(",")]
 
     for seed in seeds:
@@ -40,7 +40,7 @@ def main(config):
         model = config.init(
             name='arch',
             module=module_arch,
-            expert_modality_dim=expert_modality_dim,
+            expert_dims=expert_dims,
             text_dim=config["experts"]["text_dim"],
             disable_nan_checks=config["disable_nan_checks"],
         )
