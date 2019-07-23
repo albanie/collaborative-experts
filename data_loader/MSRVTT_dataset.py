@@ -1,4 +1,5 @@
 import time
+from pathlib import Path
 from os.path import join as pjoin
 from utils.util import memcache
 from base.base_dataset import BaseDataset
@@ -35,7 +36,7 @@ class MSRVTT(BaseDataset):
             # set for evaluation. To reproduce this evaluation, we use the indices
             # of the test captions, and restrict to this subset during eval.
             test_cap_idx_path = pjoin(self.root_feat, "jsfusion_val_caption_idx.pkl")
-            self.restrict_test_captions = memcache(test_cap_idx_path, "pkl")
+            self.restrict_test_captions = memcache(test_cap_idx_path)
         elif split_name in {"full-val", "full-val"}:
             train_list_path = "train_list_dev.txt"
             if split_name == "full-val":
@@ -62,6 +63,8 @@ class MSRVTT(BaseDataset):
 
     def load_features(self):
         root_feat = self.root_feat
+        feat_paths = {}
+
         if self.split_name == "miech":
             if self.rgb_model_name == "resnet":
                 rgb_feat_name = "resnet_features.pickle"
@@ -69,16 +72,17 @@ class MSRVTT(BaseDataset):
                 rgb_feat_name = "senet154-imagenet-raw-nocrop.pickle"
             else:
                 raise ValueError(f"unrecognised rgb_model_name: {self.rgb_model_name}")
-            audio_feat_path = pjoin(root_feat, "audio_features.pickle")
-            face_feat_path = pjoin(root_feat, "face_features.pickle")
-            flow_feat_path = pjoin(root_feat, "flow_features.pickle")
+            feat_paths["audio"] = pjoin(root_feat, "audio_features.pickle")
+            feat_paths["face"] = pjoin(root_feat, "face_features.pickle")
+            feat_paths["flow"] = pjoin(root_feat, "flow_features.pickle")
         elif self.split_name in {"full-test", "full-val", "jsfusion"}:
-            audio_feat_path = pjoin(root_feat, "Audio_MSRVTT_new.pickle")
-            face_feat_path = pjoin(root_feat, "Face_MSRVTT_new.pickle")
-            flow_feat_path = pjoin(root_feat, "I3D_MSRVTT_new.pickle")
+            feat_paths["audio"] = pjoin(root_feat, "Audio_MSRVTT_new.pickle")
+            feat_paths["face"] = pjoin(root_feat, "Face_MSRVTT_new.pickle")
+            feat_paths["flow"] = pjoin(root_feat, "I3D_MSRVTT_new.pickle")
             rgb_feat_name = f"{self.rgb_model_name}-imagenet-raw-nocrop.pickle"
-        rgb_feat_path = pjoin(root_feat, rgb_feat_name)
-        scene_feat_path = pjoin(root_feat, "scene-raw.npy")
+
+        feat_paths["rgb"] = pjoin(root_feat, rgb_feat_name)
+        feat_paths["scene"] = pjoin(root_feat, "scene-raw.npy")
 
         # Note: Antoine's text features cover the full 10,000 videos, so can be
         # used for either split, similarly for the speech embeddings
@@ -92,26 +96,43 @@ class MSRVTT(BaseDataset):
             text_feat_path = pjoin(yang_dir, "w2v_MSRVTT_transformer.pickle")
         else:
             raise ValueError("Text features {} not recognised ".format(text_feat))
-        speech_feat_path = pjoin(root_feat, "stt_w2v.pickle")
-        ocr_feat_path = pjoin(root_feat, "MSR_VTT_all_text_w2v.pkl")
+        feat_paths["speech"] = pjoin(root_feat, "stt_w2v.pickle")
+        feat_paths["ocr"] = pjoin(root_feat, "MSR_VTT_all_text_w2v.pkl")
 
-        text_features = memcache(text_feat_path, "pkl")
-        speech_features = memcache(speech_feat_path, "pkl")
-        ocr_features = memcache(ocr_feat_path, "pkl")
-        rgb_features = memcache(rgb_feat_path, "pkl")
-        audio_features = memcache(audio_feat_path, "pkl")
-        face_features = memcache(face_feat_path, "pkl")
-        flow_features = memcache(flow_feat_path, "pkl")
-        scene_features = memcache(scene_feat_path, "npy")
+        features = {expert: memcache(path) for expert, path in feat_paths.items()}
 
-        self.audio_features = self.canonical_features(audio_features)
-        self.face_features = self.canonical_features(face_features)
-        self.flow_features = self.canonical_features(flow_features)
-        self.scene_features = self.canonical_features(scene_features)
-        self.speech_features = self.canonical_features(speech_features)
-        self.ocr_features = self.canonical_features(ocr_features, raw_dim=self.ocr_dim)
-        self.rgb_features = self.canonical_features(rgb_features)
-        self.text_features = text_features
+        # we handle ocr separately from the other experts, for backwards compatibility
+        # reasons
+        canon_feats = {}
+        for expert, feats in features.items():
+            if expert != "ocr":
+                canon_feats[expert] = self.canonical_features(feats)
+            else:
+                raw_dim = self.raw_input_dims[expert]
+                canon_feats[expert] = self.canonical_features(feats, raw_dim=raw_dim)
+        self.features = canon_feats
+
+        # features = {expert:self.canonical_features(feats) for expert, feats
+        #             in features.items() if expert != "ocr"
+        #             else expert:self.canonical_features(feats, raw_dim=self.raw_input_dims[expert])}
+
+        # speech_features = memcache(speech_feat_path, "pkl")
+        # ocr_features = memcache(ocr_feat_path, "pkl")
+        # rgb_features = memcache(rgb_feat_path, "pkl")
+        # audio_features = memcache(audio_feat_path, "pkl")
+        # face_features = memcache(face_feat_path, "pkl")
+        # flow_features = memcache(flow_feat_path, "pkl")
+        # scene_features = memcache(scene_feat_path, "npy")
+
+        # self.audio_features = self.canonical_features(audio_features)
+        # self.face_features = self.canonical_features(face_features)
+        # self.flow_features = self.canonical_features(flow_features)
+        # self.scene_features = self.canonical_features(scene_features)
+        # self.speech_features = self.canonical_features(speech_features)
+        # self.ocr_features = self.canonical_features(ocr_features, raw_dim=self.ocr_dim)
+        # self.rgb_features = self.canonical_features(rgb_features)
+
+        self.text_features = memcache(text_feat_path)
         """For now, we follow Antoine's approach of using the first text caption
         for the retreival task when evaluating on his custom split."""
 

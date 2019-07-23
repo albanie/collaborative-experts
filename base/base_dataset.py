@@ -46,20 +46,18 @@ class BaseDataset(Dataset):
         self.feat_aggregation = feat_aggregation
         self.root_feat = Path(data_dir) / "symlinked-feats"
         raw_caption_path = Path(data_dir) / "processing/raw-captions.pkl"
-        self.raw_captions = memcache(raw_caption_path, "pkl")
+        self.raw_captions = memcache(raw_caption_path)
         self.captions_per_video = 1
         self.rgb_shots = 1
+        self.experts = set(raw_input_dims.keys())
+
+        # TODO(Samuel) - check if a global fixed ordering is really necessary
+        ordered = ["face", "rgb", "flow", "scene", "audio", "speech", "ocr"]
+        self.ordered_experts = [expert for expert in ordered if expert in self.experts]
 
         self.configure_train_test_splits(split_name=split_name)
         self.num_train = len(self.train_list)
-
-        self.rgb_dim = raw_input_dims["rgb"]
-        self.flow_dim = raw_input_dims["flow"]
-        self.audio_dim = raw_input_dims["audio"]
-        self.speech_dim = raw_input_dims["speech"]
-        self.ocr_dim = raw_input_dims["ocr"]
-        self.face_dim = raw_input_dims["face"]
-        self.scene_dim = raw_input_dims["scene"]
+        self.raw_input_dims = raw_input_dims
 
         # we store paths to enable visualisations
         video_paths = [Path(data_dir) / "videos/{}.mp4".format(x)
@@ -69,74 +67,78 @@ class BaseDataset(Dataset):
         # NOTE: We use nans rather than zeros to indicate missing faces
         self.MISSING_VAL = np.nan
         self.load_features()
-
         num_test = len(self.test_list)
-        self.rgb_retrieval = np.zeros((num_test, self.rgb_shots, self.rgb_dim))
-        self.flow_retrieval = np.zeros((num_test, self.flow_dim))
-        self.scene_retrieval = np.zeros((num_test, self.scene_dim))
-        self.audio_retrieval = np.zeros((num_test, max_words, self.audio_dim))
-        self.speech_retrieval = np.zeros((num_test, max_words, self.speech_dim))
-        self.ocr_retrieval = np.zeros((num_test, max_words, self.ocr_dim))
-        self.face_retrieval = np.zeros((num_test, self.face_dim))
-        self.face_ind_retrieval = np.ones((num_test))
-        self.speech_ind_retrieval = np.ones((num_test))
-        self.audio_ind_retrieval = np.ones((num_test))
-        self.ocr_ind_retrieval = np.ones((num_test))
-        self.rgb_ind_retrieval = np.ones((num_test))
-        self.scene_ind_retrieval = np.ones((num_test))
-        self.flow_ind_retrieval = np.ones((num_test))
-        self.raw_captions_retrieval = [None] * num_test
+
+        # tensors are allocated differently, depending on whether they are expected to
+        # vary in size
+        fixed_sz_experts = {"face", "flow", "scene", "rgb"}
+        variable_sz_experts = {"audio", "speech", "ocr"}
+
+        # we only allocate storage for experts used by the current dataset
+        self.fixed_sz_experts = fixed_sz_experts.intersection(self.experts)
+        self.variable_sz_experts = variable_sz_experts.intersection(self.experts)
+
+        retrieval = {expert: np.zeros((num_test, max_words, raw_input_dims[expert]))
+                     for expert in self.variable_sz_experts}
+
+        # The rgb modality is handled separately from the others because its shape can
+        # vary along a # different dimension (according to whether or not dynamic shot
+        # boundaries are used)
+        retrieval.update({expert: np.zeros((num_test, raw_input_dims[expert]))
+                          for expert in self.fixed_sz_experts if expert != "rgb"})
+        retrieval["rgb"] = np.zeros((num_test, self.rgb_shots, raw_input_dims["rgb"]))
+        self.retrieval = retrieval
         self.text_retrieval = np.zeros((num_test, self.num_test_captions,
                                         max_words, self.text_dim))
+
+        # some "flaky" experts are only available for a fraction of videos - we need
+        # to pass this information (in the form of indices) into the network for any
+        # experts present in the current dataset
+        flaky_experts = {"face", "audio", "speech", "ocr"}
+        self.flaky_experts = flaky_experts.intersection(self.experts)
+        self.test_ind = {expert: th.ones(num_test) for expert in self.experts}
+        self.raw_captions_retrieval = [None] * num_test
 
         # avoid evaluation on missing queries
         self.query_masks = np.zeros((num_test, num_test_captions))
         for ii, video_name in enumerate(self.test_list):
-            self.rgb_retrieval[ii] = self.aggregate_feats(
-                feats=self.rgb_features[video_name],
-                video_name=video_name,
-                modality="rgb",
-            )
-            self.flow_retrieval[ii] = self.aggregate_feats(
-                feats=self.flow_features[video_name],
-                video_name=video_name,
-                modality="flow",
-            )
-            self.scene_retrieval[ii] = self.aggregate_feats(
-                feats=self.scene_features[video_name],
-                video_name=video_name,
-                modality="scene",
-            )
+
             self.raw_captions_retrieval[ii] = self.raw_captions[video_name]
 
-            if len(self.face_features[video_name]) > 0:
-                face_feat_test = self.face_features[video_name]
-                self.face_retrieval[ii] = np.mean(face_feat_test, 0, keepdims=True)
-            else:
-                import ipdb; ipdb.set_trace()  # NOQA
+            for expert in self.fixed_sz_experts.intersection(self.experts):
+                self.retrieval[expert][ii] = self.aggregate_feats(
+                    feats=self.features[expert][video_name],
+                    video_name=video_name,
+                    modality=expert,
+                )
+            for expert in self.variable_sz_experts.intersection(self.experts):
+                keep = min(max_words, len(self.features[expert][video_name]))
+                feats = self.features[expert][video_name][: keep]
+                self.retrieval[expert][ii, :keep, :] = feats
 
-            keep = min(max_words, len(self.audio_features[video_name]))
-            audio_feats = self.audio_features[video_name][: keep]
-            self.audio_retrieval[ii, :keep, :] = audio_feats
-
-            keep = min(max_words, len(self.speech_features[video_name]))
-            speech_feats = self.speech_features[video_name][: keep]
-            self.speech_retrieval[ii, :keep, :] = speech_feats
-
-            keep = min(max_words, len(self.ocr_features[video_name]))
-            ocr_feats = self.ocr_features[video_name][: keep]
-            self.ocr_retrieval[ii, :keep, :] = ocr_feats
-
-            if any(np.isnan(self.face_retrieval[ii])):
-                self.face_ind_retrieval[ii] = 0
-            if any(np.isnan(self.speech_retrieval[ii].flatten())):
-                self.speech_ind_retrieval[ii] = 0
-            if any(np.isnan(self.ocr_retrieval[ii].flatten())):
-                self.ocr_ind_retrieval[ii] = 0
-            if any(np.isnan(self.audio_retrieval[ii].flatten())):
-                self.audio_ind_retrieval[ii] = 0
+            # Since some missing faces are stored as zeros, rather than nans, we handle
+            # their logic separately
+            for expert in self.flaky_experts:
+                if expert != "face":
+                    if any(np.isnan(self.retrieval[expert][ii].flatten())):
+                        self.test_ind[expert][ii] = 0
+                else:
+                    # logic for checking faces
+                    face_feat = self.retrieval[expert][ii]
+                    if np.array_equal(np.unique(face_feat), np.array([0])):
+                        face_ind = 0
+                    elif face_feat.ndim <= 2:
+                        if face_feat.ndim == 1:
+                            face_feat = face_feat.reshape(1, -1)
+                        msg = "failure checking faces"
+                        assert face_feat.shape[1] == self.raw_input_dims["face"], msg
+                        face_ind = not self.has_missing_values(face_feat)
+                    else:
+                        raise ValueError(f"unexpected shape {face_feat.shape}")
+                    self.test_ind[expert][ii] = face_ind
 
             candidates_sentences = self.text_features[video_name]
+
             if self.restrict_test_captions is not None:
                 keep_sent_idx = self.restrict_test_captions[video_name]
                 candidates_sentences = [candidates_sentences[keep_sent_idx]]
@@ -145,12 +147,14 @@ class BaseDataset(Dataset):
 
             msg = "{}/{} Evaluating with sentence {} out of {} (has {} words) for {}"
             for test_caption_idx in range(self.num_test_captions):
-                if len(candidates_sentences) <= test_caption_idx:
-                    # two MSRVTT videos only have 19 captions, so these use zeros at
-                    # test time
-                    # TODO(Samuel) - mask these values properly
-                    assert len(candidates_sentences) == 19, "unexpected edge case"
-                    continue
+                # TODO(Samuel) - generalise the sanity checks
+                # if len(candidates_sentences) <= test_caption_idx:
+                #     # two MSRVTT videos only have 19 captions, so these use zeros at
+                #     # test time
+                #     # TODO(Samuel) - mask these values properly
+                #     assert len(candidates_sentences) == 19, "unexpected edge case"
+                #     continue
+
                 keep = min(len(candidates_sentences[test_caption_idx]), max_words)
                 if ii % 500 == 0:
                     print(msg.format(ii, len(self.test_list), test_caption_idx,
@@ -171,84 +175,80 @@ class BaseDataset(Dataset):
         return agg
 
     def collate_data(self, data):
-        face_ind = np.zeros((len(data)))
-        speech_ind = np.zeros((len(data)))
-        audio_ind = np.zeros((len(data)))
-        ocr_ind = np.zeros((len(data)))
-        rgb_ind = np.zeros((len(data)))
-        scene_ind = np.zeros((len(data)))
-        flow_ind = np.zeros((len(data)))
+        batch_size = len(data)
 
-        rgb_tensor = np.zeros((len(data), self.rgb_shots, self.rgb_dim))
-        flow_tensor = np.zeros((len(data), self.flow_dim))
-        scene_tensor = np.zeros((len(data), self.scene_dim))
-        face_tensor = np.zeros((len(data), self.face_dim))
-        audio_tensor = np.zeros((len(data), self.max_words, self.audio_dim))
-        speech_tensor = np.zeros((len(data), self.max_words, self.speech_dim))
-        ocr_tensor = np.zeros((len(data), self.max_words, self.ocr_dim))
-        text_tensor = np.zeros((len(data), self.captions_per_video, self.max_words,
+        # Track which indices of each modality are available in the present batch
+        ind = {expert: np.zeros(batch_size) for expert in self.experts}
+
+        # as above, we handle rgb separately from other fixed_sz experts
+        tensors = {expert: np.zeros((batch_size, self.raw_input_dims[expert]))
+                   for expert in self.fixed_sz_experts if expert != "rgb"}
+        tensors["rgb"] = np.zeros((batch_size, self.rgb_shots,
+                                   self.raw_input_dims["rgb"]))
+        tensors.update({expert: np.zeros(
+            (batch_size, self.max_words, self.raw_input_dims[expert])
+        ) for expert in self.variable_sz_experts})
+
+        text_tensor = np.zeros((batch_size, self.captions_per_video, self.max_words,
                                 self.text_dim))
 
         for ii, _ in enumerate(data):
 
             datum = data[ii]
-            face_ind[ii] = datum["face_ind"]
-            speech_ind[ii] = datum["speech_ind"]
-            audio_ind[ii] = datum["audio_ind"]
-            ocr_ind[ii] = datum["ocr_ind"]
-            scene_ind[ii] = datum["scene_ind"]
-            flow_ind[ii] = datum["flow_ind"]
-            rgb_ind[ii] = datum["rgb_ind"]
-            flow_tensor[ii] = datum["flow"]
-            scene_tensor[ii] = datum["scene"]
-            rgb_tensor[ii] = datum["rgb"]
+            for expert in self.experts:
+                ind[expert][ii] = datum[f"{expert}_ind"]
+            ind = {key: ensure_tensor(val) for key, val in ind.items()}
 
             # It is preferable to explicitly pass NaNs into the network as missing
             # values, over simply zeros, to avoid silent failures
-            face_tensor[ii] = datum["face"]
-
-            keep = min(len(datum["audio"]), self.max_words)
-            audio_tensor[ii, :keep, :] = datum["audio"][:keep]
-
-            keep = min(len(datum["speech"]), self.max_words)
-            if keep:
-                #  NOTE that we will pass in zeros here for now
-                speech_tensor[ii, :keep, :] = datum["speech"][:keep]
-
-            keep = min(len(datum["ocr"]), self.max_words)
-            if keep:
-                #  NOTE that we will pass in zeros here for now
-                ocr_tensor[ii, :keep, :] = datum["ocr"][:keep]
-
+            for expert in self.fixed_sz_experts:
+                tensors[expert][ii] = datum[expert]
+            for expert in self.variable_sz_experts:
+                keep = min(len(datum[expert]), self.max_words)
+                if keep:
+                    tensors[expert][ii, :keep, :] = datum[expert][:keep]
             text = datum["text"]
-
             for jj in range(self.captions_per_video):
                 keep = min(len(text[jj]), self.max_words)
                 text_tensor[ii, jj, :keep, :] = text[jj][:keep]
 
         text = th.from_numpy(text_tensor).float()
-        experts = OrderedDict([
-            ("face", th.from_numpy(face_tensor).float()),
-            ("rgb", th.from_numpy(rgb_tensor).float()),
-            ("flow", th.from_numpy(flow_tensor).float()),
-            ("scene", th.from_numpy(scene_tensor).float()),
-            ("audio", th.from_numpy(audio_tensor).float()),
-            ("speech", th.from_numpy(speech_tensor).float()),
-            ("ocr", th.from_numpy(ocr_tensor).float()),
-        ])
-        indices = {
-            "face": face_ind,
-            "rgb": rgb_ind,
-            "scene": scene_ind,
-            "flow": flow_ind,
-            "speech": speech_ind,
-            "audio": audio_ind,
-            "ocr": ocr_ind,
-        }
-        for key, val in indices.items():
-            indices[key] = ensure_tensor(val)
+        experts = OrderedDict(
+            (expert, th.from_numpy(tensors[expert]).float())
+            for expert in self.ordered_experts)
 
-        return {"text": text, "experts": experts, "ind": indices}
+        minibatch = {"text": text, "experts": experts, "ind": ind}
+
+        # ----------------------------------------------------------------
+        # sanity checking
+        # ----------------------------------------------------------------
+        if False:
+            import pickle
+            with open("/tmp/minibatch.pkl", "rb") as f:
+                minibatch2 = pickle.load(f)
+
+            # text - OK
+            print("text diff", (minibatch2["text"] - minibatch["text"]).sum())
+
+            # ind - OK
+            for key, val in minibatch["ind"].items():
+                print(f"ind diff: {key}", (val - minibatch2["ind"][key]).sum())
+
+            # set nans to comparable number first
+            NAN_VAL = 2780343
+            experts1 = dict(minibatch["experts"])
+            experts2 = dict(minibatch2["experts"])
+            for key in experts1.keys():
+                fix = th.isnan(experts1[key])
+                experts1[key][fix] = NAN_VAL
+
+                fix = th.isnan(experts2[key])
+                experts2[key][fix] = NAN_VAL
+
+            for key in experts1:
+                print(key, (experts1[key] - experts2[key]).sum())
+            import ipdb; ipdb.set_trace()
+        return minibatch
 
     def __len__(self):
         return self.num_train
@@ -257,107 +257,91 @@ class BaseDataset(Dataset):
         if idx < self.num_train:
             vid = self.train_list[idx]
             text = self.text_features[vid]
-
             text = np.random.choice(text, size=self.captions_per_video)
+            features = {expert: self.features[expert][vid] for expert in self.experts}
 
-            audio_feats = self.audio_features[vid]
-            flow_feats = self.flow_features[vid]
-            scene_feats = self.scene_features[vid]
-            face_feats = self.face_features[vid]
-            rgb_feats = self.rgb_features[vid]
-            speech_feats = self.speech_features[vid]
-            ocr_feats = self.ocr_features[vid]
+            # We need to handle face availablility separately, because some missing faces
+            # are store simply as zero-vectors, rather than as NaNs.
+            ind = {expert: not self.has_missing_values(features[expert]) for expert
+                   in self.flaky_experts if expert != "face"}
+            ind.update({expert: 1 for expert in self.experts if expert
+                        not in self.flaky_experts})
 
-            rgb_ind = 1
-            flow_ind = 1
-            scene_ind = 1
-            ocr_ind = not self.has_missing_values(ocr_feats)
-            audio_ind = not self.has_missing_values(audio_feats)
-            speech_ind = not self.has_missing_values(speech_feats)
+            # logic for checking faces
+            if np.array_equal(np.unique(features["face"]), np.array([0])):
+                face_ind = 0
+            elif features["face"].ndim > 1:
+                msg = "failure checking faces"
+                assert features["face"].shape[1] == self.raw_input_dims["face"], msg
+                # face_feats = np.mean(features["face"], 0, keepdims=True)
+                face_ind = not self.has_missing_values(features["face"])
+            else:
+                raise ValueError("unexpected size")
+            ind["face"] = face_ind
 
             # NOTE: due to differences in how the features were stored, certain kinds
             # need to be aggregated along the temporal dimension
             msg = ("When features have not yet been aggregated, expect feature-dim"
                    "to lie on the second dimension")
-            assert flow_feats.ndim == 2
-            assert flow_feats.shape[1] == self.flow_dim, msg
-            flow_feats = np.mean(flow_feats, 0, keepdims=True)
+            unaggregated = {"flow", "rgb", "scene", "face"}
+            for expert in unaggregated:
+                assert features[expert].ndim == 2
+                assert features[expert].shape[1] == self.raw_input_dims[expert], msg
+                features[expert] = self.aggregate_feats(
+                    video_name=vid,
+                    feats=features[expert],
+                    modality=expert,
+                )
+        # Return both the missing indices as well as the tensors
+        sample = {"text": text}
+        sample.update({f"{key}_ind": val for key, val in ind.items()})
+        sample.update(features)
+        return sample
 
-            assert rgb_feats.ndim == 2
-            assert rgb_feats.shape[1] == self.rgb_dim, msg
-            rgb_feats = self.aggregate_feats(
-                video_name=vid,
-                feats=rgb_feats,
-                modality="rgb",
-            )
-            assert scene_feats.ndim == 2
-            assert scene_feats.shape[1] == self.scene_dim, msg
-            scene_feats = np.mean(scene_feats, 0, keepdims=True)
-
-            if np.array_equal(np.unique(face_feats), np.array([0])):
-                face_ind = 0
-            elif face_feats.ndim > 1:
-                assert face_feats.shape[1] == self.face_dim, msg
-                face_feats = np.mean(face_feats, 0, keepdims=True)
-                if self.has_missing_values(face_feats):
-                    face_ind = 0
-                else:
-                    face_ind = 1
-            else:
-                raise ValueError("unexpected size")
-
-        return {
-            "vid": vid,
-            "text": text,
-            "rgb": rgb_feats,
-            "ocr": ocr_feats,
-            "flow": flow_feats,
-            "scene": scene_feats,
-            "speech": speech_feats,
-            "face": face_feats,
-            "audio": audio_feats,
-            "scene_ind": scene_ind,
-            "flow_ind": flow_ind,
-            "rgb_ind": rgb_ind,
-            "face_ind": face_ind,
-            "ocr_ind": ocr_ind,
-            "speech_ind": speech_ind,
-            "audio_ind": audio_ind,
-        }
-
-    def getRetrievalSamples(self):
-
-        experts = OrderedDict([
-            ("face", th.from_numpy(self.face_retrieval).float()),
-            ("rgb", th.from_numpy(self.rgb_retrieval).float()),
-            ("flow", th.from_numpy(self.flow_retrieval).float()),
-            ("scene", th.from_numpy(self.scene_retrieval).float()),
-            ("audio", th.from_numpy(self.audio_retrieval).float()),
-            ("speech", th.from_numpy(self.speech_retrieval).float()),
-            ("ocr", th.from_numpy(self.ocr_retrieval).float()),
-        ])
-        indices = {
-            "face": self.face_ind_retrieval,
-            "rgb": self.rgb_ind_retrieval,
-            "scene": self.scene_ind_retrieval,
-            "flow": self.flow_ind_retrieval,
-            "speech": self.speech_ind_retrieval,
-            "audio": self.audio_ind_retrieval,
-            "ocr": self.ocr_ind_retrieval,
-        }
-        for key, val in indices.items():
-            indices[key] = ensure_tensor(val)
+    def get_retrieval_data(self):
+        experts = OrderedDict(
+            (expert, th.from_numpy(self.retrieval[expert]).float())
+            for expert in self.ordered_experts)
 
         retrieval_data = {
             "text": ensure_tensor(self.text_retrieval).float(),
             "experts": experts,
-            "ind": indices,
+            "ind": self.test_ind,
         }
         meta = {
             "query_masks": self.query_masks,
             "raw_captions": self.raw_captions_retrieval,
             "paths": self.video_path_retrieval,
         }
+
+        if False:
+            # safety checks
+            import pickle
+            ret1 = retrieval_data
+            with open("/tmp/retrieval_data.pkl", "rb") as f:
+                ret2 = pickle.load(f)
+
+            # ind - OK
+            for key, val in ret1["ind"].items():
+                print(f"ind diff: {key}", (val - ret2["ind"][key].float()).sum())
+
+            # set nans to comparable number first
+            NAN_VAL = 2780343
+            experts1 = dict(ret1["experts"])
+            experts2 = dict(ret2["experts"])
+            for key in experts1.keys():
+                fix = th.isnan(experts1[key])
+                experts1[key][fix] = NAN_VAL
+
+                fix = th.isnan(experts2[key])
+                experts2[key][fix] = NAN_VAL
+
+            for key in experts1:
+                print(key, (experts1[key] - experts2[key]).sum())
+
+            # text - OK
+            print("text diff", (ret2["text"] - ret1["text"]).sum())
+            import ipdb; ipdb.set_trace()
         return retrieval_data, meta
 
     def canonical_features(self, x, raw_dim=None, keep_zeros=False):

@@ -18,7 +18,7 @@ from test import evaluation
 
 def main(config):
     logger = config.get_logger('train')
-    expert_modality_dim, raw_input_dims = compute_dims(config)
+    expert_modality_dim, raw_input_dims = compute_dims(config, logger)
     seeds = [int(x) for x in config._args.seeds.split(",")]
 
     for seed in seeds:
@@ -113,12 +113,17 @@ if __name__ == '__main__':
                       help='path to latest checkpoint (default: None)')
     args.add_argument('--device', type=str, help="indices of GPUs to enable")
     args.add_argument('--mini_train', action="store_true")
+    args.add_argument('--disable_workers', action="store_true")
     args.add_argument('--seeds', default="0", help="comma separated list of seeds")
     args.add_argument('--purge_exp_dir', action="store_true",
                       help="remove all previous experiments with the given config")
     args.add_argument("--dbg", default="ipdb.set_trace")
     args = ConfigParser(args)
     os.environ["PYTHONBREAKPOINT"] = args._args.dbg
+
+    print("Disabling data loader workers....")
+    if args._args.disable_workers:
+        args["data_loader"]["args"]["num_workers"] = 0
 
     msg = (f"Expected the number of training epochs ({args['trainer']['epochs']})"
            f"to exceed the save period ({args['trainer']['save_period']}), otherwise"
