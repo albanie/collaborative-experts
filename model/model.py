@@ -528,6 +528,7 @@ def sharded_cross_view_inner_product(vid_embds, text_embds, text_weights,
         assert sims.min() > -1 - tol, "expected cosine similarities to be > -1"
 
     if th.isnan(sims).sum().item():
+        import ipdb; ipdb.set_trace()
         raise ValueError("Found nans in similarity matrix!")
 
     if num_caps > 1:

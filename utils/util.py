@@ -88,7 +88,10 @@ class HashableOrderedDict(OrderedDict):
         return hash(tuple(sorted(self.items())))
 
 
-def compute_dims(config, logger):
+def compute_dims(config, logger=None):
+    if logger is None:
+        logger = config.get_logger('utils')
+
     experts = config["experts"]
     # TODO(Samuel): clean up the logic since it's a little convoluted
     ordered = sorted(config["experts"]["modalities"])

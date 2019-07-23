@@ -7,8 +7,8 @@ from base.base_dataset import BaseDataset
 
 class MSVD(BaseDataset):
     def __init__(self, data_dir, feat_aggregation, raw_input_dims, num_test_captions,
-                 split_name, text_dim, text_feat, rgb_model_name, max_words=30,
-                 verbose=False):
+                 split_name, text_dim, text_feat, rgb_model_name, fuse_captions,
+                 max_words=30, verbose=False):
 
         super().__init__(
             data_dir=data_dir,
@@ -19,6 +19,7 @@ class MSVD(BaseDataset):
             text_dim=text_dim,
             text_feat=text_feat,
             rgb_model_name=rgb_model_name,
+            fuse_captions=fuse_captions,
             max_words=max_words,
             verbose=verbose,
         )
@@ -97,10 +98,7 @@ class MSVD(BaseDataset):
                 canon_feats[expert] = self.canonical_features(feats, raw_dim=raw_dim)
         self.features = canon_feats
         self.text_features = text_features
-
-        # MSVD does not have audio
-        self.audio_features = None
-        self.speech_features = None
+        self.raw_captions = memcache(Path(self.data_dir) / "processing/raw-captions.pkl")
 
     def sanity_checks(self):
         assert self.num_test_captions == 81, "Expected to have 81 test caps for MSVD"
