@@ -45,23 +45,22 @@ class BaseDataset(Dataset):
         self.restrict_test_captions = None
         self.feat_aggregation = feat_aggregation
         self.root_feat = Path(data_dir) / "symlinked-feats"
-        raw_caption_path = Path(data_dir) / "processing/raw-captions.pkl"
-        self.raw_captions = memcache(raw_caption_path)
-        self.captions_per_video = 1
+        self.raw_captions = memcache(Path(data_dir) / "processing/raw-captions.pkl")
         self.rgb_shots = 1
         self.experts = set(raw_input_dims.keys())
 
-        # TODO(Samuel) - check if a global fixed ordering is really necessary
-        ordered = ["face", "rgb", "flow", "scene", "audio", "speech", "ocr"]
-        self.ordered_experts = [expert for expert in ordered if expert in self.experts]
+        print("USING SINGLE CAPTION PER TRAINING VIDEO")
+        self.captions_per_video = 1
+
+        # TODO(Samuel) - is a global fixed ordering still necessary?
+        self.ordered_experts = list(raw_input_dims.keys())
 
         self.configure_train_test_splits(split_name=split_name)
         self.num_train = len(self.train_list)
         self.raw_input_dims = raw_input_dims
 
         # we store paths to enable visualisations
-        video_paths = [Path(data_dir) / "videos/{}.mp4".format(x)
-                       for x in self.test_list]
+        video_paths = [Path(data_dir) / f"videos/{x}.mp4" for x in self.test_list]
         self.video_path_retrieval = video_paths
 
         # NOTE: We use nans rather than zeros to indicate missing faces
@@ -94,7 +93,7 @@ class BaseDataset(Dataset):
         # some "flaky" experts are only available for a fraction of videos - we need
         # to pass this information (in the form of indices) into the network for any
         # experts present in the current dataset
-        flaky_experts = {"face", "audio", "speech", "ocr"}
+        flaky_experts = {"face", "audio", "speech", "ocr", "flow"}
         self.flaky_experts = flaky_experts.intersection(self.experts)
         self.test_ind = {expert: th.ones(num_test) for expert in self.experts}
         self.raw_captions_retrieval = [None] * num_test
@@ -147,19 +146,17 @@ class BaseDataset(Dataset):
 
             msg = "{}/{} Evaluating with sentence {} out of {} (has {} words) for {}"
             for test_caption_idx in range(self.num_test_captions):
-                # TODO(Samuel) - generalise the sanity checks
-                # if len(candidates_sentences) <= test_caption_idx:
-                #     # two MSRVTT videos only have 19 captions, so these use zeros at
-                #     # test time
-                #     # TODO(Samuel) - mask these values properly
-                #     assert len(candidates_sentences) == 19, "unexpected edge case"
-                #     continue
-
+                if len(candidates_sentences) <= test_caption_idx:
+                    break
                 keep = min(len(candidates_sentences[test_caption_idx]), max_words)
                 if ii % 500 == 0:
                     print(msg.format(ii, len(self.test_list), test_caption_idx,
                           len(candidates_sentences), keep, video_name))
                 text_feats = candidates_sentences[test_caption_idx][: keep]
+                if text_feats.size == 0:
+                    print("WARNING-WARNING: EMPTY TEXT FEATURES!")
+                    text_feats = 0
+                    import ipdb; ipdb.set_trace()
                 self.text_retrieval[ii, test_caption_idx, :keep, :] = text_feats
         self.sanity_checks()
 
