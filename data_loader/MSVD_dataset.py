@@ -57,13 +57,6 @@ class MSVD(BaseDataset):
         }
         feat_paths = {key: Path(root_feat) / value for key, value in feat_names.items()}
 
-        # face_feat_path = pjoin(root_feat, )
-        # flow_feat_path = pjoin(root_feat, )
-        # rgb_feat_name = 
-        # rgb_feat_path = pjoin(root_feat, rgb_feat_name)
-        # scene_feat_path = pjoin(root_feat, )
-        # ocr_feat_path = pjoin(root_feat, )
-
         if self.text_feat == "w2v":
             text_feat_train_path = pjoin(root_feat, "w2v-caption-train.pkl")
             text_feat_val_path = pjoin(root_feat, "w2v-caption-val.pkl")
@@ -76,14 +69,6 @@ class MSVD(BaseDataset):
             raise ValueError(f"Text features {self.text_feat} not supported ")
 
         features = {expert: memcache(path) for expert, path in feat_paths.items()}
-
-        # text_features = memcache(text_feat_path, "pkl")
-        # ocr_features = memcache(ocr_feat_path, "pkl")
-        # rgb_features = memcache(rgb_feat_path, "pkl")
-        # face_features = memcache(face_feat_path, "pkl")
-        # flow_features = memcache(flow_feat_path, "pkl")
-        # scene_features = memcache(scene_feat_path, "pkl")
-
         text_features = memcache(text_feat_train_path)
         if self.split_name == "dev":
             text_features.update(memcache(text_feat_val_path))
@@ -111,12 +96,6 @@ class MSVD(BaseDataset):
                 raw_dim = self.raw_input_dims[expert]
                 canon_feats[expert] = self.canonical_features(feats, raw_dim=raw_dim)
         self.features = canon_feats
-
-        # self.face_features = self.canonical_features(face_features)
-        # self.flow_features = self.canonical_features(flow_features)
-        # self.scene_features = self.canonical_features(scene_features)
-        # self.ocr_features = self.canonical_features(ocr_features, raw_dim=self.ocr_dim)
-        # self.rgb_features = self.canonical_features(rgb_features)
         self.text_features = text_features
 
         # MSVD does not have audio
@@ -124,15 +103,4 @@ class MSVD(BaseDataset):
         self.speech_features = None
 
     def sanity_checks(self):
-        import ipdb; ipdb.set_trace()
-        if self.num_test_captions == 20:
-            if len(self.test_list) == 2990:
-                missing = 6
-            elif len(self.test_list) == 1000:
-                missing = 2
-            elif len(self.test_list) == 497:
-                missing = 0
-            else:
-                raise ValueError("unrecognised test set")
-            msg = "Expected to find two missing queries in MSRVTT for full eval"
-            assert self.query_masks.sum() == self.query_masks.size - missing, msg
+        assert self.num_test_captions == 81, "Expected to have 81 test caps for MSVD"
