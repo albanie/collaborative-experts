@@ -60,8 +60,10 @@ if __name__ == "__main__":
     parser.add_argument("--expertiments_path", default="misc/experiments.json")
     parser.add_argument("--readme_template", default="misc/README-template.md")
     parser.add_argument("--readme_dest", default="README.md")
-    parser.add_argument("--root_url",
-                        default="www.robots.ox.ac.uk/~albanie/data/collaborative-experts")
+    parser.add_argument(
+        "--root_url",
+        default="http://www.robots.ox.ac.uk/~albanie/data/collaborative-experts",
+    )
     args = parser.parse_args()
 
     generate_readme(

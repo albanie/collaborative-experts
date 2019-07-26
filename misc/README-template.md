@@ -12,17 +12,17 @@ We provide pretrained models for each dataset to reproduce the results reported 
 
 | Benchmark     | Model | Split | R@1 | R@5 | R@10 | MdR | MnR | Links |
 |:-------------:| ------| ------| ---:| ---:|-----:|----:|----:|------:|
-| MSRVTT        | CE | Full  | - | - | - | - | - | [config](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/models/msrvtt-train-full-ce/07-25_17-19-34/config.json), [model](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/models/msrvtt-train-full-ce/07-25_17-19-34/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/log/msrvtt-train-full-ce/07-25_17-19-34/info.log) |
-| MSRVTT        | CE | 1k-A  | - | - | - | - | - | [config](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/models/msrvtt-train-jsfusion-ce/NADA/config.json), [model](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/models/msrvtt-train-jsfusion-ce/NADA/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/log/msrvtt-train-jsfusion-ce/NADA/info.log) |
-| MSRVTT        | CE | 1k-B  | - | - | - | - | - | [config](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/models/msrvtt-train-miech-ce/NADA/config.json), [model](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/models/msrvtt-train-miech-ce/NADA/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/log/msrvtt-train-miech-ce/NADA/info.log) |
-| MSRVTT        | CE* | 1k-B  | - | - | - | - | - | [config](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/models/msrvtt-train-miech-miechfeats-ce/NADA/config.json), [model](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/models/msrvtt-train-miech-miechfeats-ce/NADA/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/log/msrvtt-train-miech-miechfeats-ce/NADA/info.log) |
-| MSRVTT        | MoEE* | 1k-B  | - | - | - | - | - | [config](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/models/msrvtt-train-miech-miechfeats-moee/NADA/config.json), [model](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/models/msrvtt-train-miech-miechfeats-moee/NADA/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/log/msrvtt-train-miech-miechfeats-moee/NADA/info.log) |
+| MSRVTT        | CE | Full  | - | - | - | - | - | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
+| MSRVTT        | CE | 1k-A  | - | - | - | - | - | [config]({{msrvtt-train-jsfusion-ce.config}}), [model]({{msrvtt-train-jsfusion-ce.model}}), [log]({{msrvtt-train-jsfusion-ce.log}}) |
+| MSRVTT        | CE | 1k-B  | - | - | - | - | - | [config]({{msrvtt-train-miech-ce.config}}), [model]({{msrvtt-train-miech-ce.model}}), [log]({{msrvtt-train-miech-ce.log}}) |
+| MSRVTT        | CE* | 1k-B  | - | - | - | - | - | [config]({{msrvtt-train-miech-miechfeats-ce.config}}), [model]({{msrvtt-train-miech-miechfeats-ce.model}}), [log]({{msrvtt-train-miech-miechfeats-ce.log}}) |
+| MSRVTT        | MoEE* | 1k-B  | - | - | - | - | - | [config]({{msrvtt-train-miech-miechfeats-moee.config}}), [model]({{msrvtt-train-miech-miechfeats-moee.model}}), [log]({{msrvtt-train-miech-miechfeats-moee.log}}) |
 
 Models marked with * use the features made available with the work of [Miech et al.](https://arxiv.org/abs/1804.02516), unstarred models on the `1k-B` split make additional use of OCR, speech and scene features, as well slightly stronger text encodings (GPT, rather than word2vec - see the paper for details). The MoEE model is included as a sanity check that our codebase approximately reproduces the MoEE paper.
 
 | Benchmark     | Model | Split | R@1 | R@5 | R@10 | MdR | MnR | Links |
 |:-------------:| ------| ------| ---:| ---:|-----:|----:|----:|------:|
-| LSMDC        | CE | Full  | - | - | - | - | - | [config](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/models/lsmdc-train-full-ce/07-25_17-19-51/config.json), [model](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/models/lsmdc-train-full-ce/07-25_17-19-51/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~albanie/data/collaborative-experts/log/lsmdc-train-full-ce/07-25_17-19-51/info.log) |
+| LSMDC        | CE | Full  | - | - | - | - | - | [config]({{lsmdc-train-full-ce.config}}), [model]({{lsmdc-train-full-ce.model}}), [log]({{lsmdc-train-full-ce.log}}) |
 
 ### Training a video embedding
 
