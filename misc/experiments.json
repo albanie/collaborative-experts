@@ -1,0 +1,10 @@
+{
+    "msvd-train-full-ce": "07-25_15-18-17",
+    "lsmdc-train-full-ce": "07-25_17-19-51",
+    "msrvtt-train-full-ce": "07-25_17-19-34",
+    "activity-net-train-full-ce": "07-25_17-19-48",
+    "msrvtt-train-miech-ce": "NADA",
+    "msrvtt-train-jsfusion-ce": "NADA",
+    "msrvtt-train-miech-miechfeats-ce": "NADA",
+    "msrvtt-train-miech-miechfeats-moee": "NADA"
+}
