@@ -19,7 +19,7 @@ In our work, we use the `train` split for training and the `val_1` split for eva
 The compressed tar file (TODO GiB) can be downloaded from:
 
 ```
-http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/features/didemo-experts.tar.gz
+http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/features/activity-net-experts.tar.gz
 sha1sum: TODO
 ```
 A list of the contents of the tar file are given in [tar_include.txt](tar_include.txt).
