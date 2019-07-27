@@ -4,9 +4,9 @@ This repo provides code for learning and evaluating joint video-text embeddings 
 
 ![CE diagram](figs/CE-diagram.png)
 
-In brief, we aim to achieve robustness through two mechanisms:
-1. Extracting information from a wide range of modalities, including those that typically always available (such as RGB) as well as more specialised clues (such as text overlaid on the video), which may only occasionally be present.
-2. A module that seeks to efficiently combine these modalities into a fixed size representation that in a manner that is robust to noise.
+In brief, the *Collaborative Experts* framework aims to achieve robustness through two mechanisms:
+1. Extracting information from a wide range of modalities, including those that are typically always available in video (such as RGB) as well as more "specific" clues which may only occasionally be present (such as overlaid text).
+2. A module that aims to combine these modalities into a fixed size representation that in a manner that is robust to noise.
 
 
 **Requirements:** The code assumes PyTorch 1.1 and Python 3.7 (other versions may work, but have not been tested).
@@ -17,9 +17,9 @@ We provide pretrained models for each dataset to reproduce the results reported 
 * `t2v` denotes that a text query is used to retrieve videos
 * `v2t` denotes that a video query is used to retrieve text video descriptions
 
-Joint-embeddings can be used for either of these two tasks. In the results reported below, the same model is used for both the t2v and v2t evaluations.  
+Joint-embeddings can be used for either of these two tasks. In the results reported below, the same model is used for both the t2v and v2t evaluations.  Each metric is reported as the mean and standard deviation (in parentheses) across three training runs.
 
-**Reference results:** The results below are close to those in the paper for MSRVTT, LSMDC, MSRVTT (they should vary by at most +/- 0.6 across different metrics from those reported).  The performance for ActivityNet and DiDeMo has improved, in some cases quite significantly, after removing some bugs in the training code.
+**Reference results:** The results below are close to those in the paper for MSRVTT, LSMDC, MSRVTT (the mean performance should vary by at most +/- 0.6 across different metrics from those reported).  The performance for ActivityNet and DiDeMo has improved, in some cases quite significantly, after removing some bugs in the training code.
 
 
 **MSRVTT Benchmark**
@@ -43,18 +43,21 @@ See the [MSRVTT README](misc/datasets/msrvtt/README.md) for links to the train/v
 
 **LSMDC Benchmark**
 
-| Model | Split | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
+| Model | Task | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
 | ------| ------| ---:| ---:| ----:| ----:|----:|----:|------:|
-| CE | Full  | {{lsmdc-train-full-ce.t2v}} | [config]({{lsmdc-train-full-ce.config}}), [model]({{lsmdc-train-full-ce.model}}), [log]({{lsmdc-train-full-ce.log}}) |
-| CE | Full  | {{lsmdc-train-full-ce.v2t}} | [config]({{lsmdc-train-full-ce.config}}), [model]({{lsmdc-train-full-ce.model}}), [log]({{lsmdc-train-full-ce.log}}) |
+| CE | t2v  | {{lsmdc-train-full-ce.t2v}} | [config]({{lsmdc-train-full-ce.config}}), [model]({{lsmdc-train-full-ce.model}}), [log]({{lsmdc-train-full-ce.log}}) |
+| CE | v2t  | {{lsmdc-train-full-ce.v2t}} | [config]({{lsmdc-train-full-ce.config}}), [model]({{lsmdc-train-full-ce.model}}), [log]({{lsmdc-train-full-ce.log}}) |
 
 See the [LSMDC README](misc/datasets/lsmdc/README.md) for descriptions of the train/test splits.
 
 **MSVD Benchmark**
 
-| Model | Split | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
+| Model | Task | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
 | ------| ------| ---:| ---:| ----:| ----:|----:|----:|------:|
-| CE | Full  | {{msvd-train-full-ce.t2v}} | [config]({{msvd-train-full-ce.config}}), [model]({{msvd-train-full-ce.model}}), [log]({{msvd-train-full-ce.log}}) |
+| CE | t2v  | {{msvd-train-full-ce.t2v}} | [config]({{msvd-train-full-ce.config}}), [model]({{msvd-train-full-ce.model}}), [log]({{msvd-train-full-ce.log}}) |
+| CE | v2t  | {{msvd-train-full-ce.v2t}} | [config]({{msvd-train-full-ce.config}}), [model]({{msvd-train-full-ce.model}}), [log]({{msvd-train-full-ce.log}}) |
+
+See the [MSVD README](misc/datasets/msvd/README.md) for descriptions of the train/test splits. Note that the videos in the MSVD dataset do not have soundtracks.
 
 **DiDeMo Benchmark**
 
@@ -80,7 +83,8 @@ For each dataset, the Collaborative Experts model makes use of a collection of p
   | Dataset           | Experts  |  Details and links | Archive size |
  |:-------------:|:-----:|:----:|:---:|
 | MSRVTT | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/msrvtt/README.md)| 19.6 GiB
-| LSMDC | audio, face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| <TODO> GiB
+| LSMDC | audio, face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 6.1 GiB
+| LSMDC | face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 6.1 GiB
 
 ### Visualising the retrieval ranking
 
@@ -101,6 +105,19 @@ If you find this code useful or use the extracted features, please consider citi
   date      = {2019},
 }
 ```
+
+If you make use of the MSRVTT or LSMDC features provided by Miech et al. (details are given in their respective READMEs [here](misc/datasets/msrvtt/README.md) and [here](misc/datasets/lsmdc/README.md)), please cite:
+
+```
+@article{miech2018learning,
+  title={Learning a text-video embedding from incomplete and heterogeneous data},
+  author={Miech, Antoine and Laptev, Ivan and Sivic, Josef},
+  journal={arXiv preprint arXiv:1804.02516},
+  year={2018}
+}
+```
+
+
 
 ### Acknowledgements
 

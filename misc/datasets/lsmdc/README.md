@@ -18,7 +18,7 @@ The train/test splits are listed in the files:
 **Tar contents**
 
 A list of the contents of the tar file are given in [tar_include.txt](tar_include.txt).
-The gzipped form of the file is TODO GiB.
+The gzipped form of the file is 6.1 GiB.
 
 **Features from MoEE [2]**
 
