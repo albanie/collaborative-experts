@@ -84,7 +84,7 @@ For each dataset, the Collaborative Experts model makes use of a collection of p
  |:-------------:|:-----:|:----:|:---:|
 | MSRVTT | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/msrvtt/README.md)| 19.6 GiB
 | LSMDC | audio, face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 6.1 GiB
-| LSMDC | face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 6.1 GiB
+| MSVD | face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 6.1 GiB
 
 ### Visualising the retrieval ranking
 
