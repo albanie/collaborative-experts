@@ -49,32 +49,48 @@ The original versions of these features can be obtained at:
 
 ### References:
 
-If you use these features, please consider citing:
+[1] If you use these features, please consider citing:
 ```
-[1] Yang Liu, Samuel Albanie, Arsha Nagrani and Andrew Zisserman,
-"Use What You Have: Video retrieval using representations from collaborative experts"
-British Machine Vision Conference, 2019
-```
-
-If you make use of the features shared by Antoine Miech and his coauthors, please cite:
-```
-[2] Miech, A., Laptev, I., & Sivic, J.
-Learning a text-video embedding from incomplete and heterogeneous data.
-arXiv preprint arXiv:1804.02516, 2018
+@inproceedings{Liu2019a,
+  author    = {Liu, Y. and Albanie, S. and Nagrani, A. and Zisserman, A.},
+  booktitle = {British Machine Vision Conference},
+  title     = {Use What You Have: Video retrieval using representations from collaborative experts},
+  date      = {2019},
+}
 ```
 
-The original MSRVTT dataset was described in:
+[2] If you make use of the features shared by Antoine Miech and his coauthors, please cite:
+
 
 ```
-[3] Xu, J., Mei, T., Yao, T., & Rui, Y.
-"Msr-vtt: A large video description dataset for bridging video and language"
-CVPR 2016
+@article{miech2018learning,
+  title={Learning a text-video embedding from incomplete and heterogeneous data},
+  author={Miech, Antoine and Laptev, Ivan and Sivic, Josef},
+  journal={arXiv preprint arXiv:1804.02516},
+  year={2018}
+}
 ```
 
-The JSFusion method was described in:
+[3] The original MSRVTT dataset was described in:
 
 ```
-[4] Yu, Youngjae, Jongseok Kim, and Gunhee Kim.
-"A joint sequence fusion model for video question answering and retrieval."
-Proceedings of the European Conference on Computer Vision (ECCV). 2018.
+@inproceedings{xu2016msr,
+  title={Msr-vtt: A large video description dataset for bridging video and language},
+  author={Xu, Jun and Mei, Tao and Yao, Ting and Rui, Yong},
+  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+  pages={5288--5296},
+  year={2016}
+}
+```
+
+[4] The JSFusion method was described in:
+
+```
+@inproceedings{yu2018joint,
+  title={A joint sequence fusion model for video question answering and retrieval},
+  author={Yu, Youngjae and Kim, Jongseok and Kim, Gunhee},
+  booktitle={Proceedings of the European Conference on Computer Vision (ECCV)},
+  pages={471--487},
+  year={2018}
+}
 ```

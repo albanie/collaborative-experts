@@ -8,11 +8,14 @@ from pathlib import Path
 
 
 def upload_to_server(web_dir, dataset, webserver, root_feat_dir, refresh):
-    # NOTE: The compression step will take a long time (last run: 00h29m43s)
+    # NOTE: The compression step will take a long time
+    # (last runs: MSRVTT -> 00h29m43s, LSMDC -> 22m21s, MSVD -> )
     server_dir = Path(web_dir) / "data" / "features"
     subprocess.call(["ssh", webserver, "mkdir -p", str(server_dir)])
     compressed_file = f"{dataset}-experts.tar.gz"
     compressed_path = Path("data") / dataset / "webserver-files" / compressed_file
+    if not compressed_path.parent.exists():
+        compressed_path.parent.mkdir(exist_ok=True, parents=True)
     tar_include = Path("misc") / "datasets" / dataset.lower() / "tar_include.txt"
     compression_args = (f"tar --dereference --create --verbose"
                         f" --file={str(compressed_path)}"
@@ -40,7 +43,8 @@ def upload_to_server(web_dir, dataset, webserver, root_feat_dir, refresh):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", default="MSRVTT")
+    parser.add_argument("--dataset", default="MSRVTT",
+                        choices=["MSRVTT", "LSMDC", "MSVD"])
     parser.add_argument("--action", default="upload", choices=["upload", "fetch"])
     parser.add_argument("--webserver", default="login.robots.ox.ac.uk")
     parser.add_argument("--refresh_compression", action="store_true")
