@@ -61,16 +61,21 @@ See the [MSVD README](misc/datasets/msvd/README.md) for descriptions of the trai
 
 **DiDeMo Benchmark**
 
-| Model | Split | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
+| Model | Task | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
 | ------| ------| ---:| ---:| ----:| ----:|----:|----:|------:|
-| CE | Full  | {{didemo-train-full-ce.t2v}} | [config]({{didemo-train-full-ce.config}}), [model]({{didemo-train-full-ce.model}}), [log]({{didemo-train-full-ce.log}}) |
+| CE | t2v  | {{didemo-train-full-ce.t2v}} | [config]({{didemo-train-full-ce.config}}), [model]({{didemo-train-full-ce.model}}), [log]({{didemo-train-full-ce.log}}) |
+| CE | v2t  | {{didemo-train-full-ce.v2t}} | [config]({{didemo-train-full-ce.config}}), [model]({{didemo-train-full-ce.model}}), [log]({{didemo-train-full-ce.log}}) |
+
+See the [DiDeMo README](misc/datasets/didemo/README.md) for descriptions of the train/val/test splits.
 
 **ActivityNet Benchmark**
 
-| Model | Split | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
+| Model | Task | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
 | ------| ------| ---:| ---:| ----:| ----:|----:|----:|------:|
-| CE | Full  | {{activity-net-train-full-ce.t2v}} | [config]({{activity-net-train-full-ce.config}}), [model]({{activity-net-train-full-ce.model}}), [log]({{activity-net-train-full-ce.log}}) |
+| CE | t2v  | {{activity-net-train-full-ce.t2v}} | [config]({{activity-net-train-full-ce.config}}), [model]({{activity-net-train-full-ce.model}}), [log]({{activity-net-train-full-ce.log}}) |
+| CE | v2t  | {{activity-net-train-full-ce.v2t}} | [config]({{activity-net-train-full-ce.config}}), [model]({{activity-net-train-full-ce.model}}), [log]({{activity-net-train-full-ce.log}}) |
 
+See the [ActivityNet README](misc/datasets/activity-net/README.md) for descriptions of the train/test splits.
 
 ### Training a video embedding
 
@@ -85,6 +90,8 @@ For each dataset, the Collaborative Experts model makes use of a collection of p
 | MSRVTT | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/msrvtt/README.md)| 19.6 GiB
 | LSMDC | audio, face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 6.1 GiB
 | MSVD | face, flow, ocr, rgb, scene | [README](misc/datasets/msvd/README.md)| 2.1 GiB
+| DiDeMo | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/didemo/README.md)| 2.3 GiB
+| ActivityNet | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/activity-net/README.md)| TODO GiB
 
 ### Visualising the retrieval ranking
 
