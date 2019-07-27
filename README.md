@@ -162,7 +162,7 @@ conda env create -f requirements/conda-freeze.yml
 ```
 
 Otherwise, if you'd prefer to take a leaner approach, you can either:
-1. `pip install` each missing package each time you hit an `ImportError`
+1. `pip/conda install` each missing package each time you hit an `ImportError`
 2. manually inspect the slightly more readable `requirements/pip-requirements.txt`
 
 
@@ -194,4 +194,4 @@ Otherwise, if you'd prefer to take a leaner approach, you can either:
 
 ### Acknowledgements
 
-This work was inspired by a number of prior works for learning joint embeddings of text and video, but in particular the *Mixture-of-Embedding-Experts* method proposed by Antoine Miech, Ivan Laptev and Josef Sivic ([paper](https://arxiv.org/abs/1804.02516), [code](https://github.com/antoine77340/Mixture-of-Embedding-Experts)). We would also like to thank Zak Stone and Susie Lim for their considerable help with using Cloud TPUs.
+This work was inspired by a number of prior works for learning joint embeddings of text and video, but in particular the *Mixture-of-Embedding-Experts* method proposed by Antoine Miech, Ivan Laptev and Josef Sivic ([paper](https://arxiv.org/abs/1804.02516), [code](https://github.com/antoine77340/Mixture-of-Embedding-Experts)). We would also like to thank Zak Stone and Susie Lim for their help with using Cloud TPUs.
