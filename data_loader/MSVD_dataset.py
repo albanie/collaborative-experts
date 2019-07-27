@@ -81,7 +81,7 @@ class MSVD(BaseDataset):
                 canon_feats[expert] = self.canonical_features(feats, raw_dim=raw_dim)
         self.features = canon_feats
         self.text_features = text_features
-        self.raw_captions = memcache(Path(self.data_dir) / "processing/raw-captions.pkl")
+        self.raw_captions = memcache(pjoin(root_feat, "raw-captions.pkl"))
 
     def sanity_checks(self):
         assert self.num_test_captions == 81, "Expected to have 81 test caps for MSVD"
