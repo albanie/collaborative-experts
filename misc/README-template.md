@@ -17,7 +17,7 @@ We provide pretrained models for each dataset to reproduce the results reported 
 * `t2v` denotes that a text query is used to retrieve videos
 * `v2t` denotes that a video query is used to retrieve text video descriptions
 
-In the results reported below, the same model is used for both the t2v and v2t tasks.
+Joint-embeddings can be used for either of these two tasks. In the results reported below, the same model is used for both the t2v and v2t evaluations.
 
 
 **MSRVTT Benchmark**

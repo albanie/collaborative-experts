@@ -24,7 +24,7 @@ def generate_url(root_url, target, exp_name, experiments):
     return str(Path(root_url) / paths["parent"] / exp_name / timestamp / paths["fname"])
 
 
-def sync_files(experiments, save_dir, webserver, webdir):
+def sync_files(experiments, save_dir, webserver, web_dir):
     filetypes = {
         "log": ["info.log"],
         "models": ["trained_model.pth", "config.json"]
@@ -36,7 +36,7 @@ def sync_files(experiments, save_dir, webserver, webdir):
             for fname in fnames:
                 rel_path = Path(rel_dir) / fname
                 local_path = Path(save_dir) / filetype / key / rel_path
-                server_path = Path(webdir).expanduser() / filetype / key / rel_path
+                server_path = Path(web_dir).expanduser() / filetype / key / rel_path
                 dest = f"{webserver}:{str(server_path)}"
                 print(f"{key} -> {webserver} [{local_path} -> {server_path}]")
                 subprocess.call(["ssh", webserver, "mkdir -p", str(server_path.parent)])
@@ -143,8 +143,12 @@ if __name__ == "__main__":
     parser.add_argument("--task", default="generate_readme",
                         choices=["sync_files", "generate_readme"])
     parser.add_argument(
+        "--web_dir",
+        default="/projects/vgg/vgg/WWW/research/collaborative-experts/data",
+    )
+    parser.add_argument(
         "--root_url",
-        default="http://www.robots.ox.ac.uk/~albanie/data/collaborative-experts",
+        default="http://www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data",
     )
     args = parser.parse_args()
 
@@ -153,10 +157,10 @@ if __name__ == "__main__":
 
     if args.task == "sync_files":
         sync_files(
-            webdir=args.web_dir,
+            web_dir=args.web_dir,
             save_dir=args.save_dir,
             webserver=args.webserver,
-            experiments_path=args.experiments_path,
+            experiments=experiments,
         )
     elif args.task == "generate_readme":
         generate_readme(
