@@ -42,7 +42,7 @@
             "num_test_captions": 81,
             "rgb_model_name": "senet154",
             "feat_aggregation": {
-                "scene": "avg",
+                "scene": "max",
                 "rgb": "avg",
                 "flow": "avg",
                 "face": "avg"
