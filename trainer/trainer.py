@@ -48,17 +48,19 @@ class Trainer(BaseTrainer):
     """
     def __init__(self, model, loss, metrics, optimizer, config, data_loaders,
                  lr_scheduler, visualizer, disable_nan_checks, skip_first_n_saves,
-                 mini_train=False):
+                 include_optim_in_ckpts, num_keep_ckpts=3, mini_train=False):
         super().__init__(model, loss, metrics, optimizer, config)
         self.config = config
         self.data_loaders = data_loaders
         self.lr_scheduler = lr_scheduler
         self.mini_train = mini_train
+        self.num_keep_ckpts = num_keep_ckpts
         self.disable_nan_checks = disable_nan_checks
         self.len_epoch = len(self.data_loaders["train"])
         self.log_step = int(np.sqrt(data_loaders["train"].batch_size))
         self.visualizer = visualizer
         self.skip_first_n_saves = skip_first_n_saves
+        self.include_optim_in_ckpts = include_optim_in_ckpts
 
     def _train_epoch(self, epoch):
         """
@@ -145,7 +147,7 @@ class Trainer(BaseTrainer):
 
         for name, param in self.model.named_parameters():
             self.writer.add_histogram(name, param, bins='auto')
-        if self.data_loaders.num_test_captions == 1:
+        if self.data_loaders.num_test_captions == 1 and meta["raw_captions"] is not None:
             self.visualizer.visualize_ranking(
                 sims=sims,
                 meta=meta,

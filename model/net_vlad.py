@@ -47,11 +47,7 @@ class NetVLAD(nn.Module):
         Returns:
             (th.Tensor): B x DK
         """
-        if th.isnan(x).sum():
-            ipdb.set_trace()
-        if th.isnan(self.clusters[0][0]):
-            print("nan clusters")
-            ipdb.set_trace()
+        self.sanity_checks(x)
         max_sample = x.size()[1]
         x = x.view(-1, self.feature_size)  # B x N x D -> BN x D
         if x.device != self.clusters.device:
@@ -80,3 +76,12 @@ class NetVLAD(nn.Module):
         vlad = vlad.view(-1, self.cluster_size * self.feature_size)  # -> B x DK
         vlad = F.normalize(vlad)
         return vlad  # B x DK
+
+    def sanity_checks(self, x):
+        """Catch any nans in the inputs/clusters"""
+        if th.isnan(th.sum(x)):
+            print("nan inputs")
+            ipdb.set_trace()
+        if th.isnan(self.clusters[0][0]):
+            print("nan clusters")
+            ipdb.set_trace()

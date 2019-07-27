@@ -23,9 +23,14 @@ The `Full` split was produced by the authors of MSRVTT [3].  The train/val/test 
 
 1. [train_list_full.txt](train_list_dev.txt) (6513 videos), [val_list_full.txt](val_list_full.txt) (497 videos) and [test_list_full.txt](test_list_full.txt) (2990 videos).
 
+**Label Noise**
+
+It is worth being aware that there is a reasonable degree of label noise in the MSRVTT dataset (for instance, captions which are duplicated across videos).
+
 **Tar contents**
 
 A list of the contents of the tar file are given in [tar_include.txt](tar_include.txt).
+The gzipped form of the file is 19.6 GiB.
 
 **Features from MoEE [2]**
 
