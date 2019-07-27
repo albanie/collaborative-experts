@@ -190,4 +190,3 @@ def cols2metrics(cols, num_queries):
     stats = [metrics[x] for x in ("R1", "R5", "R10")]
     metrics["geometric_mean_R1-R5-R10"] = scipy.stats.mstats.gmean(stats)
     return metrics
-

@@ -1,8 +1,12 @@
 ## Collaborative Experts
 
-This repo provides code for learning and evaluating joint video-text embeddings for the task of video retrieval, using the approach described in the [collaborative experts paper](link).
+This repo provides code for learning and evaluating joint video-text embeddings for the task of video retrieval.  Our approach is described in the [collaborative experts paper](link).  
 
 ![CE diagram](figs/CE-diagram.png)
+
+In brief, we aim to achieve robustness through two mechanisms:
+1. Extracting information from a wide range of modalities, including those that typically always available (such as RGB) as well as more specialised clues (such as text overlaid on the video), which may only occasionally be present.
+2. A module that seeks to efficiently combine these modalities into a fixed size representation that in a manner that is robust to noise.
 
 
 **Requirements:** The code assumes PyTorch 1.1 and Python 3.7 (other versions may work, but have not been tested).
