@@ -17,7 +17,9 @@ We provide pretrained models for each dataset to reproduce the results reported 
 * `t2v` denotes that a text query is used to retrieve videos
 * `v2t` denotes that a video query is used to retrieve text video descriptions
 
-Joint-embeddings can be used for either of these two tasks. In the results reported below, the same model is used for both the t2v and v2t evaluations.
+Joint-embeddings can be used for either of these two tasks. In the results reported below, the same model is used for both the t2v and v2t evaluations.  
+
+**Reference results:** The results below are close to those in the paper for MSRVTT, LSMDC, MSRVTT (they should vary by at most +/- 0.6 across different metrics from those reported).  The performance for ActivityNet and DiDeMo has improved, in some cases quite significantly, after removing some bugs in the training code.
 
 
 **MSRVTT Benchmark**
@@ -44,6 +46,7 @@ See the [MSRVTT README](misc/datasets/msrvtt/README.md) for links to the train/v
 | Model | Split | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
 | ------| ------| ---:| ---:| ----:| ----:|----:|----:|------:|
 | CE | Full  | 12.6<sub>(0.8)</sub> | 31.0<sub>(0.6)</sub> | 40.3<sub>(0.5)</sub> | 68.1<sub>(1.0)</sub> | 19.0<sub>(0.0)</sub> | 65.7<sub>(0.8)</sub> | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/lsmdc-train-full-ce/07-25_17-19-51/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/lsmdc-train-full-ce/07-25_17-19-51/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/lsmdc-train-full-ce/07-25_17-19-51/info.log) |
+| CE | Full  | 13.5<sub>(1.1)</sub> | 30.8<sub>(0.7)</sub> | 41.0<sub>(0.6)</sub> | 67.1<sub>(1.1)</sub> | 18.7<sub>(0.6)</sub> | 66.2<sub>(0.9)</sub> | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/lsmdc-train-full-ce/07-25_17-19-51/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/lsmdc-train-full-ce/07-25_17-19-51/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/lsmdc-train-full-ce/07-25_17-19-51/info.log) |
 
 
 **MSVD Benchmark**

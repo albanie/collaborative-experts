@@ -17,7 +17,9 @@ We provide pretrained models for each dataset to reproduce the results reported 
 * `t2v` denotes that a text query is used to retrieve videos
 * `v2t` denotes that a video query is used to retrieve text video descriptions
 
-Joint-embeddings can be used for either of these two tasks. In the results reported below, the same model is used for both the t2v and v2t evaluations.
+Joint-embeddings can be used for either of these two tasks. In the results reported below, the same model is used for both the t2v and v2t evaluations.  
+
+**Reference results:** The results below are close to those in the paper for MSRVTT, LSMDC, MSRVTT (they should vary by at most +/- 0.6 across different metrics from those reported).  The performance for ActivityNet and DiDeMo has improved, in some cases quite significantly, after removing some bugs in the training code.
 
 
 **MSRVTT Benchmark**
@@ -44,6 +46,7 @@ See the [MSRVTT README](misc/datasets/msrvtt/README.md) for links to the train/v
 | Model | Split | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
 | ------| ------| ---:| ---:| ----:| ----:|----:|----:|------:|
 | CE | Full  | {{lsmdc-train-full-ce.t2v}} | [config]({{lsmdc-train-full-ce.config}}), [model]({{lsmdc-train-full-ce.model}}), [log]({{lsmdc-train-full-ce.log}}) |
+| CE | Full  | {{lsmdc-train-full-ce.v2t}} | [config]({{lsmdc-train-full-ce.config}}), [model]({{lsmdc-train-full-ce.model}}), [log]({{lsmdc-train-full-ce.log}}) |
 
 
 **MSVD Benchmark**
