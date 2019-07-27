@@ -8,7 +8,9 @@
         "face_dim": 128,
         "drop_feats": "",
         "text_feat": "openai",
-        "text_dim": 768
+        "text_dim": 768,
+        "modalities": ["audio", "face", "flow", "ocr", "rgb",  "scene", "speech"],
+        "ce_shared_dim": 512
     },
     "arch": {
         "type": "CENet",
@@ -34,8 +36,11 @@
             "data_dir": "data/MSRVTT",
             "batch_size": 64,
             "split_name": "miech",
+            "fuse_captions": false,
             "num_workers": 4,
             "num_test_captions": 1,
+            "max_text_words": 30,
+            "max_expert_tokens": 30,
             "rgb_model_name": "senet154",
             "feat_aggregation": {
                 "scene": "avg",
