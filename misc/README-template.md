@@ -81,7 +81,7 @@ See the [ActivityNet README](misc/datasets/activity-net/README.md) for descripti
 
 ### Expert Zoo
 
-For each dataset, the Collaborative Experts model makes use of a collection of pretrained "expert" feature extractors (see the paper for more precise descriptions). Some experts have been obtained from other sources (described where applicable), rather than extracted by us.  To reproduce the experiments listed above, the experts for each dataset have been bundled into compressed tar files.  These can be downloaded and unpacked with a utility [script](misc/sync_experts.py) (recommended -- see example usage below), which will store them in the locations expected by the training code. Each set of experts has a brief README, which also provides a link from which they can be downloaded directly.
+For each dataset, the Collaborative Experts model makes use of a collection of pretrained "expert" feature extractors (see the paper for more precise descriptions). Some experts have been obtained from other sources (described where applicable), rather than extracted by us.  To reproduce the experiments listed above, the experts for each dataset have been bundled into compressed tar files.  These can be downloaded and unpacked with a [utility script](misc/sync_experts.py) (recommended -- see example usage below), which will store them in the locations expected by the training code. Each set of experts has a brief README, which also provides a link from which they can be downloaded directly.
 
   | Dataset           | Experts  |  Details and links | Archive size |
  |:-------------:|:-----:|:----:|:---:|
@@ -94,7 +94,7 @@ For each dataset, the Collaborative Experts model makes use of a collection of p
 ### Evaluating a pretrained model
 
 Evaluting a pretrained model for a given dataset requires:
-1. The pretrained experts for the target dataset, which should be located in `<root>/data/<dataset-name>/symlinked-feats` (this will be done automatically by the [utility-script](), or can be done manually).
+1. The pretrained experts for the target dataset, which should be located in `<root>/data/<dataset-name>/symlinked-feats` (this will be done automatically by the [utility script](misc/sync_experts.py), or can be done manually).
 2. A `config.json` file.
 3. A `trained_model.pth` file.
 
@@ -125,7 +125,7 @@ python3 test.py --config configs/msvd/eval-full-ce.json --resume ${MODEL} --devi
 ### Training a new model
 
 Training a new video-text embedding requires:
-1. The pretrained experts for the dataset used for training, which should be located in `<root>/data/<dataset-name>/symlinked-feats` (this will be done automatically by the [utility-script](), or can be done manually).
+1. The pretrained experts for the dataset used for training, which should be located in `<root>/data/<dataset-name>/symlinked-feats` (this will be done automatically by the [utility script](misc/sync_experts.py), or can be done manually).
 2. A `config.json` file.  You can define your own, or use one of the provided configs in the [configs](configs) directory.
 
 Training is then performed with the following command:
