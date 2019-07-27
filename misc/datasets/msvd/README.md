@@ -29,7 +29,7 @@ The gzipped form of the file is 2.1 GiB.
 }
 ```
 
-[2] The original MSVD dataset was described in:
+[2] Please also consider citing the original MSVD dataset, which was described in:
 
 ```
 @inproceedings{chen2011collecting,
@@ -42,7 +42,7 @@ The gzipped form of the file is 2.1 GiB.
 }
 ```
 
-The train/val/test splits we also used in (and possibly produced by)
+The train/val/test splits were also used in (and possibly produced by)
 
 ```
 @inproceedings{venugopalan2015sequence,

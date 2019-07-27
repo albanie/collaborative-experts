@@ -71,7 +71,7 @@ The original versions of these features can be obtained at:
 }
 ```
 
-[3] The original MSRVTT dataset was described in:
+[3] Please also consider citing the original MSRVTT dataset, which was described in:
 
 ```
 @inproceedings{xu2016msr,

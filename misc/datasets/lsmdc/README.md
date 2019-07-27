@@ -48,24 +48,34 @@ The original versions of these features can be obtained at:
 
 ### References:
 
-If you use these features, please consider citing:
+[1] If you use these features, please consider citing:
 ```
-[1] Yang Liu, Samuel Albanie, Arsha Nagrani and Andrew Zisserman,
-"Use What You Have: Video retrieval using representations from collaborative experts"
-British Machine Vision Conference, 2019
-```
-
-If you make use of the features shared by Antoine Miech and his coauthors, please cite:
-```
-[2] Miech, A., Laptev, I., & Sivic, J.
-Learning a text-video embedding from incomplete and heterogeneous data.
-arXiv preprint arXiv:1804.02516, 2018
+@inproceedings{Liu2019a,
+  author    = {Liu, Y. and Albanie, S. and Nagrani, A. and Zisserman, A.},
+  booktitle = {British Machine Vision Conference},
+  title     = {Use What You Have: Video retrieval using representations from collaborative experts},
+  date      = {2019},
+}
 ```
 
-The original LSMDC dataset was described in:
+[2] If you make use of the features shared by Antoine Miech and his coauthors, please cite:
+```
+@article{miech2018learning,
+  title={Learning a text-video embedding from incomplete and heterogeneous data},
+  author={Miech, Antoine and Laptev, Ivan and Sivic, Josef},
+  journal={arXiv preprint arXiv:1804.02516},
+  year={2018}
+}
+```
+
+[3] Please also consider citing the original LSMDC dataset, which was described in:
 
 ```
-[3] Rohrbach, A., Rohrbach, M., Tandon, N., & Schiele, B. (2015).
-A dataset for movie description.
-In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 3202-3212).
+@inproceedings{rohrbach2015dataset,
+  title={A dataset for movie description},
+  author={Rohrbach, Anna and Rohrbach, Marcus and Tandon, Niket and Schiele, Bernt},
+  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+  pages={3202--3212},
+  year={2015}
+}
 ```

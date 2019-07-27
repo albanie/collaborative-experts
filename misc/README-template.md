@@ -13,11 +13,11 @@ In brief, the *Collaborative Experts* framework aims to achieve robustness throu
 
 ### Evaluating pretrained video embeddings
 
-We provide pretrained models for each dataset to reproduce the results reported in the paper.  Each model is accompanied by training and evaluation logs.  Performance is evalauted for retrieval in both directions:
+We provide pretrained models for each dataset to reproduce the results reported in the paper.  Each model is accompanied by training and evaluation logs.  Performance is evalauted for retrieval in both directions (joint-embeddings can be used for either of these two tasks):
 * `t2v` denotes that a text query is used to retrieve videos
 * `v2t` denotes that a video query is used to retrieve text video descriptions
 
-Joint-embeddings can be used for either of these two tasks. In the results reported below, the same model is used for both the t2v and v2t evaluations.  Each metric is reported as the mean and standard deviation (in parentheses) across three training runs.
+In the results reported below, the same model is used for both the t2v and v2t evaluations.  Each metric is reported as the mean and standard deviation (in parentheses) across three training runs.
 
 **Reference results:** The results below are close to those in the paper for MSRVTT, LSMDC, MSRVTT (the mean performance should vary by at most +/- 0.6 across different metrics from those reported).  The performance for ActivityNet and DiDeMo has improved, in some cases quite significantly, after removing some bugs in the training code.
 
@@ -84,7 +84,7 @@ For each dataset, the Collaborative Experts model makes use of a collection of p
  |:-------------:|:-----:|:----:|:---:|
 | MSRVTT | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/msrvtt/README.md)| 19.6 GiB
 | LSMDC | audio, face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 6.1 GiB
-| MSVD | face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 2.1 GiB
+| MSVD | face, flow, ocr, rgb, scene | [README](misc/datasets/msvd/README.md)| 2.1 GiB
 
 ### Visualising the retrieval ranking
 
