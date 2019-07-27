@@ -13,17 +13,15 @@ def upload_to_server(web_dir, dataset, webserver, root_feat_dir, refresh):
     subprocess.call(["ssh", webserver, "mkdir -p", str(server_dir)])
     compressed_file = f"{dataset}-experts.tar.gz"
     compressed_path = Path("data") / dataset / "webserver-files" / compressed_file
-
-    # ramdisk_file = f"/dev/shm/{dataset}-experts.tar.gz"
     tar_include = Path("misc") / "datasets" / dataset.lower() / "tar_include.txt"
     compression_args = (f"tar --dereference --create --verbose"
                         f" --file={str(compressed_path)}"
                         f" --gzip  --files-from={tar_include}")
     print(f"running command {compression_args}")
 
-    # TODO(Samuel): Figure out why using subprocess introduces tarring problems
-    if not Path(compressed_path).exists() and not refresh["compression'"]:
+    if not Path(compressed_path).exists() or refresh["compression"]:
         tic = time.time()
+        # TODO(Samuel): Figure out why using subprocess introduces tarring problems
         os.system(compression_args)
         duration = time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - tic))
         print(f"Finished compressing features in {duration}s")
@@ -34,7 +32,6 @@ def upload_to_server(web_dir, dataset, webserver, root_feat_dir, refresh):
     rsync_args = ["rsync", "-av", "--progress", str(compressed_path), dest]
     if not refresh["server"]:
         rsync_args.insert(1, "--ignore-existing")
-    import ipdb; ipdb.set_trace()
     tic = time.time()
     subprocess.call(rsync_args)
     duration = time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - tic))

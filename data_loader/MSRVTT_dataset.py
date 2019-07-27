@@ -24,7 +24,7 @@ class MSRVTT(BaseDataset):
             test_cap_idx_path = pjoin(self.root_feat, "jsfusion_val_caption_idx.pkl")
             self.restrict_test_captions = memcache(test_cap_idx_path)
         elif split_name in {"full-val", "full-test"}:
-            train_list_path = "train_list_dev.txt"
+            train_list_path = "train_list_full.txt"
             if split_name == "full-val":
                 test_list_path = "val_list_full.txt"
             else:

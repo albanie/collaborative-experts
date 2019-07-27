@@ -20,7 +20,7 @@ data/MSRVTT/symlinked-feats/stt_w2v.pickle
 data/MSRVTT/symlinked-feats/tar_include.txt
 data/MSRVTT/symlinked-feats/test_list_full.txt
 data/MSRVTT/symlinked-feats/test_list_miech.txt
-data/MSRVTT/symlinked-feats/train_list_dev.txtG
+data/MSRVTT/symlinked-feats/train_list_full.txt
 data/MSRVTT/symlinked-feats/train_list_jsfusion.txt
 data/MSRVTT/symlinked-feats/train_list_miech.txt
 data/MSRVTT/symlinked-feats/train_list_new.txt
