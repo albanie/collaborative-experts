@@ -156,7 +156,7 @@ Tensorboard lacks video support via HTML5 tags (at the time of writing) so after
 If you have enough disk space, the recommended approach to installing the dependencies for this project is to create a conda enviroment via the `requirements/conda-requirements.txt`:
 
 ```
-conda create --name ce --file requirements/conda-requirements.txt
+conda env create -f requirements/conda-freeze.yml
 ```
 
 Otherwise, if you'd prefer to take a leaner approach, you can either:
