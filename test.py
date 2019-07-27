@@ -19,7 +19,7 @@ def evaluation(config, logger=None):
     logger.info("Running evaluation with configuration:")
     logger.info(config)
 
-    expert_modality_dim, raw_input_dims = compute_dims(config)
+    expert_dims, raw_input_dims = compute_dims(config)
 
     # Set the random initial seeds
     seed = config["seed"]
@@ -38,7 +38,7 @@ def evaluation(config, logger=None):
     model = config.init(
         name='arch',
         module=module_arch,
-        expert_modality_dim=expert_modality_dim,
+        expert_dims=expert_dims,
         text_dim=config["experts"]["text_dim"],
         disable_nan_checks=config["disable_nan_checks"],
     )
@@ -51,15 +51,22 @@ def evaluation(config, logger=None):
         exp_name=config._exper_name,
         log_dir=config._web_log_dir,
     )
-    logger.info('Loading checkpoint: {} ...'.format(config.resume))
-    checkpoint = torch.load(config.resume)
+    ckpt_path = config._args.resume
+    logger.info(f"Loading checkpoint: {ckpt_path} ...")
+    checkpoint = torch.load(ckpt_path)
     state_dict = checkpoint['state_dict']
     if config['n_gpu'] > 1:
         model = torch.nn.DataParallel(model)
     model.load_state_dict(state_dict)
 
-    # prepare model for testing
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # prepare model for testing.  Note that some datasets fail to fit the retrieval
+    # set on the GPU, so we run them on the CPU
+    if torch.cuda.is_available() and not config.get("disable_gpu", False):
+        device = "cuda"
+    else:
+        device = "cpu"
+    logger.info(f"Running evaluation on {device}")
+
     model = model.to(device)
     model.eval()
 

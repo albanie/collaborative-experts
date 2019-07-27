@@ -70,10 +70,11 @@ def main(config):
             disable_nan_checks=config["disable_nan_checks"],
             visualizer=visualizer,
             skip_first_n_saves=config["trainer"].get("skip_first_n_saves", 0),
+            include_optim_in_ckpts=config["trainer"].get("include_optim_in_ckpts", False),
         )
         trainer.train()
         best_ckpt_path = config.save_dir / "trained_model.pth"
-        duration = time.strftime('%H:%M:%S', time.gmtime(time.time() - tic))
+        duration = time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - tic))
         logger.info(f"Training took {duration}")
 
         # If the dataset supports separate validation/test splits, the training config
@@ -85,7 +86,6 @@ def main(config):
             eval_args.add_argument("--device", default=config._args.device)
             eval_args.add_argument("--resume", default=best_ckpt_path)
             eval_config = ConfigParser(eval_args, slave_mode=True)
-            import ipdb; ipdb.set_trace()
             evaluation(eval_config, logger=logger)
 
     # If multiple runs were conducted, report relevant statistics
@@ -114,6 +114,7 @@ if __name__ == '__main__':
     args.add_argument('--device', type=str, help="indices of GPUs to enable")
     args.add_argument('--mini_train', action="store_true")
     args.add_argument('--disable_workers', action="store_true")
+    args.add_argument('--train_single_epoch', action="store_true")
     args.add_argument('--seeds', default="0", help="comma separated list of seeds")
     args.add_argument('--purge_exp_dir', action="store_true",
                       help="remove all previous experiments with the given config")
@@ -121,9 +122,15 @@ if __name__ == '__main__':
     args = ConfigParser(args)
     os.environ["PYTHONBREAKPOINT"] = args._args.dbg
 
-    print("Disabling data loader workers....")
     if args._args.disable_workers:
+        print("Disabling data loader workers....")
         args["data_loader"]["args"]["num_workers"] = 0
+
+    if args._args.train_single_epoch:
+        print("Restring training to a single epoch....")
+        args["trainer"]["epochs"] = 1
+        args["trainer"]["save_period"] = 1
+        args["trainer"]["skip_first_n_saves"] = 0
 
     msg = (f"Expected the number of training epochs ({args['trainer']['epochs']})"
            f"to exceed the save period ({args['trainer']['save_period']}), otherwise"

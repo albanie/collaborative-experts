@@ -3,7 +3,6 @@ import torch as th
 from abc import abstractmethod
 from torch.utils.data import Dataset
 import numpy as np
-from os.path import join as pjoin
 from utils.util import ensure_tensor
 from collections import OrderedDict
 from utils.util import memcache
@@ -34,18 +33,21 @@ class BaseDataset(Dataset):
         raise NotImplementedError
 
     def __init__(self, data_dir, feat_aggregation, raw_input_dims, num_test_captions,
-                 split_name, text_dim, text_feat, rgb_model_name, max_words=30,
-                 verbose=False):
+                 split_name, text_dim, text_feat, rgb_model_name, fuse_captions,
+                 max_text_words, max_expert_tokens, verbose=False):
 
+        # TODO(samuel) - document difference between max_text_words vs max_expert_tokens
         self.text_feat = text_feat
+        self.data_dir = data_dir
         self.text_dim = text_dim
-        self.max_words = max_words
+        self.max_text_words = max_text_words
+        self.max_expert_tokens = max_expert_tokens
+        self.fuse_captions = fuse_captions
         self.num_test_captions = num_test_captions
         self.rgb_model_name = rgb_model_name
         self.restrict_test_captions = None
         self.feat_aggregation = feat_aggregation
         self.root_feat = Path(data_dir) / "symlinked-feats"
-        self.raw_captions = memcache(Path(data_dir) / "processing/raw-captions.pkl")
         self.rgb_shots = 1
         self.experts = set(raw_input_dims.keys())
 
@@ -65,7 +67,19 @@ class BaseDataset(Dataset):
 
         # NOTE: We use nans rather than zeros to indicate missing faces
         self.MISSING_VAL = np.nan
+
+        # load the dataset-specific features into memory
         self.load_features()
+
+        # Generate canonical forms of features - note that we handle ocr separately
+        # from the other experts, for backward-compatibility reasons
+        for expert, feats in self.features.items():
+            if expert != "ocr":
+                self.features[expert] = self.canonical_features(feats)
+            else:
+                raw_dim = self.raw_input_dims[expert]
+                self.features[expert] = self.canonical_features(feats, raw_dim=raw_dim)
+
         num_test = len(self.test_list)
 
         # tensors are allocated differently, depending on whether they are expected to
@@ -77,7 +91,7 @@ class BaseDataset(Dataset):
         self.fixed_sz_experts = fixed_sz_experts.intersection(self.experts)
         self.variable_sz_experts = variable_sz_experts.intersection(self.experts)
 
-        retrieval = {expert: np.zeros((num_test, max_words, raw_input_dims[expert]))
+        retrieval = {expert: np.zeros((num_test, max_expert_tokens, raw_input_dims[expert]))
                      for expert in self.variable_sz_experts}
 
         # The rgb modality is handled separately from the others because its shape can
@@ -88,7 +102,7 @@ class BaseDataset(Dataset):
         retrieval["rgb"] = np.zeros((num_test, self.rgb_shots, raw_input_dims["rgb"]))
         self.retrieval = retrieval
         self.text_retrieval = np.zeros((num_test, self.num_test_captions,
-                                        max_words, self.text_dim))
+                                        max_text_words, self.text_dim))
 
         # some "flaky" experts are only available for a fraction of videos - we need
         # to pass this information (in the form of indices) into the network for any
@@ -111,7 +125,7 @@ class BaseDataset(Dataset):
                     modality=expert,
                 )
             for expert in self.variable_sz_experts.intersection(self.experts):
-                keep = min(max_words, len(self.features[expert][video_name]))
+                keep = min(max_expert_tokens, len(self.features[expert][video_name]))
                 feats = self.features[expert][video_name][: keep]
                 self.retrieval[expert][ii, :keep, :] = feats
 
@@ -131,7 +145,7 @@ class BaseDataset(Dataset):
                             face_feat = face_feat.reshape(1, -1)
                         msg = "failure checking faces"
                         assert face_feat.shape[1] == self.raw_input_dims["face"], msg
-                        face_ind = not self.has_missing_values(face_feat)
+                        face_ind = float(not self.has_missing_values(face_feat))
                     else:
                         raise ValueError(f"unexpected shape {face_feat.shape}")
                     self.test_ind[expert][ii] = face_ind
@@ -144,20 +158,28 @@ class BaseDataset(Dataset):
 
             self.query_masks[ii, :len(candidates_sentences)] = 1
 
-            msg = "{}/{} Evaluating with sentence {} out of {} (has {} words) for {}"
-            for test_caption_idx in range(self.num_test_captions):
-                if len(candidates_sentences) <= test_caption_idx:
-                    break
-                keep = min(len(candidates_sentences[test_caption_idx]), max_words)
-                if ii % 500 == 0:
-                    print(msg.format(ii, len(self.test_list), test_caption_idx,
-                          len(candidates_sentences), keep, video_name))
-                text_feats = candidates_sentences[test_caption_idx][: keep]
-                if text_feats.size == 0:
-                    print("WARNING-WARNING: EMPTY TEXT FEATURES!")
-                    text_feats = 0
-                    import ipdb; ipdb.set_trace()
-                self.text_retrieval[ii, test_caption_idx, :keep, :] = text_feats
+            if self.fuse_captions:
+                # fuse into a single caption
+                text_feats = np.vstack(candidates_sentences)
+                keep = min(len(text_feats), max_text_words)
+                self.text_retrieval[ii, 0, :keep, :] = text_feats[:keep, :]
+                self.query_masks[ii, :] = 1
+            else:
+                msg = "{}/{} Evaluating with sentence {} out of {} (has {} words) for {}"
+                for test_caption_idx in range(self.num_test_captions):
+                    if len(candidates_sentences) <= test_caption_idx:
+                        break
+                    keep = min(len(candidates_sentences[test_caption_idx]),
+                               max_text_words)
+                    if ii % 500 == 0:
+                        print(msg.format(ii, len(self.test_list), test_caption_idx,
+                              len(candidates_sentences), keep, video_name))
+                    text_feats = candidates_sentences[test_caption_idx][: keep]
+                    if text_feats.size == 0:
+                        print("WARNING-WARNING: EMPTY TEXT FEATURES!")
+                        text_feats = 0
+                        import ipdb; ipdb.set_trace()
+                    self.text_retrieval[ii, test_caption_idx, :keep, :] = text_feats
         self.sanity_checks()
 
     def aggregate_feats(self, feats, video_name, modality):
@@ -183,10 +205,10 @@ class BaseDataset(Dataset):
         tensors["rgb"] = np.zeros((batch_size, self.rgb_shots,
                                    self.raw_input_dims["rgb"]))
         tensors.update({expert: np.zeros(
-            (batch_size, self.max_words, self.raw_input_dims[expert])
+            (batch_size, self.max_expert_tokens, self.raw_input_dims[expert])
         ) for expert in self.variable_sz_experts})
 
-        text_tensor = np.zeros((batch_size, self.captions_per_video, self.max_words,
+        text_tensor = np.zeros((batch_size, self.captions_per_video, self.max_text_words,
                                 self.text_dim))
 
         for ii, _ in enumerate(data):
@@ -194,21 +216,21 @@ class BaseDataset(Dataset):
             datum = data[ii]
             for expert in self.experts:
                 ind[expert][ii] = datum[f"{expert}_ind"]
-            ind = {key: ensure_tensor(val) for key, val in ind.items()}
 
             # It is preferable to explicitly pass NaNs into the network as missing
             # values, over simply zeros, to avoid silent failures
             for expert in self.fixed_sz_experts:
                 tensors[expert][ii] = datum[expert]
             for expert in self.variable_sz_experts:
-                keep = min(len(datum[expert]), self.max_words)
+                keep = min(len(datum[expert]), self.max_expert_tokens)
                 if keep:
                     tensors[expert][ii, :keep, :] = datum[expert][:keep]
             text = datum["text"]
             for jj in range(self.captions_per_video):
-                keep = min(len(text[jj]), self.max_words)
+                keep = min(len(text[jj]), self.max_text_words)
                 text_tensor[ii, jj, :keep, :] = text[jj][:keep]
 
+        ind = {key: ensure_tensor(val) for key, val in ind.items()}
         text = th.from_numpy(text_tensor).float()
         experts = OrderedDict(
             (expert, th.from_numpy(tensors[expert]).float())
@@ -254,7 +276,16 @@ class BaseDataset(Dataset):
         if idx < self.num_train:
             vid = self.train_list[idx]
             text = self.text_features[vid]
-            text = np.random.choice(text, size=self.captions_per_video)
+
+            # Handle some inconsistencies between how the text features are stored
+            if self.fuse_captions:
+                text = [np.vstack(text)]
+            elif isinstance(text, list):
+                pick = np.random.choice(len(text), size=self.captions_per_video)
+                text = np.array(text)[pick]
+            else:
+                text = np.random.choice(text, size=self.captions_per_video)
+
             features = {expert: self.features[expert][vid] for expert in self.experts}
 
             # We need to handle face availablility separately, because some missing faces
@@ -280,7 +311,7 @@ class BaseDataset(Dataset):
             # need to be aggregated along the temporal dimension
             msg = ("When features have not yet been aggregated, expect feature-dim"
                    "to lie on the second dimension")
-            unaggregated = {"flow", "rgb", "scene", "face"}
+            unaggregated = {"flow", "rgb", "scene", "face"}.intersection(self.experts)
             for expert in unaggregated:
                 assert features[expert].ndim == 2
                 assert features[expert].shape[1] == self.raw_input_dims[expert], msg
@@ -298,7 +329,8 @@ class BaseDataset(Dataset):
     def get_retrieval_data(self):
         experts = OrderedDict(
             (expert, th.from_numpy(self.retrieval[expert]).float())
-            for expert in self.ordered_experts)
+            for expert in self.ordered_experts
+        )
 
         retrieval_data = {
             "text": ensure_tensor(self.text_retrieval).float(),

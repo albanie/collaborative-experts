@@ -1,5 +1,6 @@
 import torch
 from abc import abstractmethod
+import re
 import time
 from numpy import inf
 from logger import TensorboardWriter
@@ -128,6 +129,35 @@ class BaseTrainer:
 
             if epoch % self.save_period == 0 or save_best:
                 self._save_checkpoint(epoch, save_best=best)
+            if epoch > self.num_keep_ckpts:
+                self.purge_stale_checkpoints()
+
+    def purge_stale_checkpoints(self):
+        """Remove checkpoints that are no longer neededself.
+
+        NOTE: This function assumes that the `best` checkpoint has already been renamed
+        to have a format that differs from `checkpoint-epoch<num>.pth`
+        """
+        all_ckpts = list(self.checkpoint_dir.glob("*.pth"))
+        found_epoch_ckpts = list(self.checkpoint_dir.glob("checkpoint-epoch*.pth"))
+        if len(all_ckpts) <= self.num_keep_ckpts:
+            return
+
+        msg = "Expected at the best checkpoint to have been renamed to a different format"
+        if not len(all_ckpts) > len(found_epoch_ckpts):
+            import ipdb; ipdb.set_trace()
+        assert len(all_ckpts) > len(found_epoch_ckpts), msg
+
+        # purge the oldest checkpoints
+        regex = r".*checkpoint-epoch(\d+)[.]pth$"
+        epochs = [int(re.search(regex, str(x)).groups()[0]) for x in found_epoch_ckpts]
+        sorted_ckpts = sorted(list(zip(epochs, found_epoch_ckpts)), key=lambda x: -x[0])
+
+        for epoch, stale_ckpt in sorted_ckpts[self.num_keep_ckpts:]:
+            tic = time.time()
+            stale_ckpt.unlink()
+            msg = f"removing stale ckpt [epoch {epoch}] [took {time.time() - tic:.2f}s]"
+            self.logger.info(msg)
 
     def _prepare_device(self, n_gpu_use):
         """
@@ -159,10 +189,12 @@ class BaseTrainer:
             'arch': arch,
             'epoch': epoch,
             'state_dict': self.model.state_dict(),
-            'optimizer': self.optimizer.state_dict(),
             'monitor_best': self.mnt_best,
             'config': self.config
         }
+        if self.include_optim_in_ckpts:
+            state["optimizer"] = self.optimizer.state_dict()
+
         filename = str(self.checkpoint_dir /
                        'checkpoint-epoch{}.pth'.format(epoch))
         tic = time.time()
@@ -194,13 +226,14 @@ class BaseTrainer:
             self.logger.warning(msg)
         self.model.load_state_dict(checkpoint['state_dict'])
 
-        # load optimizer state from checkpoint only when optimizer type is not changed.
-        if checkpoint['config']['optimizer']['type'] != self.config['optimizer']['type']:
-            msg = ("Warning: Optimizer type given in config file is different from that"
-                   " of checkpoint. Optimizer parameters not being resumed.")
-            self.logger.warning(msg)
-        else:
-            self.optimizer.load_state_dict(checkpoint['optimizer'])
+        if self.include_optim_in_ckpts:
+            # load optimizer state from ckpt only when optimizer type is not changed.
+            optim_args = checkpoint['config']['optimizer']
+            if optim_args['type'] != self.config['optimizer']['type']:
+                msg = ("Warning: Optimizer type given in config file differs from that"
+                    " of checkpoint. Optimizer parameters not being resumed.")
+                self.logger.warning(msg)
+            else:
+                self.optimizer.load_state_dict(checkpoint['optimizer'])
 
-        self.logger.info(
-            "Checkpoint loaded. Resume training from epoch {}".format(self.start_epoch))
+        self.logger.info(f"Ckpt loaded. Resume training from epoch {self.start_epoch}")

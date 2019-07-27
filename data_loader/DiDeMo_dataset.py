@@ -32,15 +32,18 @@ class DiDeMo(BaseDataset):
 
     def load_features(self):
         root_feat = self.root_feat
+        feat_agg = self.feat_aggregation
+
         feat_names = {
-            "face": "VGGFace2-ResNet50-face-avg.pickle",
-            "flow": "i3d-i3d-avg.pickle",
-            "rgb": f"{self.rgb_model_name}-imagenet-avg.pickle",
-            "scene": "densenet161-scene-max.pickle",
+            "flow": f"i3d-i3d-{feat_agg['flow']}.pickle",
+            "face": f"VGGFace2-ResNet50-face-{feat_agg['face']}.pickle",
+            "rgb": f"{self.rgb_model_name}-imagenet-{feat_agg['rgb']}.pickle",
+            "scene": f"densenet161-scene-{feat_agg['scene']}.pickle",
             "ocr": "ocr-feats.pkl",
             "audio": "vggish-audio-raw.pickle",
             "speech": "stt_w2v.pickle",
         }
+        assert feat_agg["scene"] == "max", "expected max pooling over scenes"
         feat_paths = {key: Path(root_feat) / value for key, value in feat_names.items()}
 
         if self.text_feat == "openai":

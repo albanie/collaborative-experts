@@ -63,7 +63,7 @@ def log_summary(logger, log_path, eval_mode="test_run", fixed_num_epochs=None):
                     if tag in tokens:
                         pos = tokens.index(tag) + 1
                         val = tokens[pos]
-                        val = float(val[:-1])
+                        val = float(val)
                         assert current_seed is not None, "failed to determine the seed"
                         scores[key][current_seed].append(val)
 
@@ -95,11 +95,11 @@ def log_summary(logger, log_path, eval_mode="test_run", fixed_num_epochs=None):
                 elif eval_mode == "fixed_num_epochs":
                     stat = values[fixed_num_epochs - 1]
                 elif "LSMDC" in log_path and eval_mode == "geometric_mean":
-                    import ipdb; ipdb.set_trace()
                     stat = values[best_epochs[seed]]
                 else:
                     raise ValueError(f"unrecognised eval_mode: {eval_mode}")
                 agg_scores[metric].append(stat)
+        import ipdb; ipdb.set_trace()
 
         if eval_mode == "fixed_num_epochs":
             logger.info(f"Reporting stats with fixed training length: {fixed_num_epochs}")
@@ -108,8 +108,9 @@ def log_summary(logger, log_path, eval_mode="test_run", fixed_num_epochs=None):
 
 
 if __name__ == "__main__":
-    sample_path = "data/saved/log/train-full-ce-dev/07-21_11-27-57/info.log"
+    sample_path = "data/saved/log/lsmdc-train-full-ce/07-25_15-15-18/info.log"
     # sample_path = ("/scratch/shared/nfs1/albanie/exp/collaborative-experts/saved/"
     #                "log/msrvtt-miech-split-ce/07-20_07-03-12/info.log")
     logger = logging.getLogger("parser")
-    log_summary(logger=logger, log_path=sample_path, eval_mode="test_run")
+    logging.basicConfig(level=logging.INFO)
+    log_summary(logger=logger, log_path=sample_path, eval_mode="fixed_num_epochs", fixed_num_epochs=9)

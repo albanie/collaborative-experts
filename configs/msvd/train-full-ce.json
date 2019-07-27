@@ -9,7 +9,9 @@
         "face_dim": 512,
         "drop_feats": "",
         "text_feat": "openai",
-        "text_dim": 768
+        "text_dim": 768,
+        "modalities": ["face", "flow", "rgb", "ocr", "scene"],
+        "ce_shared_dim": 512
     },
     "arch": {
         "type": "CENet",
@@ -31,9 +33,12 @@
         "args":{
             "dataset_name": "MSVD",
             "data_dir": "data/MSVD",
-            "batch_size": 64,
+            "batch_size": 16,
             "split_name": "dev",
             "num_workers": 4,
+            "fuse_captions": false,
+            "max_expert_tokens": 30,
+            "max_text_words": 30,
             "num_test_captions": 81,
             "rgb_model_name": "senet154",
             "feat_aggregation": {
@@ -47,9 +52,9 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 0.0004,
+            "lr": 0.002,
             "weight_decay": 0,
-            "amsgrad": true
+            "amsgrad": false
         }
     },
     "loss": {
@@ -79,10 +84,10 @@
         }
     },
     "trainer": {
-        "epochs": 100,
+        "epochs": 150,
         "save_dir": "data/saved/",
-        "save_period": 20,
-        "skip_first_n_saves": 25,
+        "save_period": 1,
+        "skip_first_n_saves": 10,
         "verbosity": 2,
         "tensorboard": true,
         "monitor": "max val_t2v_metrics_geometric_mean_R1-R5-R10"

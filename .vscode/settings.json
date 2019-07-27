@@ -2,6 +2,7 @@
     "workbench.settings.editor": "json",
     "workbench.quickOpen.preserveInput": true,
     "python.linting.enabled": true,
+    "python.jediEnabled": true,
     "files.watcherExclude": {
         "**/.git/objects/**": true,
         "**/.git/subtree-cache/**": true,

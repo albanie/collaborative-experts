@@ -47,8 +47,11 @@ class ConfigParser:
             assert Path(self._config.get("eval_config")).exists(), msg
 
         # set save_dir where trained model and log will be saved.
-        save_dir = Path(self.config['trainer']['save_dir'])
-        timestamp = datetime.now().strftime(r"%m-%d_%H-%M-%S") if timestamp else ""
+        if "trainer" in self.config:
+            save_dir = Path(self.config['trainer']['save_dir'])
+        else:
+            save_dir = Path(self.config['tester']['save_dir'])
+        timestamp = datetime.now().strftime(r"%Y-%m-%d_%H-%M-%S") if timestamp else ""
 
         if slave_mode:
             timestamp = f"{timestamp}-eval-worker"
@@ -102,6 +105,9 @@ class ConfigParser:
 
     def __getitem__(self, name):
         return self.config[name]
+
+    def get(self, name, default):
+        return self.config.get(name, default)
 
     def get_logger(self, name, verbosity=2):
         msg_verbosity = "verbosity option {} is invalid. Valid options are {}."

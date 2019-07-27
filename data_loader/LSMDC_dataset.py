@@ -34,7 +34,7 @@ class LSMDC(Dataset):
             "face": "X_face.npy",
             "flow": "X_flow.npy",
             "rgb": "X_resnet.npy",
-            "scene": "densenet161-scene-avg-train.npy",
+            "scene": f"densenet161-scene-{feat_aggregation['scene']}-train.npy",
             "ocr": "w2v-ocr-raw-train.npy",
             "audio": "X_audio_train.npy",
         }
@@ -42,7 +42,7 @@ class LSMDC(Dataset):
             "face": "face-retrieval.npy.tensor.npy",
             "flow": "flow-retrieval.npy.tensor.npy",
             "rgb": "resnet152-retrieval.npy.tensor.npy",
-            "scene": "densenet161-scene-avg-val.npy",
+            "scene": f"densenet161-scene-{feat_aggregation['scene']}-val.npy",
             "ocr": "w2v-ocr-raw-val.npy",
             "audio": "X_audio_retrieval.npy.tensor.npy",
         }

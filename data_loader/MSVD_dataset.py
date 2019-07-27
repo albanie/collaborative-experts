@@ -6,23 +6,6 @@ from base.base_dataset import BaseDataset
 
 
 class MSVD(BaseDataset):
-    def __init__(self, data_dir, feat_aggregation, raw_input_dims, num_test_captions,
-                 split_name, text_dim, text_feat, rgb_model_name, fuse_captions,
-                 max_words=30, verbose=False):
-
-        super().__init__(
-            data_dir=data_dir,
-            feat_aggregation=feat_aggregation,
-            raw_input_dims=raw_input_dims,
-            num_test_captions=num_test_captions,
-            split_name=split_name,
-            text_dim=text_dim,
-            text_feat=text_feat,
-            rgb_model_name=rgb_model_name,
-            fuse_captions=fuse_captions,
-            max_words=max_words,
-            verbose=verbose,
-        )
 
     def configure_train_test_splits(self, split_name):
         train_list_path = "train_list.txt"

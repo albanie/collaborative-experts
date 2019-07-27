@@ -1,12 +1,15 @@
 {
     "n_gpu": 1,
     "seed": 0,
+    "disable_gpu": true,
     "disable_nan_checks": false,
     "experts": {
         "face_dim": 512,
         "drop_feats": "",
         "text_feat": "openai",
-        "text_dim": 768
+        "text_dim": 768,
+        "modalities": ["face", "flow", "rgb", "ocr", "scene"],
+        "ce_shared_dim": 512
     },
     "arch": {
         "type": "CENet",
@@ -26,13 +29,17 @@
     },
 
     "data_loader": {
-        "type": "MSVDDataLoader",
+        "type": "ExpertDataLoader",
         "args":{
+            "dataset_name": "MSVD",
             "data_dir": "data/MSVD",
             "batch_size": 64,
             "split_name": "official",
             "num_workers": 4,
+            "fuse_captions": false,
             "num_test_captions": 81,
+            "max_expert_tokens": 30,
+            "max_text_words": 30,
             "rgb_model_name": "senet154",
             "feat_aggregation": {
                 "scene": "avg",
@@ -54,5 +61,9 @@
             "src_video_dir": "data/MSVD/videos",
             "vis_vid_freq": 1
         }
+    },
+    "tester": {
+        "save_dir": "data/saved/",
+        "verbosity": 2
     }
 }

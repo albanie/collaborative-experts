@@ -1,28 +1,55 @@
 ## Collaborative Experts
 
-This repo provides code for learning and evaluating joint video-text embeddings for the task of video retrieval.
+This repo provides code for learning and evaluating joint video-text embeddings for the task of video retrieval, using the approach described in the [collaborative experts paper](link).
 
-### Requirements
+![CE diagram](figs/CE-diagram.png)
 
-The code assumes PyTorch 1.1 and Python 3.7 (other versions may work, but have not been tested).
+
+**Requirements:** The code assumes PyTorch 1.1 and Python 3.7 (other versions may work, but have not been tested).
 
 ### Evaluating pretrained video embeddings
 
 We provide pretrained models for each dataset to reproduce the results reported in the paper.  Each model is accompanied by training and evaluation logs.  
 
-| Benchmark     | Model | Split | R@1 | R@5 | R@10 | MdR | MnR | Links |
-|:-------------:| ------| ------| ---:| ---:|-----:|----:|----:|------:|
-| MSRVTT        | CE | Full  | - | - | - | - | - | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
-| MSRVTT        | CE | 1k-A  | - | - | - | - | - | [config]({{msrvtt-train-jsfusion-ce.config}}), [model]({{msrvtt-train-jsfusion-ce.model}}), [log]({{msrvtt-train-jsfusion-ce.log}}) |
-| MSRVTT        | CE | 1k-B  | - | - | - | - | - | [config]({{msrvtt-train-miech-ce.config}}), [model]({{msrvtt-train-miech-ce.model}}), [log]({{msrvtt-train-miech-ce.log}}) |
-| MSRVTT        | CE* | 1k-B  | - | - | - | - | - | [config]({{msrvtt-train-miech-miechfeats-ce.config}}), [model]({{msrvtt-train-miech-miechfeats-ce.model}}), [log]({{msrvtt-train-miech-miechfeats-ce.log}}) |
-| MSRVTT        | MoEE* | 1k-B  | - | - | - | - | - | [config]({{msrvtt-train-miech-miechfeats-moee.config}}), [model]({{msrvtt-train-miech-miechfeats-moee.model}}), [log]({{msrvtt-train-miech-miechfeats-moee.log}}) |
+**MSRVTT Benchmark**
 
-Models marked with * use the features made available with the work of [Miech et al.](https://arxiv.org/abs/1804.02516), unstarred models on the `1k-B` split make additional use of OCR, speech and scene features, as well slightly stronger text encodings (GPT, rather than word2vec - see the paper for details). The MoEE model is included as a sanity check that our codebase approximately reproduces the MoEE paper.
 
-| Benchmark     | Model | Split | R@1 | R@5 | R@10 | MdR | MnR | Links |
-|:-------------:| ------| ------| ---:| ---:|-----:|----:|----:|------:|
-| LSMDC        | CE | Full  | - | - | - | - | - | [config]({{lsmdc-train-full-ce.config}}), [model]({{lsmdc-train-full-ce.model}}), [log]({{lsmdc-train-full-ce.log}}) |
+| Model | Split | Task | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
+| ----- | ------| ---- | --- | --- | ---- | ---- | --- | --- | ----- |
+| CE    | Full  | t2v  | {{msrvtt-train-full-ce.t2v}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
+| CE    | 1k-A  | t2v  | {{msrvtt-train-jsfusion-ce.t2v}} | [config]({{msrvtt-train-jsfusion-ce.config}}), [model]({{msrvtt-train-jsfusion-ce.model}}), [log]({{msrvtt-train-jsfusion-ce.log}}) |
+| CE    | 1k-B  | t2v  | {{msrvtt-train-miech-ce.t2v}} | [config]({{msrvtt-train-miech-ce.config}}), [model]({{msrvtt-train-miech-ce.model}}), [log]({{msrvtt-train-miech-ce.log}}) |
+| MoEE* | 1k-B  | t2v  | {{msrvtt-train-miech-miechfeats-moee.t2v}} | [config]({{msrvtt-train-miech-miechfeats-moee.config}}), [model]({{msrvtt-train-miech-miechfeats-moee.model}}), [log]({{msrvtt-train-miech-miechfeats-moee.log}}) |
+
+Models marked with * use the features made available with the work of [Miech et al.](https://arxiv.org/abs/1804.02516) (without OCR, speech and scene features), unstarred models on the `1k-B` and `Full` splits make use of OCR, speech and scene features, as well slightly stronger text encodings (GPT, rather than word2vec - see the paper for details). The MoEE model is included as a sanity check that our codebase approximately reproduces the MoEE paper.
+
+See the [MSRVTT README](misc/datasets/msrvtt/README.md) for links to the train/val/test lists of each split.
+
+**LSMDC Benchmark**
+
+| Model | Split | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
+| ------| ------| ---:| ---:| ----:| ----:|----:|----:|------:|
+| CE | Full  | {{lsmdc-train-full-ce.t2v}} | [config]({{lsmdc-train-full-ce.config}}), [model]({{lsmdc-train-full-ce.model}}), [log]({{lsmdc-train-full-ce.log}}) |
+
+
+**MSVD Benchmark**
+
+| Model | Split | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
+| ------| ------| ---:| ---:| ----:| ----:|----:|----:|------:|
+| CE | Full  | {{msvd-train-full-ce.t2v}} | [config]({{msvd-train-full-ce.config}}), [model]({{msvd-train-full-ce.model}}), [log]({{msvd-train-full-ce.log}}) |
+
+**DiDeMo Benchmark**
+
+| Model | Split | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
+| ------| ------| ---:| ---:| ----:| ----:|----:|----:|------:|
+| CE | Full  | {{didemo-train-full-ce.t2v}} | [config]({{didemo-train-full-ce.config}}), [model]({{didemo-train-full-ce.model}}), [log]({{didemo-train-full-ce.log}}) |
+
+**ActivityNet Benchmark**
+
+| Model | Split | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
+| ------| ------| ---:| ---:| ----:| ----:|----:|----:|------:|
+| CE | Full  | {{activity-net-train-full-ce.t2v}} | [config]({{activity-net-train-full-ce.config}}), [model]({{activity-net-train-full-ce.model}}), [log]({{activity-net-train-full-ce.log}}) |
+
 
 ### Training a video embedding
 
@@ -30,17 +57,11 @@ To train a new video embedding, please see the scripts for each dataset.
 
 ### Expert Zoo
 
-The links below point the features extracted from each dataset with a collection of pretrained "expert" models (see the paper for more precise descriptions). Some experts have been obtained from other sources (described where applicable), rather than extracted by us.
+For each dataset, the Collaborative Experts model makes use of a collection of pretrained "expert" feature extractors (see the paper for more precise descriptions). Some experts have been obtained from other sources (described where applicable), rather than extracted by us.  To reproduce the experiments listed above, the experts for each dataset have been bundled into compressed tar files.  These can be downloaded and unpacked with a [utility script-TODO-LINK]() (recommended), which will store them in the locations expected by the training code. Each set of experts has a brief README, which also provides a link from which they can be downloaded directly.
 
-  | Expert           | Description  |  Feature dim | Links |
- |:-------------:| -----| -----:| ---:|
-| RGB appearance | [SENet-154](https://arxiv.org/abs/1709.01507) evaluated on frames at 5ps  | 2048 | [MSR-VTT]() |
-
-### Collaborative Gating module
-
-The structure of the Collaborative Gating module is shown below (please see the [paper](link) for more details).
-
-![CE diagram](figs/CE-diagram.png)
+  | Dataset           | Experts  |  Details and links | Archive size |
+ |:-------------:|:-----:|:----:|:---:|
+| MSRVTT | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/msrvtt/README.md)| 19.6 GiB
 
 ### Visualising the retrieval ranking
 

@@ -1,10 +1,10 @@
 {
     "msvd-train-full-ce": "07-25_15-18-17",
     "lsmdc-train-full-ce": "07-25_17-19-51",
-    "msrvtt-train-full-ce": "07-25_17-19-34",
+    "didemo-train-full-ce": "2019-07-26_15-12-44",
     "activity-net-train-full-ce": "07-25_17-19-48",
-    "msrvtt-train-miech-ce": "NADA",
-    "msrvtt-train-jsfusion-ce": "NADA",
-    "msrvtt-train-miech-miechfeats-ce": "NADA",
-    "msrvtt-train-miech-miechfeats-moee": "NADA"
+    "msrvtt-train-full-ce": "07-25_17-19-34",
+    "msrvtt-train-miech-ce": "2019-07-26_15-04-54",
+    "msrvtt-train-jsfusion-ce": "2019-07-26_15-18-46",
+    "msrvtt-train-miech-miechfeats-moee": "2019-07-26_15-16-18"
 }
