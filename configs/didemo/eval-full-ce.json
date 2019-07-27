@@ -1,7 +1,6 @@
 {
     "n_gpu": 1,
     "seed": 0,
-    "disable_gpu": true,
     "disable_nan_checks": false,
     "experts": {
         "face_dim": 512,
@@ -27,27 +26,24 @@
             }
         }
     },
-
     "data_loader": {
         "type": "ExpertDataLoader",
         "args":{
-            "dataset_name": "MSRVTT",
-            "data_dir": "data/MSRVTT",
+            "dataset_name": "DiDeMo",
+            "data_dir": "data/didemo",
             "batch_size": 64,
-            "split_name": "full-test",
+            "split_name": "val",
             "num_workers": 4,
-            "fuse_captions": false,
-            "num_test_captions": 20,
-            "max_text_words": 30,
+            "fuse_captions": true,
             "max_expert_tokens": 30,
+            "max_text_words": 50,
+            "num_test_captions": 1,
             "rgb_model_name": "senet154",
             "feat_aggregation": {
-                "scene": "avg",
+                "scene": "max",
                 "rgb": "avg",
                 "flow": "avg",
-                "face": "avg",
-                "audio": "vlad",
-                "speech": "vlad"
+                "face": "avg"
             }
         }
     },
@@ -58,7 +54,7 @@
     "visualizer": {
         "type": "Visualizer",
         "args":{
-            "src_video_dir": "data/MSRVTT/videos/all",
+            "src_video_dir": "data/MSVD/videos",
             "vis_vid_freq": 1
         }
     },

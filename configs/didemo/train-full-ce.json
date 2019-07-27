@@ -2,20 +2,23 @@
     "n_gpu": 1,
     "seed": 0,
     "disable_nan_checks": false,
-    "eval_mode": "fixed_num_epochs",
+    "log_name": "info.json",
+    "eval_mode": "test_run",
+    "eval_config": "configs/didemo/eval-full-ce.json",
     "experts": {
-        "face_dim": 128,
-        "drop_feats": "scene,ocr,speech",
-        "text_feat": "w2v",
-        "text_dim": 300,
-        "modalities": ["audio", "face", "flow", "rgb"]
+        "face_dim": 512,
+        "drop_feats": "",
+        "text_feat": "openai",
+        "text_dim": 768,
+        "modalities": ["audio", "face", "flow", "ocr", "rgb",  "scene", "speech"],
+        "ce_shared_dim": 512
     },
     "arch": {
         "type": "CENet",
         "args": {
             "keep_missing_modalities": false,
             "test_caption_mode": "indep",
-            "use_ce": false,
+            "use_ce": true,
             "l2renorm": false,
             "randomise_feats": "",
             "vlad_clusters": {
@@ -30,23 +33,21 @@
     "data_loader": {
         "type": "ExpertDataLoader",
         "args":{
-            "dataset_name": "MSRVTT",
-            "data_dir": "data/MSRVTT",
+            "dataset_name": "DiDeMo",
+            "data_dir": "data/didemo",
             "batch_size": 64,
-            "split_name": "miech",
-            "fuse_captions": false,
-            "num_test_captions": 1,
+            "split_name": "val",
             "num_workers": 4,
-            "max_text_words": 30,
             "max_expert_tokens": 30,
-            "rgb_model_name": "resnet",
+            "max_text_words": 50,
+            "fuse_captions": true,
+            "num_test_captions": 1,
+            "rgb_model_name": "senet154",
             "feat_aggregation": {
-                "scene": "avg",
+                "scene": "max",
                 "rgb": "avg",
                 "flow": "avg",
-                "face": "avg",
-                "audio": "vlad",
-                "speech": "vlad"
+                "face": "avg"
             }
         }
     },
@@ -72,7 +73,7 @@
     "visualizer": {
         "type": "Visualizer",
         "args":{
-            "src_video_dir": "data/MSRVTT/videos/all",
+            "src_video_dir": "data/didemo/videos",
             "vis_vid_freq": 50,
             "num_samples": 100
         }
@@ -85,11 +86,12 @@
         }
     },
     "trainer": {
-        "epochs": 100,
+        "epochs": 25,
         "save_dir": "data/saved/",
-        "save_period": 50,
+        "save_period": 1,
+        "skip_first_n_saves": 0,
         "verbosity": 2,
         "tensorboard": true,
-        "monitor": "max epoch"
+        "monitor": "max val_t2v_metrics_geometric_mean_R1-R5-R10"
     }
 }

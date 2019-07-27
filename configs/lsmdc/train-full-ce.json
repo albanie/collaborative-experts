@@ -2,26 +2,27 @@
     "n_gpu": 1,
     "seed": 0,
     "disable_nan_checks": false,
+    "log_name": "info.json",
     "eval_mode": "fixed_num_epochs",
     "experts": {
         "face_dim": 128,
-        "drop_feats": "scene,ocr,speech",
+        "drop_feats": "",
         "text_feat": "w2v",
         "text_dim": 300,
-        "modalities": ["audio", "face", "flow", "rgb"]
+        "modalities": ["audio", "face", "flow", "ocr", "rgb",  "scene"],
+        "ce_shared_dim": 512
     },
     "arch": {
         "type": "CENet",
         "args": {
             "keep_missing_modalities": false,
             "test_caption_mode": "indep",
-            "use_ce": false,
+            "use_ce": true,
             "l2renorm": false,
             "randomise_feats": "",
             "vlad_clusters": {
                 "text": 32,
                 "audio": 16,
-                "speech": 32,
                 "ocr": 32
             }
         }
@@ -30,30 +31,28 @@
     "data_loader": {
         "type": "ExpertDataLoader",
         "args":{
-            "dataset_name": "MSRVTT",
-            "data_dir": "data/MSRVTT",
-            "batch_size": 64,
-            "split_name": "miech",
+            "dataset_name": "LSMDC",
+            "data_dir": "data/LSMDC",
+            "batch_size": 512,
+            "split_name": "val",
+            "num_workers": 4,
             "fuse_captions": false,
             "num_test_captions": 1,
-            "num_workers": 4,
-            "max_text_words": 30,
-            "max_expert_tokens": 30,
             "rgb_model_name": "resnet",
+            "max_expert_tokens": 50,
+            "max_text_words": 30,
             "feat_aggregation": {
-                "scene": "avg",
+                "scene": "max",
                 "rgb": "avg",
                 "flow": "avg",
-                "face": "avg",
-                "audio": "vlad",
-                "speech": "vlad"
+                "face": "avg"
             }
         }
     },
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 0.0004,
+            "lr": 0.0001,
             "weight_decay": 0,
             "amsgrad": true
         }
@@ -72,7 +71,7 @@
     "visualizer": {
         "type": "Visualizer",
         "args":{
-            "src_video_dir": "data/MSRVTT/videos/all",
+            "src_video_dir": "data/lsmdc/videos",
             "vis_vid_freq": 50,
             "num_samples": 100
         }
@@ -85,9 +84,9 @@
         }
     },
     "trainer": {
-        "epochs": 100,
+        "epochs": 9,
         "save_dir": "data/saved/",
-        "save_period": 50,
+        "save_period": 5,
         "verbosity": 2,
         "tensorboard": true,
         "monitor": "max epoch"

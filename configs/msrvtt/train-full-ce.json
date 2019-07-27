@@ -38,7 +38,10 @@
             "batch_size": 64,
             "split_name": "full-val",
             "num_workers": 4,
+            "fuse_captions": false,
             "num_test_captions": 20,
+            "max_text_words": 30,
+            "max_expert_tokens": 30,
             "rgb_model_name": "senet154",
             "feat_aggregation": {
                 "scene": "avg",
@@ -55,7 +58,7 @@
         "args":{
             "lr": 0.0004,
             "weight_decay": 0,
-            "amsgrad": true
+            "amsgrad": false
         }
     },
     "loss": {
@@ -87,8 +90,8 @@
     "trainer": {
         "epochs": 100,
         "save_dir": "data/saved/",
-        "save_period": 20,
-        "skip_first_n_saves": 25,
+        "save_period": 1,
+        "skip_first_n_saves": 0,
         "verbosity": 2,
         "tensorboard": true,
         "monitor": "max val_t2v_metrics_geometric_mean_R1-R5-R10"

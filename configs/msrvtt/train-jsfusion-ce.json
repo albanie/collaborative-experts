@@ -1,6 +1,5 @@
 {
     "n_gpu": 1,
-    "seed": 0,
     "disable_nan_checks": false,
     "log_name": "info.json",
     "eval_mode": "fixed_num_epochs",
@@ -8,7 +7,9 @@
         "face_dim": 512,
         "drop_feats": "",
         "text_feat": "openai",
-        "text_dim": 768
+        "text_dim": 768,
+        "modalities": ["audio", "face", "flow", "ocr", "rgb",  "scene", "speech"],
+        "ce_shared_dim": 512
     },
     "arch": {
         "type": "CENet",
@@ -30,11 +31,15 @@
     "data_loader": {
         "type": "ExpertDataLoader",
         "args":{
+            "dataset_name": "MSRVTT",
             "data_dir": "data/MSRVTT",
             "batch_size": 64,
             "split_name": "jsfusion",
             "num_workers": 4,
+            "fuse_captions": false,
             "num_test_captions": 1,
+            "max_text_words": 30,
+            "max_expert_tokens": 30,
             "rgb_model_name": "senet154",
             "feat_aggregation": {
                 "scene": "avg",
