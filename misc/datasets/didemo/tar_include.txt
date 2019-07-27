@@ -1,0 +1,16 @@
+data/didemo/symlinked-feats/train_list.txt
+data/didemo/symlinked-feats/val_list.txt
+data/didemo/symlinked-feats/test_list.txt
+data/didemo/symlinked-feats/densenet161-scene-avg.pickle
+data/didemo/symlinked-feats/densenet161-scene-max.pickle
+data/didemo/symlinked-feats/i3d-i3d-avg.pickle
+data/didemo/symlinked-feats/i3d-i3d-max.pickle
+data/didemo/symlinked-feats/ocr-feats.pkl
+data/didemo/symlinked-feats/openai-feats.pkl
+data/didemo/symlinked-feats/openai-test.npy
+data/didemo/symlinked-feats/openai-train.npy
+data/didemo/symlinked-feats/openai-val.npy
+data/didemo/symlinked-feats/senet154-imagenet-avg.pickle
+data/didemo/symlinked-feats/stt_w2v.pickle
+data/didemo/symlinked-feats/VGGFace2-ResNet50-face-avg.pickle
+data/didemo/symlinked-feats/vggish-audio-raw.pickle

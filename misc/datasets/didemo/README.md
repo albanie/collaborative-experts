@@ -17,7 +17,7 @@ NOTE: That in the original paper [2], the training split contained 8395 videos (
 **Tar contents**
 
 A list of the contents of the tar file are given in [tar_include.txt](tar_include.txt).
-The gzipped form of the file is 2.1 GiB.
+The gzipped form of the file is <TODO> GiB.
 
 ### References:
 

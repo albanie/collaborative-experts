@@ -61,9 +61,12 @@ See the [MSVD README](misc/datasets/msvd/README.md) for descriptions of the trai
 
 **DiDeMo Benchmark**
 
-| Model | Split | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
+| Model | Task | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
 | ------| ------| ---:| ---:| ----:| ----:|----:|----:|------:|
-| CE | Full  | 22.6<sub>(0.5)</sub> | 51.1<sub>(1.0)</sub> | 63.6<sub>(1.2)</sub> | 87.3<sub>(0.3)</sub> | 5.0<sub>(0.0)</sub> | 27.4<sub>(1.1)</sub> | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/didemo-train-full-ce/2019-07-26_15-12-44/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/didemo-train-full-ce/2019-07-26_15-12-44/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/didemo-train-full-ce/2019-07-26_15-12-44/info.log) |
+| CE | t2v  | 22.6<sub>(0.5)</sub> | 51.1<sub>(1.0)</sub> | 63.6<sub>(1.2)</sub> | 87.3<sub>(0.3)</sub> | 5.0<sub>(0.0)</sub> | 27.4<sub>(1.1)</sub> | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/didemo-train-full-ce/2019-07-26_15-12-44/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/didemo-train-full-ce/2019-07-26_15-12-44/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/didemo-train-full-ce/2019-07-26_15-12-44/info.log) |
+| CE | v2t  | 22.5<sub>(1.3)</sub> | 52.3<sub>(0.8)</sub> | 65.7<sub>(0.8)</sub> | 89.2<sub>(0.8)</sub> | 5.0<sub>(0.0)</sub> | 23.2<sub>(1.1)</sub> | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/didemo-train-full-ce/2019-07-26_15-12-44/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/didemo-train-full-ce/2019-07-26_15-12-44/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/didemo-train-full-ce/2019-07-26_15-12-44/info.log) |
+
+See the [DiDeMo README](misc/datasets/didemo/README.md) for descriptions of the train/val/test splits.
 
 **ActivityNet Benchmark**
 
