@@ -48,6 +48,7 @@ See the [MSRVTT README](misc/datasets/msrvtt/README.md) for links to the train/v
 | CE | Full  | {{lsmdc-train-full-ce.t2v}} | [config]({{lsmdc-train-full-ce.config}}), [model]({{lsmdc-train-full-ce.model}}), [log]({{lsmdc-train-full-ce.log}}) |
 | CE | Full  | {{lsmdc-train-full-ce.v2t}} | [config]({{lsmdc-train-full-ce.config}}), [model]({{lsmdc-train-full-ce.model}}), [log]({{lsmdc-train-full-ce.log}}) |
 
+See the [LSMDC README](misc/datasets/lsmdc/README.md) for descriptions of the train/test splits.
 
 **MSVD Benchmark**
 
@@ -79,6 +80,7 @@ For each dataset, the Collaborative Experts model makes use of a collection of p
   | Dataset           | Experts  |  Details and links | Archive size |
  |:-------------:|:-----:|:----:|:---:|
 | MSRVTT | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/msrvtt/README.md)| 19.6 GiB
+| LSMDC | audio, face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| <TODO> GiB
 
 ### Visualising the retrieval ranking
 
