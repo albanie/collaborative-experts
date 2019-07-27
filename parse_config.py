@@ -29,12 +29,12 @@ class ConfigParser:
 
         if args.resume and not slave_mode:
             self.resume = Path(args.resume)
-            self.cfg_fname = self.resume.parent / 'config.json'
+            # self.cfg_fname = self.resume.parent / 'config.json'
         else:
             msg_no_cfg = "Config file must be specified"
             assert args.config is not None, msg_no_cfg
             self.resume = None
-            self.cfg_fname = Path(args.config)
+        self.cfg_fname = Path(args.config)
 
         # load config file and apply custom cli options
         config = read_json(self.cfg_fname)

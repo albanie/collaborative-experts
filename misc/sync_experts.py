@@ -1,4 +1,8 @@
 """A small utility for transferring features to/from the webserver.
+
+Example usage:
+To fetch features for LSMDC, run the following in the project root folder:
+python misc/sync_experts.py --dataset LSMDC
 """
 import os
 import time
@@ -42,40 +46,70 @@ def upload_to_server(web_dir, dataset, webserver, root_feat_dir, refresh):
     print(f"Finished transferring features in {duration}")
 
 
+def fetch_from_server(dataset, root_url, refresh, purge_tar_file):
+    local_data_dir = Path("data") / dataset
+    symlinked_feats_dir = local_data_dir / "symlinked-feats"
+    if symlinked_feats_dir.exists() and not refresh["symlinked-feats"]:
+        print(f"Found symlinked feats at {symlinked_feats_dir}, skipping")
+        return
+
+    local_data_dir.mkdir(exist_ok=True, parents=True)
+    archive_name = f"{dataset}-experts.tar.gz"
+    local_archive = local_data_dir / archive_name
+    if not local_archive.exists():
+        src_url = f"{root_url}/features/{archive_name}"
+        wget_args = ["wget", f"--output-document={str(local_archive)}", src_url]
+        print(f"running command: {' '.join(wget_args)}")
+        subprocess.call(wget_args)
+    else:
+        print(f"found archive at {local_archive}, skipping...")
+
+    # unpack the archive and optionally clean up
+    untar_args = ["tar", "-xvf", str(local_archive)]
+    subprocess.call(untar_args)
+    if purge_tar_file:
+        local_archive.unlink()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", default="MSRVTT",
                         choices=["MSRVTT", "LSMDC", "MSVD", "didemo", "activity-net"])
-    parser.add_argument("--action", default="upload", choices=["upload", "fetch"])
+    parser.add_argument("--action", default="fetch", choices=["upload", "fetch"])
     parser.add_argument("--webserver", default="login.robots.ox.ac.uk")
     parser.add_argument("--refresh_compression", action="store_true")
     parser.add_argument("--refresh_server", action="store_true")
+    parser.add_argument("--refresh_symlinked_feats", action="store_true")
+    parser.add_argument("--purge_tar_file", action="store_true")
     parser.add_argument("--web_dir",
                         default="/projects/vgg/vgg/WWW/research/collaborative-experts")
+    parser.add_argument(
+        "--root_url",
+        default="http://www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data",
+    )
     args = parser.parse_args()
 
     server_root_feat_dir = Path("data") / args.dataset / "symlinked-feats"
     refresh_targets = {
-        "compression": args.refresh_compression,
         "server": args.refresh_server,
+        "compression": args.refresh_compression,
+        "symlinked-feats": args.refresh_symlinked_feats,
     }
 
     if args.action == "upload":
         upload_to_server(
             web_dir=args.web_dir,
             dataset=args.dataset,
+            refresh=refresh_targets,
             webserver=args.webserver,
             root_feat_dir=server_root_feat_dir,
-            refresh=refresh_targets,
         )
     elif args.action == "fetch":
-        raise NotImplementedError("TODO(Samuel): Implement the fetcher")
         fetch_from_server(
-            refresh=refresh,
-            web_dir=args.web_dir,
-            save_dir=args.save_dir,
-            webserver=args.webserver,
-            expertiments_path=args.expertiments_path,
+            dataset=args.dataset,
+            root_url=args.root_url,
+            refresh=refresh_targets,
+            purge_tar_file=args.purge_tar_file,
         )
     else:
         raise ValueError(f"unknown action: {args.action}")

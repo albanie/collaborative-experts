@@ -81,7 +81,7 @@ See the [ActivityNet README](misc/datasets/activity-net/README.md) for descripti
 
 ### Expert Zoo
 
-For each dataset, the Collaborative Experts model makes use of a collection of pretrained "expert" feature extractors (see the paper for more precise descriptions). Some experts have been obtained from other sources (described where applicable), rather than extracted by us.  To reproduce the experiments listed above, the experts for each dataset have been bundled into compressed tar files.  These can be downloaded and unpacked with a [utility script-TODO-LINK]() (recommended), which will store them in the locations expected by the training code. Each set of experts has a brief README, which also provides a link from which they can be downloaded directly.
+For each dataset, the Collaborative Experts model makes use of a collection of pretrained "expert" feature extractors (see the paper for more precise descriptions). Some experts have been obtained from other sources (described where applicable), rather than extracted by us.  To reproduce the experiments listed above, the experts for each dataset have been bundled into compressed tar files.  These can be downloaded and unpacked with a utility [script](misc/sync_experts.py) (recommended -- see example usage below), which will store them in the locations expected by the training code. Each set of experts has a brief README, which also provides a link from which they can be downloaded directly.
 
   | Dataset           | Experts  |  Details and links | Archive size |
  |:-------------:|:-----:|:----:|:---:|
@@ -108,14 +108,14 @@ For example, to reproduce the MSVD results described above, run the following se
 
 ```
 # fetch the pretrained experts for MSVD 
-utility-expert FETCH MSVD
+python misc/sync_experts.py --dataset MSVD
 
 # find the name of a pretrained model using the links in the tables above 
-MODEL=data/models/msvd-train-full-ce/07-25_15-18-17/trained_model.path
+export MODEL=data/models/msvd-train-full-ce/07-25_15-18-17/trained_model.pth
 
 # create a local directory and download the model into it 
 mkdir -p $(dirname "${MODEL}")
-wget http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/${MODEL} ${MODEL}
+wget --output-document="${MODEL}" "http://www.robots.ox.ac.uk/~vgg/research/collaborative-experts/${MODEL}"
 
 # Evaluate the model
 python3 test.py --config configs/msvd/eval-full-ce.json --resume ${MODEL} --device 0
@@ -138,7 +138,7 @@ For example, to train a new embedding for the LSMDC dataset, run the following s
 
 ```
 # fetch the pretrained experts for LSMDC 
-utility-expert FETCH LSMDC
+python misc/sync_experts.py --dataset LSMDC
 
 # Train the model
 python3 train.py --config configs/lsmdc/train-full-ce.json --device 0
@@ -149,6 +149,8 @@ python3 train.py --config configs/lsmdc/train-full-ce.json --device 0
 Tensorboard lacks video support via HTML5 tags (at the time of writing) so after each evaluation of a retrieval model, a simple HTML file is generated to allow the predicted rankings of different videos to be visualised: an example screenshot is given below (this tool is inspired by the visualiser in the [pix2pix codebase](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix)). To view the visualisation, navigate to the `web directory` (this is generated for each experiment, and will be printed in the log during training) and run `python3 -m http.server 9999`, then navigate to `localhost:9999` in your web browser.  You should see something like the following:
 
 ![visualisation](figs/vis-ranking.png)
+
+Note that the visualising the results in this manner requires that you also download the source videos for each of the datasets to some directory <src-video-dir>. Then set the `visualizer.args.src_video_dir` attribute of the training `config.json` file to point to <src-video-dir>.
 
 
 ### Dependencies
