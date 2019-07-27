@@ -43,7 +43,7 @@
             "max_expert_tokens": 30,
             "max_text_words": 100,
             "feat_aggregation": {
-                "scene": "avg",
+                "scene": "max",
                 "rgb": "avg",
                 "flow": "avg",
                 "face": "avg"
