@@ -9,7 +9,7 @@ In brief, the *Collaborative Experts* framework aims to achieve robustness throu
 2. A module that aims to combine these modalities into a fixed size representation that in a manner that is robust to noise.
 
 
-**Requirements:** The code assumes PyTorch 1.1 and Python 3.7 (other versions may work, but have not been tested).
+**Requirements:** The code assumes PyTorch 1.1 and Python 3.7 (other versions may work, but have not been tested).  See the section on dependencies towards the end of this file for specific package requirements.
 
 ### Evaluating pretrained video embeddings
 
@@ -28,10 +28,12 @@ In the results reported below, the same model is used for both the t2v and v2t e
 | Model | Split | Task | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
 | ----- | ------| ---- | --- | --- | ---- | ---- | --- | --- | ----- |
 | CE    | Full  | t2v  | {{msrvtt-train-full-ce.t2v}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
+| MoEE | Full  | t2v  | {{msrvtt-train-full-moee.t2v}} | [config]({{msrvtt-train-full-moee.config}}), [model]({{msrvtt-train-full-moee.model}}), [log]({{msrvtt-train-full-moee.log}}) |
 | CE    | 1k-A  | t2v  | {{msrvtt-train-jsfusion-ce.t2v}} | [config]({{msrvtt-train-jsfusion-ce.config}}), [model]({{msrvtt-train-jsfusion-ce.model}}), [log]({{msrvtt-train-jsfusion-ce.log}}) |
 | CE    | 1k-B  | t2v  | {{msrvtt-train-miech-ce.t2v}} | [config]({{msrvtt-train-miech-ce.config}}), [model]({{msrvtt-train-miech-ce.model}}), [log]({{msrvtt-train-miech-ce.log}}) |
 | MoEE* | 1k-B  | t2v  | {{msrvtt-train-miech-miechfeats-moee.t2v}} | [config]({{msrvtt-train-miech-miechfeats-moee.config}}), [model]({{msrvtt-train-miech-miechfeats-moee.model}}), [log]({{msrvtt-train-miech-miechfeats-moee.log}}) |
 | CE    | Full  | v2t  | {{msrvtt-train-full-ce.v2t}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
+| MoEE | Full  | v2t  | {{msrvtt-train-full-moee.v2t}} | [config]({{msrvtt-train-full-moee.config}}), [model]({{msrvtt-train-full-moee.model}}), [log]({{msrvtt-train-full-moee.log}}) |
 | CE    | 1k-A  | v2t  | {{msrvtt-train-jsfusion-ce.v2t}} | [config]({{msrvtt-train-jsfusion-ce.config}}), [model]({{msrvtt-train-jsfusion-ce.model}}), [log]({{msrvtt-train-jsfusion-ce.log}}) |
 | CE    | 1k-B  | v2t  | {{msrvtt-train-miech-ce.v2t}} | [config]({{msrvtt-train-miech-ce.config}}), [model]({{msrvtt-train-miech-ce.model}}), [log]({{msrvtt-train-miech-ce.log}}) |
 | MoEE* | 1k-B  | v2t  | {{msrvtt-train-miech-miechfeats-moee.v2t}} | [config]({{msrvtt-train-miech-miechfeats-moee.config}}), [model]({{msrvtt-train-miech-miechfeats-moee.model}}), [log]({{msrvtt-train-miech-miechfeats-moee.log}}) |
@@ -87,7 +89,7 @@ For each dataset, the Collaborative Experts model makes use of a collection of p
 | LSMDC | audio, face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 6.1 GiB
 | MSVD | face, flow, ocr, rgb, scene | [README](misc/datasets/msvd/README.md)| 2.1 GiB
 | DiDeMo | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/didemo/README.md)| 2.3 GiB
-| ActivityNet | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/activity-net/README.md)| TODO GiB
+| ActivityNet | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/activity-net/README.md)| 3.8 GiB
 
 ### Evaluating a pretrained model
 
@@ -120,17 +122,46 @@ python3 test.py --config configs/msvd/eval-full-ce.json --resume ${MODEL} --devi
 ```
 
 
+### Training a new model
 
-### Training a video embedding
+Training a new video-text embedding requires:
+1. The pretrained experts for the dataset used for training, which should be located in `<root>/data/<dataset-name>/symlinked-feats` (this will be done automatically by the [utility-script](), or can be done manually).
+2. A `config.json` file.  You can define your own, or use one of the provided configs in the [configs](configs) directory.
 
-To train a new video embedding, please see the scripts for each dataset.
+Training is then performed with the following command:
+```
+python3 train.py --config <path-to-config.json> --device <gpu-id>
+```
+where `<gpu-id>` is the index of the GPU to train on.  This option can be ommitted to run the training on the CPU.
 
+For example, to train a new embedding for the LSMDC dataset, run the following sequence of commands:
+
+```
+# fetch the pretrained experts for LSMDC 
+utility-expert FETCH LSMDC
+
+# Train the model
+python3 train.py --config configs/lsmdc/train-full-ce.json --device 0
+```
 
 ### Visualising the retrieval ranking
 
 Tensorboard lacks video support via HTML5 tags (at the time of writing) so after each evaluation of a retrieval model, a simple HTML file is generated to allow the predicted rankings of different videos to be visualised: an example screenshot is given below (this tool is inspired by the visualiser in the [pix2pix codebase](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix)). To view the visualisation, navigate to the `web directory` (this is generated for each experiment, and will be printed in the log during training) and run `python3 -m http.server 9999`, then navigate to `localhost:9999` in your web browser.  You should see something like the following:
 
 ![visualisation](figs/vis-ranking.png)
+
+
+### Dependencies
+
+If you have enough disk space, the recommended approach to installing the dependencies for this project is to create a conda enviroment via the `requirements/conda-requirements.txt`:
+
+```
+conda create --name pt11 --file requirements/conda-requirements.txt
+```
+
+Otherwise, if you'd prefer to take a leaner approach, you can either:
+1. `pip install` each missing package each time you hit an `ImportError`
+2. manually inspect the slightly more readable `requirements/pip-requirements.txt`
 
 
 ### References

@@ -4,6 +4,7 @@
     "didemo-train-full-ce": "2019-07-26_15-12-44",
     "activity-net-train-full-ce": "07-25_17-19-48",
     "msrvtt-train-full-ce": "07-25_17-19-34",
+    "msrvtt-train-full-moee": "2019-07-27_11-35-13",
     "msrvtt-train-miech-ce": "2019-07-26_15-04-54",
     "msrvtt-train-jsfusion-ce": "2019-07-26_15-18-46",
     "msrvtt-train-miech-miechfeats-moee": "2019-07-26_15-16-18"
