@@ -13,10 +13,12 @@ X_train2014_resnet152.npy
 Audio_MSRVTT_new.pickle
 Face_MSRVTT_new.pickle
 I3D_MSRVTT_new.pickle
+flow_features.pickle
+w2v_MSRVTT.pickle
+resnet_features.pickle
 resnet_MSRVTT_new.pickle
 resnet_MSRVTT_test.pickle
 resnet_MSRVTT_train.pickle
-w2v_MSRVTT.pickle
 ```
 
 The original versions of these features can be obtained at:
