@@ -15,9 +15,9 @@ The `1k-A` split was produced by the authors of JSFusion [4].  The train/val spl
 
 1. [train_list_jsfusion.txt](train_list_jsfusion.txt) (9000 videos) and [val_list_jsfusion.txt](val_list_jsfusion.txt) (1000 videos)
 
-The `1k-B` split was produced by the authors of MoEE [2].  The train/val splits are listed in the files:
+The `1k-B` split was produced by the authors of MoEE [2].  The train/test splits are listed in the files:
 
-1. [train_list_miech.txt](train_list_miech.txt) (6656 videos) and [val_list_miech.txt](val_list_miech.txt) (1000 videos)
+1. [train_list_miech.txt](train_list_miech.txt) (6656 videos) and [test_list_miech.txt](test_list_miech.txt) (1000 videos)
 
 The `Full` split was produced by the authors of MSRVTT [3].  The train/val/test splits are listed in the files:
 
