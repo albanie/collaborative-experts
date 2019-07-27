@@ -14,8 +14,13 @@ The training splits were taken from prior work [3] and are given in the files li
 
 **Tar contents**
 
+The compressed tar file (2.1 GiB) can be downloaded from:
+
+```
+http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/features/MSVD-experts.tar.gz
+sha1sum: a3dc395eddd48527b01b4af7321e4fcee1386ee7
+```
 A list of the contents of the tar file are given in [tar_include.txt](tar_include.txt).
-The gzipped form of the file is 2.1 GiB.
 
 ### References:
 

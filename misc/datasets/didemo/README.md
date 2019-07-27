@@ -11,13 +11,19 @@ The training splits were taken from [2] and are given in the files linked below:
 * [val_list.txt](val_list.txt) (1065 videos)
 * [test_list.txt](test_list.txt) (1004 videos)
 
-NOTE: That in the original paper [2], the training split contained 8395 videos (therefore, three are missing in our split).
+NOTE: That in the original paper [2], the training split contained 8395 videos (three are missing in our split).
 
 
 **Tar contents**
 
+The compressed tar file (2.3 GiB) can be downloaded from:
+
+```
+http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/features/didemo-experts.tar.gz
+sha1sum: 6fd4bcc68c1611052de2499fd8ab3f488c7c195b
+```
 A list of the contents of the tar file are given in [tar_include.txt](tar_include.txt).
-The gzipped form of the file is <TODO> GiB.
+
 
 ### References:
 
