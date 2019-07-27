@@ -21,7 +21,7 @@ The `1k-B` split was produced by the authors of MoEE [2].  The train/test splits
 
 The `Full` split was produced by the authors of MSRVTT [3].  The train/val/test splits are listed in the files:
 
-1. [train_list_full.txt](train_list_dev.txt) (6513 videos), [val_list_full.txt](val_list_full.txt) (497 videos) and [test_list_full.txt](test_list_full.txt) (2990 videos).
+1. [train_list_full.txt](train_list_full.txt) (6513 videos), [val_list_full.txt](val_list_full.txt) (497 videos) and [test_list_full.txt](test_list_full.txt) (2990 videos).
 
 **Label Noise**
 
