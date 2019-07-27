@@ -8,8 +8,9 @@ from pathlib import Path
 
 
 def upload_to_server(web_dir, dataset, webserver, root_feat_dir, refresh):
-    # NOTE: The compression step will take a long time
-    # (last runs: MSRVTT -> 00h29m43s, LSMDC -> 22m21s, MSVD -> )
+    # NOTE: The compression step will take a long time. The last runs took:
+    # MSRVTT -> 00h29m43s, LSMDC -> 0022m21s, MSVD -> 00h03m28s
+    # DiDeMo -> 00h04m20s, ActivityNet ->  00h08m00s
     server_dir = Path(web_dir) / "data" / "features"
     subprocess.call(["ssh", webserver, "mkdir -p", str(server_dir)])
     compressed_file = f"{dataset}-experts.tar.gz"
@@ -27,7 +28,7 @@ def upload_to_server(web_dir, dataset, webserver, root_feat_dir, refresh):
         # TODO(Samuel): Figure out why using subprocess introduces tarring problems
         os.system(compression_args)
         duration = time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - tic))
-        print(f"Finished compressing features in {duration}s")
+        print(f"Finished compressing features in {duration}")
     else:
         print(f"Found existing compressed file at {compressed_path}, skipping....")
 
@@ -38,13 +39,13 @@ def upload_to_server(web_dir, dataset, webserver, root_feat_dir, refresh):
     tic = time.time()
     subprocess.call(rsync_args)
     duration = time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - tic))
-    print(f"Finished transferring features in {duration}s")
+    print(f"Finished transferring features in {duration}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", default="MSRVTT",
-                        choices=["MSRVTT", "LSMDC", "MSVD"])
+                        choices=["MSRVTT", "LSMDC", "MSVD", "didemo", "activity-net"])
     parser.add_argument("--action", default="upload", choices=["upload", "fetch"])
     parser.add_argument("--webserver", default="login.robots.ox.ac.uk")
     parser.add_argument("--refresh_compression", action="store_true")

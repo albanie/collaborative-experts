@@ -77,10 +77,6 @@ See the [DiDeMo README](misc/datasets/didemo/README.md) for descriptions of the 
 
 See the [ActivityNet README](misc/datasets/activity-net/README.md) for descriptions of the train/test splits.
 
-### Training a video embedding
-
-To train a new video embedding, please see the scripts for each dataset.
-
 ### Expert Zoo
 
 For each dataset, the Collaborative Experts model makes use of a collection of pretrained "expert" feature extractors (see the paper for more precise descriptions). Some experts have been obtained from other sources (described where applicable), rather than extracted by us.  To reproduce the experiments listed above, the experts for each dataset have been bundled into compressed tar files.  These can be downloaded and unpacked with a [utility script-TODO-LINK]() (recommended), which will store them in the locations expected by the training code. Each set of experts has a brief README, which also provides a link from which they can be downloaded directly.
@@ -93,9 +89,46 @@ For each dataset, the Collaborative Experts model makes use of a collection of p
 | DiDeMo | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/didemo/README.md)| 2.3 GiB
 | ActivityNet | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/activity-net/README.md)| TODO GiB
 
+### Evaluating a pretrained model
+
+Evaluting a pretrained model for a given dataset requires:
+1. The pretrained experts for the target dataset, which should be located in `<root>/data/<dataset-name>/symlinked-feats` (this will be done automatically by the [utility-script](), or can be done manually).
+2. A `config.json` file.
+3. A `trained_model.pth` file.
+
+Evaluation is then performed with the following command:
+```
+python3 test.py --config <path-to-config.json> --resume <path-to-trained_model.pth> --device <gpu-id>
+```
+where `<gpu-id>` is the index of the GPU to evaluate on.  This option can be ommitted to run the evaluation on the CPU.
+
+For example, to reproduce the MSVD results described above, run the following sequence of commands:
+
+```
+# fetch the pretrained experts for MSVD 
+utility-expert FETCH MSVD
+
+# find the name of a pretrained model using the links in the tables above 
+MODEL=data/models/msvd-train-full-ce/07-25_15-18-17/trained_model.path
+
+# create a local directory and download the model into it 
+mkdir -p $(dirname "${MODEL}")
+wget http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/${MODEL} ${MODEL}
+
+# Evaluate the model
+python3 test.py --config configs/msvd/eval-full-ce.json --resume ${MODEL} --device 0
+```
+
+
+
+### Training a video embedding
+
+To train a new video embedding, please see the scripts for each dataset.
+
+
 ### Visualising the retrieval ranking
 
-Tensorboard lacks video support via HTML5 tags (at the time of writing) so after each evaluation of a retrieval model, a simple HTML file is generated to allow the predicted rankings of different videos to be visualised: an example screenshot is given below (this tool is inspired by the visualiser in the [pix2pix codebase](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix)). To view the visualisation, navigate to the `vis_dir` specified in the relevant config file (e.g. [here]()) and run `python3 -m http.server 9999`, then navigate to `localhost:9999` in your web browser.  You should see something like the following:
+Tensorboard lacks video support via HTML5 tags (at the time of writing) so after each evaluation of a retrieval model, a simple HTML file is generated to allow the predicted rankings of different videos to be visualised: an example screenshot is given below (this tool is inspired by the visualiser in the [pix2pix codebase](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix)). To view the visualisation, navigate to the `web directory` (this is generated for each experiment, and will be printed in the log during training) and run `python3 -m http.server 9999`, then navigate to `localhost:9999` in your web browser.  You should see something like the following:
 
 ![visualisation](figs/vis-ranking.png)
 
@@ -128,4 +161,4 @@ If you make use of the MSRVTT or LSMDC features provided by Miech et al. (detail
 
 ### Acknowledgements
 
-This work was inspired by the *Mixture-of-Embedding-Experts* method proposed by Antoine Miech, Ivan Laptev and Josef Sivic ([paper](https://arxiv.org/abs/1804.02516), [code](https://github.com/antoine77340/Mixture-of-Embedding-Experts)). We would also like to thank Zak Stone and Susie Lim for their considerable help with using Cloud TPUs.
+This work was inspired by a number of prior works for learning joint embeddings of text and video, but in particular the *Mixture-of-Embedding-Experts* method proposed by Antoine Miech, Ivan Laptev and Josef Sivic ([paper](https://arxiv.org/abs/1804.02516), [code](https://github.com/antoine77340/Mixture-of-Embedding-Experts)). We would also like to thank Zak Stone and Susie Lim for their considerable help with using Cloud TPUs.
