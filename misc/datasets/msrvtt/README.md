@@ -13,7 +13,7 @@ are described in the paper [1] as `1k-A`, `1k-B` and `Full`.
 
 The `1k-A` split was produced by the authors of JSFusion [4].  The train/val splits are listed in the files:
 
-1. [train_list_jsfusion.txt](train_list_jsfusion_.txt) (9000 videos) and [val_list_jsfusion.txt](val_list_jsfusion.txt) (1000 videos)
+1. [train_list_jsfusion.txt](train_list_jsfusion.txt) (9000 videos) and [val_list_jsfusion.txt](val_list_jsfusion.txt) (1000 videos)
 
 The `1k-B` split was produced by the authors of MoEE [2].  The train/val splits are listed in the files:
 
