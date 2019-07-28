@@ -1,25 +1,9 @@
-import torch
+"""Module for computing performance metrics
+
+"""
 import scipy.stats
 import numpy as np
-
-
-def my_metric(output, target):
-    with torch.no_grad():
-        pred = torch.argmax(output, dim=1)
-        assert pred.shape[0] == len(target)
-        correct = 0
-        correct += torch.sum(pred == target).item()
-    return correct / len(target)
-
-
-def my_metric2(output, target, k=3):
-    with torch.no_grad():
-        pred = torch.topk(output, k, dim=1)[1]
-        assert pred.shape[0] == len(target)
-        correct = 0
-        for i in range(k):
-            correct += torch.sum(pred[:, i] == target).item()
-    return correct / len(target)
+from pathlib import Path
 
 
 def t2v_metrics(sims, query_masks=None):
@@ -49,6 +33,7 @@ def t2v_metrics(sims, query_masks=None):
         from zsvision.zs_iterm import zs_dispFig # NOQA
         plt.matshow(dists)
         zs_dispFig()
+        # import ipdb; ipdb.set_trace()
 
     # The indices are computed such that they slice out the ground truth distances
     # from the psuedo-rectangular dist matrix
@@ -61,10 +46,54 @@ def t2v_metrics(sims, query_masks=None):
     gt_dists = gt_dists[:, np.newaxis]
     rows, cols = np.where((sorted_dists - gt_dists) == 0)  # find column position of GT
 
-    # note: we sometimes need to break ties (these should occur extremely rarely)
+    # --------------------------------
+    # NOTE: Breaking ties
+    # --------------------------------
+    # We sometimes need to break ties (in general, these should occur extremely rarely,
+    # but there are pathological cases when they can distort the scores, such as when
+    # the similarity matrix is all zeros). Previous implementations (e.g. the t2i
+    # evaluation function used
+    # here: https://github.com/niluthpol/multimodal_vtt/blob/master/evaluation.py and
+    # here: https://github.com/linxd5/VSE_Pytorch/blob/master/evaluation.py#L87) generally
+    # break ties "optimistically".  However, if the similarity matrix is constant this
+    # can evaluate to a perfect ranking. A principled option is to average over all
+    # possible partial orderings implied by the ties. See # this paper for a discussion:
+    #    McSherry, Frank, and Marc Najork,
+    #    "Computing information retrieval performance measures efficiently in the presence
+    #    of tied scores." European conference on information retrieval. Springer, Berlin, 
+    #    Heidelberg, 2008.
+    # http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.145.8892&rep=rep1&type=pdf
+
+    # break_ties = "optimistically"
+    break_ties = "averaging"
+
     if rows.size > num_queries:
-        _, idx = np.unique(rows, return_index=True)
-        cols = cols[idx]
+        assert np.unique(rows).size == num_queries, "issue in metric evaluation"
+        if break_ties == "optimistically":
+            _, idx = np.unique(rows, return_index=True)
+            cols = cols[idx]
+        elif break_ties == "averaging":
+            # fast implementation, based on this code:
+            # https://stackoverflow.com/a/49239335
+            locs = np.argwhere((sorted_dists - gt_dists) == 0)
+
+            # Find the split indices
+            steps = np.diff(locs[:, 0])
+            splits = np.nonzero(steps)[0] + 1
+            splits = np.insert(splits, 0, 0)
+
+            # Compute the result columns
+            summed_cols = np.add.reduceat(locs[:, 1], splits)
+            counts = np.diff(np.append(splits, locs.shape[0]))
+            avg_cols = summed_cols / counts
+            if False:
+                print("Running slower code to verify rank averaging across ties")
+                # slow, but more interpretable version, used for testing
+                avg_cols_slow = [np.mean(cols[rows == idx]) for idx in range(num_queries)]
+                assert np.array_equal(avg_cols, avg_cols_slow), "slow vs fast difference"
+                print("passed num check")
+            cols = avg_cols
+
     msg = "expected ranks to match queries ({} vs {}) "
     if cols.size != num_queries:
         import ipdb; ipdb.set_trace()
@@ -125,6 +154,7 @@ def v2t_metrics(sims, query_masks=None):
     num_queries, num_caps = sims.shape
     dists = -sims
     caps_per_video = num_caps // num_queries
+    break_ties = "averaging"
 
     MISSING_VAL = 1E8
     query_ranks = []
@@ -147,7 +177,14 @@ def v2t_metrics(sims, query_masks=None):
             if row_dists[jj] == MISSING_VAL:
                 # skip rankings of missing captions
                 continue
-            rank = np.where((sorted_dists - row_dists[jj]) == 0)[0][0]
+            ranks = np.where((sorted_dists - row_dists[jj]) == 0)[0]
+            if break_ties == "optimistically":
+                rank = ranks[0]
+            elif break_ties == "averaging":
+                # NOTE: If there is more than one caption per video, its possible for the
+                # method to do "worse than chance" in the degenerate case when all
+                # similarities are tied.  TODO(Samuel): Address this case.
+                rank = ranks.mean()
             if rank < min_rank:
                 min_rank = rank
         query_ranks.append(min_rank)

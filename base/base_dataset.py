@@ -296,16 +296,17 @@ class BaseDataset(Dataset):
                         not in self.flaky_experts})
 
             # logic for checking faces
-            if np.array_equal(np.unique(features["face"]), np.array([0])):
-                face_ind = 0
-            elif features["face"].ndim > 1:
-                msg = "failure checking faces"
-                assert features["face"].shape[1] == self.raw_input_dims["face"], msg
-                # face_feats = np.mean(features["face"], 0, keepdims=True)
-                face_ind = not self.has_missing_values(features["face"])
-            else:
-                raise ValueError("unexpected size")
-            ind["face"] = face_ind
+            if "face" in self.ordered_experts:
+                if np.array_equal(np.unique(features["face"]), np.array([0])):
+                    face_ind = 0
+                elif features["face"].ndim > 1:
+                    msg = "failure checking faces"
+                    assert features["face"].shape[1] == self.raw_input_dims["face"], msg
+                    # face_feats = np.mean(features["face"], 0, keepdims=True)
+                    face_ind = not self.has_missing_values(features["face"])
+                else:
+                    raise ValueError("unexpected size")
+                ind["face"] = face_ind
 
             # NOTE: due to differences in how the features were stored, certain kinds
             # need to be aggregated along the temporal dimension

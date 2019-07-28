@@ -7,5 +7,6 @@
     "msrvtt-train-full-moee": "2019-07-27_11-35-13",
     "msrvtt-train-miech-ce": "2019-07-26_15-04-54",
     "msrvtt-train-jsfusion-ce": "2019-07-26_15-18-46",
-    "msrvtt-train-miech-miechfeats-moee": "2019-07-26_15-16-18"
+    "msrvtt-train-miech-miechfeats-moee": "2019-07-26_15-16-18",
+    "msrvtt-train-full-moee-minus-moe-weights": "2019-07-28_14-20-52"
 }

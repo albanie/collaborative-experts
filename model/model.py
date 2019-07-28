@@ -62,12 +62,12 @@ class CENet(BaseModel):
     def __init__(self, text_dim, use_ce, l2renorm, vlad_clusters,
                  disable_nan_checks, expert_dims,
                  keep_missing_modalities, test_caption_mode, randomise_feats,
-                 freeze_weights=False, verbose=False):
+                 freeze_weights=False, verbose=False, mimic_ce_dims=False,
+                 concat_experts=False, concat_mix_experts=False):
         super().__init__()
 
         self.expert_dims = expert_dims
         self.l2renorm = l2renorm
-        self.freeze_weights = freeze_weights
         self.disable_nan_checks = disable_nan_checks
         self.text_pooling = NetVLAD(
             feature_size=text_dim,
@@ -99,9 +99,12 @@ class CENet(BaseModel):
             freeze_weights=freeze_weights,
             text_dim=self.text_pooling.out_dim,
             test_caption_mode=test_caption_mode,
+            concat_experts=concat_experts,
+            concat_mix_experts=concat_mix_experts,
             expert_dims=expert_dims,
             disable_nan_checks=disable_nan_checks,
             keep_missing_modalities=keep_missing_modalities,
+            mimic_ce_dims=mimic_ce_dims,
         )
 
     def randomise_feats(self, experts, key):
@@ -148,16 +151,19 @@ class CENet(BaseModel):
 
 
 class CEModule(nn.Module):
-    def __init__(self, expert_dims, text_dim,
-                 use_ce, verbose, l2renorm, disable_nan_checks,
-                 random_feats, test_caption_mode, same_dim=512,
-                 freeze_weights=False, keep_missing_modalities=False):
+    def __init__(self, expert_dims, text_dim, use_ce, verbose, l2renorm,
+                 disable_nan_checks, random_feats, test_caption_mode, mimic_ce_dims,
+                 concat_experts, concat_mix_experts, freeze_weights,
+                 keep_missing_modalities, same_dim=512):
         super().__init__()
 
         modalities = list(expert_dims.keys())
         self.expert_dims = expert_dims
         self.modalities = modalities
         self.disable_nan_checks = disable_nan_checks
+        self.mimic_ce_dims = mimic_ce_dims
+        self.concat_experts = concat_experts
+        self.concat_mix_experts = concat_mix_experts
         self.test_caption_mode = test_caption_mode
         self.freeze_weights = freeze_weights
         self.random_feats = random_feats
@@ -179,17 +185,14 @@ class CEModule(nn.Module):
 
         # NOTE: When use_ce is not used, the text features are projected to
         # subspaces of different dimensions.  When use_ce is used, they must all
-        # be projected to `same_dim` (to allow fusion)
-        if not self.use_ce:
-            print("NOT use_ce")
-            gated_vid_embds = [GatedEmbeddingUnit(in_dim, dim, use_bn) for
-                               in_dim, dim, use_bn in zip(in_dims, agg_dims, use_bns)]
-            gated_text_embds = [GatedEmbeddingUnit(text_dim, dim, use_bn=True) for
-                                dim in agg_dims]
-        else:
+        # be projected to `same_dim` (to allow fusion). The only excpetion is for an
+        # ablation in which we mimic the `same_dim` reduction to measure whether this
+        # projection influences overall performance.
+        if self.use_ce or self.mimic_ce_dims:
             dim_reducers = [ReduceDim(in_dim, same_dim) for in_dim in in_dims]
             self.video_dim_reduce = nn.ModuleList(dim_reducers)
 
+        if self.use_ce:
             self.g_reason_1 = nn.Linear(same_dim * 2, same_dim)
             self.g_reason_2 = nn.Linear(same_dim, same_dim)
             self.g_reason_3 = nn.Linear(same_dim, same_dim)
@@ -204,13 +207,41 @@ class CEModule(nn.Module):
             self.batch_norm_f1 = nn.BatchNorm1d(same_dim)
             self.batch_norm_f2 = nn.BatchNorm1d(same_dim)
             gated_vid_embds = [GatedEmbeddingUnitReasoning(same_dim) for _ in in_dims]
-            gated_text_embds = [GatedEmbeddingUnit(text_dim, same_dim, use_bn=True) for
-                                _ in modalities]
+            text_out_dims = [same_dim for _ in agg_dims]
+        elif self.mimic_ce_dims:  # ablation study
+            gated_vid_embds = [GatedEmbeddingUnit(same_dim, same_dim, use_bn=True)
+                               for _ in modalities]
+            text_out_dims = [same_dim for _ in agg_dims]
+        elif self.concat_mix_experts:  # ablation study
+            # use a single large GEU to mix the experts - the output will be the sum
+            # of the aggregation sizes
+            in_dim, out_dim = sum(in_dims), sum(agg_dims)
+            gated_vid_embds = [GatedEmbeddingUnit(in_dim, out_dim, use_bn=True)]
+        elif self.concat_experts:  # ablation study
+            # We do not use learnable parameters for the video combination, (we simply
+            # use a high dimensional inner product). This also means that there is
+            # no projection to reduce dimensionality on the text, which ultimately
+            # leads to many more parameters on the text side of the embedding
+            gated_vid_embds = []
+        else:
+            gated_vid_embds = [GatedEmbeddingUnit(in_dim, dim, use_bn) for
+                               in_dim, dim, use_bn in zip(in_dims, agg_dims, use_bns)]
+            text_out_dims = agg_dims
+
+        if self.concat_experts:
+            gated_text_embds = [nn.Sequential()]
+        elif self.concat_mix_experts:
+            # As with the video inputs, we similiarly use a single large GEU for the
+            # text embedding
+            gated_text_embds = [GatedEmbeddingUnit(text_dim, sum(agg_dims), use_bn=True)]
+        else:
+            gated_text_embds = [GatedEmbeddingUnit(text_dim, dim, use_bn=True) for
+                                dim in text_out_dims]
 
         self.video_GU = nn.ModuleList(gated_vid_embds)
         self.text_GU = nn.ModuleList(gated_text_embds)
 
-    def compute_moe_weights(self, text, ind, freeze_weights):
+    def compute_moe_weights(self, text, ind):
         # compute weights for all captions (including when assigned K captions to
         # the same video)
         B, K, D = text.shape
@@ -219,7 +250,7 @@ class CEModule(nn.Module):
 
         # Treat each caption independently in the softmax (which runs over modalities)
         text = text.view(B * K, D)
-        if freeze_weights:
+        if self.freeze_weights:
             moe_weights = self.moe_weights.repeat(B, K, 1)
             if text.is_cuda:
                 moe_weights = moe_weights.cuda()
@@ -309,17 +340,14 @@ class CEModule(nn.Module):
 
         # MOE weights computation + normalization - note that we use the first caption
         # sample to predict the weights
-        moe_weights = self.compute_moe_weights(text, ind=ind,
-                                               freeze_weights=self.freeze_weights)
+        moe_weights = self.compute_moe_weights(text, ind=ind)
 
-        # Embed all features to a common dimension
-        if not self.use_ce:
-            for modality, layer in zip(self.modalities, self.video_GU):
-                experts[modality] = layer(experts[modality])
-        else:
+        if hasattr(self, "video_dim_reduce"):
+            # Embed all features to a common dimension
             for modality, layer in zip(self.modalities, self.video_dim_reduce):
                 experts[modality] = layer(experts[modality])
 
+        if self.use_ce:
             all_combinations = list(itertools.permutations(experts, 2))
             assert len(self.modalities) > 1, "use_ce requires multiple modalities"
 
@@ -356,28 +384,44 @@ class CEModule(nn.Module):
                 # curr_mask = self.f_reason_3 (F.relu(curr_mask))
                 # curr_mask= F.relu （curr_mask）
                 experts[curr_modality] = l(experts[curr_modality], curr_mask)
+        elif self.concat_mix_experts:
+            concatenated = th.cat(tuple(experts.values()), dim=1)
+            vid_embd_ = self.video_GU[0](concatenated)
+            text_embd_ = text_embd[self.modalities[0]]
+            text_embd_ = text_embd_.view(-1, text_embd_.shape[-1])
+
+        elif self.concat_experts:
+            vid_embd_ = th.cat(tuple(experts.values()), dim=1)
+            text_embd_ = text_embd[self.modalities[0]]
+            text_embd_ = text_embd_.view(-1, text_embd_.shape[-1])
+        else:
+            for modality, layer in zip(self.modalities, self.video_GU):
+                experts[modality] = layer(experts[modality])
 
         if self.training:
             merge_caption_similiarities = "avg"
         else:
             merge_caption_similiarities = self.test_caption_mode
 
-        # hard code for safety
-        # merge_caption_similiarities = "indep"
-
-        cross_view_conf_matrix = sharded_cross_view_inner_product(
-            vid_embds=experts,
-            text_embds=text_embd,
-            l2renorm=self.l2renorm,
-            text_weights=moe_weights,
-            subspaces=self.modalities,
-            raw_captions=raw_captions,
-            merge_caption_similiarities=merge_caption_similiarities,
-        )
+        if self.concat_experts or self.concat_mix_experts:
+            cross_view_conf_matrix = th.matmul(text_embd_, vid_embd_.t())
+        else:
+            cross_view_conf_matrix = sharded_cross_view_inner_product(
+                vid_embds=experts,
+                text_embds=text_embd,
+                l2renorm=self.l2renorm,
+                text_weights=moe_weights,
+                subspaces=self.modalities,
+                raw_captions=raw_captions,
+                merge_caption_similiarities=merge_caption_similiarities,
+            )
         return {
             "modalities": self.modalities,
             "cross_view_conf_matrix": cross_view_conf_matrix,
         }
+
+
+# def direct_inner_product(vid_embedding)
 
 
 class GatedEmbeddingUnit(nn.Module):

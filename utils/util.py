@@ -102,6 +102,9 @@ def compute_dims(config, logger=None):
         ordered = [x for x in ordered if x not in to_drop]
 
     dims = []
+    arch_args = config["arch"]["args"]
+    msg = f"It is not valid to use both the `use_ce` and `mimic_ce_dims` options"
+    assert not (arch_args["use_ce"] and arch_args.get("mimic_ce_dims", False)), msg
     for expert in ordered:
         if expert == "face":
             in_dim, out_dim = experts["face_dim"], experts["face_dim"]
@@ -120,7 +123,7 @@ def compute_dims(config, logger=None):
 
         # For the CE architecture, we need to project all features to a common
         # dimensionality
-        if config["arch"]["args"]["use_ce"]:
+        if arch_args["use_ce"] or arch_args.get("mimic_ce_dims", False):
             out_dim = experts["ce_shared_dim"]
 
         dims.append((expert, (in_dim, out_dim)))
@@ -133,7 +136,7 @@ def compute_dims(config, logger=None):
     for expert, dim_pair in expert_dims.items():
         raw_dim = dim_pair[0]
         if expert in {"audio", "speech", "ocr"}:
-            raw_dim = raw_dim // config["arch"]["args"]["vlad_clusters"][expert]
+            raw_dim = raw_dim // arch_args["vlad_clusters"][expert]
         raw_input_dims[expert] = raw_dim
 
     return expert_dims, raw_input_dims

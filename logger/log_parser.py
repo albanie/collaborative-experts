@@ -99,7 +99,6 @@ def log_summary(logger, log_path, eval_mode="test_run", fixed_num_epochs=None):
                 else:
                     raise ValueError(f"unrecognised eval_mode: {eval_mode}")
                 agg_scores[metric].append(stat)
-        import ipdb; ipdb.set_trace()
 
         if eval_mode == "fixed_num_epochs":
             logger.info(f"Reporting stats with fixed training length: {fixed_num_epochs}")
