@@ -7,6 +7,7 @@ import re
 import json
 import argparse
 import subprocess
+from millify import millify
 import numpy as np
 from pathlib import Path
 from itertools import zip_longest
@@ -68,6 +69,9 @@ def parse_log(log_path):
             assert tokens[-3] == f"{metric}:", f"unexpected row format {row}"
             mean, std = float(tokens[-2].split(",")[0]), float(tokens[-1])
             results[group][metric] = (mean, std)
+    for row in log:
+        if "Trainable parameters" in row:
+            results["params"] = int(row.split(" ")[-1])
     return results
 
 
@@ -81,12 +85,14 @@ def parse_results(experiments, save_dir):
     return log_results
 
 
-def generate_results_string(target, exp_name, results):
+def generate_results_string(target, exp_name, results, drop=None):
     stats = results[exp_name]["results"][target]
     print(f"Filling template values for {exp_name}")
     tokens = []
     for metric, values in stats.items():
         mean, std = values
+        if drop and metric in drop:
+            continue
         print(f"{metric}: {mean} ({std})")
         tokens += [f"{mean}<sub>({std})</sub>"]
     return " | ".join(tokens)
@@ -114,6 +120,12 @@ def generate_readme(experiments, readme_template, root_url, readme_dest, results
                 token = generate_url(root_url, target, exp_name, experiments=experiments)
             elif target in {"t2v", "v2t"}:
                 token = generate_results_string(target, exp_name, results)
+            elif target in {"short-t2v", "short-v2t"}:
+                drop = {"R50", "MeanR"}
+                target_ = target.split("-")[1]
+                token = generate_results_string(target_, exp_name, results, drop=drop)
+            elif target in {"params"}:
+                token = millify(results[exp_name]["results"]["params"], precision=2)
             edits.append((match.span(), token))
         if edits:
             # invert the spans

@@ -82,20 +82,25 @@ See the [ActivityNet README](misc/datasets/activity-net/README.md) for descripti
 
 We conduct several ablation studies to investigate the importance of different components in the Collaborative Experts design.  Each ablation is conducted on the `Full` MSRVTT split. First, we investigate the importance of the parts used by the CE model.
 
-| Model | Task | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
-| ----- | ---- | --- | --- | ---- | ---- | --- | --- | ----- |
-| Concat (P) | t2v  | {{msrvtt-train-full-concat-ablation.t2v}} | [config]({{msrvtt-train-full-concat-ablation.config}}), [model]({{msrvtt-train-full-concat-ablation.model}}), [log]({{msrvtt-train-full-concat-ablation.log}}) |
-| Concat | t2v |  |  |  |  |  |  |  |
-| CE (CG,P,W) | t2v  | {{msrvtt-train-full-moee-minus-moe-weights.t2v}} | [config]({{msrvtt-train-full-moee-minus-moe-weights.config}}), [model]({{msrvtt-train-full-moee-minus-moe-weights.model}}), [log]({{msrvtt-train-full-moee-minus-moe-weights.log}}) |
-| CE (CG,P) | t2v  | {{msrvtt-train-full-moee.t2v}} | [config]({{msrvtt-train-full-moee.config}}), [model]({{msrvtt-train-full-moee.model}}), [log]({{msrvtt-train-full-moee.log}}) |
-| CE    | t2v  | {{msrvtt-train-full-ce.t2v}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
-| Concat (P) | v2t  | {{msrvtt-train-full-concat-ablation.v2t}} | [config]({{msrvtt-train-full-concat-ablation.config}}), [model]({{msrvtt-train-full-concat-ablation.model}}), [log]({{msrvtt-train-full-concat-ablation.log}}) |
-| Concat | v2t |  |  |  |  |  |  |  |
-| CE (CG,P,W) | t2v  | {{msrvtt-train-full-moee-minus-moe-weights.t2v}} | [config]({{msrvtt-train-full-moee-minus-moe-weights.config}}), [model]({{msrvtt-train-full-moee-minus-moe-weights.model}}), [log]({{msrvtt-train-full-moee-minus-moe-weights.log}}) |
-| CE (CG,P) | v2t  | {{msrvtt-train-full-moee.v2t}} | [config]({{msrvtt-train-full-moee.config}}), [model]({{msrvtt-train-full-moee.model}}), [log]({{msrvtt-train-full-moee.log}}) |
-| CE    | v2t  | {{msrvtt-train-full-ce.v2t}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
+| Model | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
+| ----- | ---- | --- | --- | ---- | --- | ---- | ----- |
+| Concat | t2v  | {{msrvtt-train-full-concat-ablation.short-t2v}} | {{msrvtt-train-full-concat-ablation.params}} | [config]({{msrvtt-train-full-concat-ablation.config}}), [model]({{msrvtt-train-full-concat-ablation.model}}), [log]({{msrvtt-train-full-concat-ablation.log}}) |
+| Concat + G | t2v  | {{msrvtt-train-full-concat-mix-ablation.short-t2v}} | {{msrvtt-train-full-concat-mix-ablation.params}} | [config]({{msrvtt-train-full-concat-mix-ablation.config}}), [model]({{msrvtt-train-full-concat-mix-ablation.model}}), [log]({{msrvtt-train-full-concat-mix-ablation.log}}) |
+| CE -CG,P,W | t2v  | {{msrvtt-train-full-moee-minus-moe-weights.short-t2v}} | [config]({{msrvtt-train-full-moee-minus-moe-weights.config}}), [model]({{msrvtt-train-full-moee-minus-moe-weights.model}}), [log]({{msrvtt-train-full-moee-minus-moe-weights.log}}) |
+| CE -CG,P | t2v  | {{msrvtt-train-full-moee.short-t2v}} | [config]({{msrvtt-train-full-moee.config}}), [model]({{msrvtt-train-full-moee.model}}), [log]({{msrvtt-train-full-moee.log}}) |
+| CE    | t2v  | {{msrvtt-train-full-ce.short-t2v}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
+
+In each row, we aim to add a single logical component (some metrics have been removed to allow the number of parameters to be displayed - the extra metrics can be found in the logs).  The names refer to the following model designs:
+* **Concat**: A barebones concatenation model.  After aggregating each expert across time (which still requires some parameters for the variable-length VLAD layers), the experts are concatenated and compared directly against the aggregated text embeddings.  Note: this model uses a slightly greater number of VLAD clusters than the others to allow the concatentated embedding to match the dimensionality of the text.  This model uses {{msrvtt-train-full-concat-ablation.params}} parameters.
+* **CE** - The full model (which contains {{msrvtt-train-full-ce.log}} params)
+* **CE -** - The full model (which contains {{msrvtt-train-full-ce.log}} params)
+* **Concat-Gate**: The experts are concatenated (similarly to the previous model), but are then passed through a single large context gating module before  After aggregating each expert across time (which requires some parameters for the variable-length VLAD layers), the experts are concatenated and compared directly against the aggregated text embeddings.  Note: this model uses a slightly greater number of VLAD clusters than the others to allow the concatentated embedding to match the dimensionality of the text.
 
 Next, we investigate the importance of different experts.
+
+| Experts | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
+| ----- | ---- | --- | --- | ---- | --- | ---- | ----- |
+| RGB+SC+MO+AU+OCR+SP+FA    | t2v  | {{msrvtt-train-full-ce.short-t2v}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
 
 ### Expert Zoo
 
