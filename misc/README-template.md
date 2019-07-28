@@ -102,10 +102,10 @@ Next, we investigate the importance of different experts.
 
 | Experts | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
 | ----- | ---- | --- | --- | ---- | --- | ---- | ----- |
-| RGB    | t2v  | {{msrvtt-train-full-ce-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-only-rgb.params}} | [config]({{msrvtt-train-full-ce-only-rgb.config}}), [model]({{msrvtt-train-full-ce-only-rgb.model}}), [log]({{msrvtt-train-full-ce-only-rgb.log}}) |
-| RGB+SC    | t2v  | {{msrvtt-train-full-ce-only-rgb-scene.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-scene.params}} | [config]({{msrvtt-train-full-ce-only-rgb-scene.config}}), [model]({{msrvtt-train-full-ce-only-rgb-scene.model}}), [log]({{msrvtt-train-full-ce-only-rgb-scene.log}}) |
-| RGB+SC+MO    | t2v  | {{msrvtt-train-full-ce-only-rgb-scene-flow.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-scene-flow.params}} | [config]({{msrvtt-train-full-ce-only-rgb-scene-flow.config}}), [model]({{msrvtt-train-full-ce-only-rgb-scene-flow.model}}), [log]({{msrvtt-train-full-ce-only-rgb-scene-flow.log}}) |
-| RGB+SC+MO+AU+OCR+SP+FA    | t2v  | {{msrvtt-train-full-ce.short-t2v}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
+| RG    | t2v  | {{msrvtt-train-full-ce-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-only-rgb.params}} | [config]({{msrvtt-train-full-ce-only-rgb.config}}), [model]({{msrvtt-train-full-ce-only-rgb.model}}), [log]({{msrvtt-train-full-ce-only-rgb.log}}) |
+| RG,SC    | t2v  | {{msrvtt-train-full-ce-only-rgb-scene.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-scene.params}} | [config]({{msrvtt-train-full-ce-only-rgb-scene.config}}), [model]({{msrvtt-train-full-ce-only-rgb-scene.model}}), [log]({{msrvtt-train-full-ce-only-rgb-scene.log}}) |
+| RG,SC,MO    | t2v  | {{msrvtt-train-full-ce-only-rgb-scene-flow.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-scene-flow.params}} | [config]({{msrvtt-train-full-ce-only-rgb-scene-flow.config}}), [model]({{msrvtt-train-full-ce-only-rgb-scene-flow.model}}), [log]({{msrvtt-train-full-ce-only-rgb-scene-flow.log}}) |
+| RG,SC,MO,AU,OC,SP,FA    | t2v  | {{msrvtt-train-full-ce.short-t2v}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
 
 ### Expert Zoo
 
