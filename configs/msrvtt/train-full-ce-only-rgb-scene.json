@@ -1,0 +1,99 @@
+{
+    "n_gpu": 1,
+    "seed": 0,
+    "disable_nan_checks": false,
+    "log_name": "info.json",
+    "eval_mode": "test_run",
+    "eval_config": "configs/msrvtt/eval-full-ce-only-rgb-scene.json",
+    "experts": {
+        "face_dim": 512,
+        "drop_feats": "",
+        "text_feat": "openai",
+        "text_dim": 768,
+        "modalities": ["rgb", "scene"],
+        "ce_shared_dim": 512
+    },
+    "arch": {
+        "type": "CENet",
+        "args": {
+            "keep_missing_modalities": false,
+            "test_caption_mode": "indep",
+            "use_ce": true,
+            "l2renorm": false,
+            "randomise_feats": "",
+            "vlad_clusters": {
+                "text": 32,
+                "audio": 16,
+                "speech": 32,
+                "ocr": 32
+            }
+        }
+    },
+
+    "data_loader": {
+        "type": "ExpertDataLoader",
+        "args":{
+            "dataset_name": "MSRVTT",
+            "data_dir": "data/MSRVTT",
+            "batch_size": 64,
+            "split_name": "full-val",
+            "num_workers": 4,
+            "fuse_captions": false,
+            "num_test_captions": 20,
+            "max_text_words": 30,
+            "max_expert_tokens": 30,
+            "rgb_model_name": "senet154",
+            "feat_aggregation": {
+                "scene": "avg",
+                "rgb": "avg",
+                "flow": "avg",
+                "face": "avg",
+                "audio": "vlad",
+                "speech": "vlad"
+            }
+        }
+    },
+    "optimizer": {
+        "type": "Adam",
+        "args":{
+            "lr": 0.0004,
+            "weight_decay": 0,
+            "amsgrad": false
+        }
+    },
+    "loss": {
+        "type": "MaxMarginRankingLoss",
+        "args":{
+            "margin": 0.2,
+            "fix_norm": true
+        }
+    },
+    "metrics": [
+        "t2v_metrics",
+        "v2t_metrics"
+    ],
+    "visualizer": {
+        "type": "Visualizer",
+        "args":{
+            "src_video_dir": "data/MSRVTT/videos/all",
+            "vis_vid_freq": 50,
+            "num_samples": 100
+        }
+    },
+    "lr_scheduler": {
+        "type": "StepLR",
+        "args": {
+            "step_size": 1,
+            "gamma": 0.95
+        }
+    },
+    "trainer": {
+        "epochs": 100,
+        "save_dir": "data/saved/",
+        "save_period": 20,
+        "skip_first_n_saves": 25,
+        "verbosity": 2,
+        "tensorboard": true,
+        "monitor": "max val_t2v_metrics_geometric_mean_R1-R5-R10"
+    }
+}
