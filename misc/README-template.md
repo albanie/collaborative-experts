@@ -80,16 +80,22 @@ See the [ActivityNet README](misc/datasets/activity-net/README.md) for descripti
 
 ### Ablation studies
 
-We conduct several ablation studies to investigate the importance of different components in the Collaborative Experts design.  Each ablation is conducted on the `Full` MSRVTT split. First, we investigate the importance of the CE module itself.
+We conduct several ablation studies to investigate the importance of different components in the Collaborative Experts design.  Each ablation is conducted on the `Full` MSRVTT split. First, we investigate the importance of the parts used by the CE model.
 
 | Model | Task | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
 | ----- | ---- | --- | --- | ---- | ---- | --- | --- | ----- |
-| MoEE (CG,P,W) | t2v  | {{msrvtt-train-full-moee-minus-moe-weights.t2v}} | [config]({{msrvtt-train-full-moee-minus-moe-weights.config}}), [model]({{msrvtt-train-full-moee-minus-moe-weights.model}}), [log]({{msrvtt-train-full-moee-minus-moe-weights.log}}) |
+| Concat (P) | t2v  | {{msrvtt-train-full-concat-ablation.t2v}} | [config]({{msrvtt-train-full-concat-ablation.config}}), [model]({{msrvtt-train-full-concat-ablation.model}}), [log]({{msrvtt-train-full-concat-ablation.log}}) |
+| Concat | t2v |  |  |  |  |  |  |  |
+| CE (CG,P,W) | t2v  | {{msrvtt-train-full-moee-minus-moe-weights.t2v}} | [config]({{msrvtt-train-full-moee-minus-moe-weights.config}}), [model]({{msrvtt-train-full-moee-minus-moe-weights.model}}), [log]({{msrvtt-train-full-moee-minus-moe-weights.log}}) |
 | CE (CG,P) | t2v  | {{msrvtt-train-full-moee.t2v}} | [config]({{msrvtt-train-full-moee.config}}), [model]({{msrvtt-train-full-moee.model}}), [log]({{msrvtt-train-full-moee.log}}) |
 | CE    | t2v  | {{msrvtt-train-full-ce.t2v}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
-| MoEE (CG,P,W) | t2v  | {{msrvtt-train-full-moee-minus-moe-weights.t2v}} | [config]({{msrvtt-train-full-moee-minus-moe-weights.config}}), [model]({{msrvtt-train-full-moee-minus-moe-weights.model}}), [log]({{msrvtt-train-full-moee-minus-moe-weights.log}}) |
+| Concat (P) | v2t  | {{msrvtt-train-full-concat-ablation.v2t}} | [config]({{msrvtt-train-full-concat-ablation.config}}), [model]({{msrvtt-train-full-concat-ablation.model}}), [log]({{msrvtt-train-full-concat-ablation.log}}) |
+| Concat | v2t |  |  |  |  |  |  |  |
+| CE (CG,P,W) | t2v  | {{msrvtt-train-full-moee-minus-moe-weights.t2v}} | [config]({{msrvtt-train-full-moee-minus-moe-weights.config}}), [model]({{msrvtt-train-full-moee-minus-moe-weights.model}}), [log]({{msrvtt-train-full-moee-minus-moe-weights.log}}) |
 | CE (CG,P) | v2t  | {{msrvtt-train-full-moee.v2t}} | [config]({{msrvtt-train-full-moee.config}}), [model]({{msrvtt-train-full-moee.model}}), [log]({{msrvtt-train-full-moee.log}}) |
 | CE    | v2t  | {{msrvtt-train-full-ce.v2t}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
+
+Next, we investigate the importance of different experts.
 
 ### Expert Zoo
 
