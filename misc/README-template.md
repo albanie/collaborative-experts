@@ -88,17 +88,17 @@ We conduct several ablation studies to investigate the importance of different c
 | Concat + G | t2v  | {{msrvtt-train-full-concat-mix-ablation.short-t2v}} | {{msrvtt-train-full-concat-mix-ablation.params}} | [config]({{msrvtt-train-full-concat-mix-ablation.config}}), [model]({{msrvtt-train-full-concat-mix-ablation.model}}), [log]({{msrvtt-train-full-concat-mix-ablation.log}}) |
 | CE - P,CG,MW | t2v  | {{msrvtt-train-full-moee-minus-moe-weights.short-t2v}} | {{msrvtt-train-full-moee-minus-moe-weights.params}} | [config]({{msrvtt-train-full-moee-minus-moe-weights.config}}), [model]({{msrvtt-train-full-moee-minus-moe-weights.model}}), [log]({{msrvtt-train-full-moee-minus-moe-weights.log}}) |
 | CE - P,CG | t2v  | {{msrvtt-train-full-moee.short-t2v}} | {{msrvtt-train-full-moee.params}} | [config]({{msrvtt-train-full-moee.config}}), [model]({{msrvtt-train-full-moee.model}}), [log]({{msrvtt-train-full-moee.log}}) |
-| CE - CG | t2v  | {{msrvtt-train-full-moee.short-t2v}} | {{msrvtt-train-full-moee.params}} | [config]({{msrvtt-train-full-moee.config}}), [model]({{msrvtt-train-full-moee.model}}), [log]({{msrvtt-train-full-moee.log}}) |
 | CE - CG | t2v  | - | - |
 | CE    | t2v  | {{msrvtt-train-full-ce.short-t2v}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
 
-In each row, we aim to add a single logical component (some metrics have been removed to allow the number of parameters to be displayed - the extra metrics can be found in the logs).  The names refer to the following model designs:
+Each row adds an additional component to the model.  The names refer to the following model designs:
 * **Concat**: A barebones concatenation model.  After aggregating each expert across time (which still requires some parameters for the variable-length VLAD layers), the experts are concatenated and compared directly against the aggregated text embeddings.  Note: this model uses a slightly greater number of VLAD clusters than the others to allow the concatentated embedding to match the dimensionality of the text.
 * **Concat-Gate**: The experts are concatenated (similarly to the previous model), but are then passed through a single large context gating module before matching against the text embedding.
-* **CE -MW,P,CG** - The CE model without MoE weights, projecting to a common dimension or Collaborative Gating.
-* **CE -P,CG** - The CE model without projecting to a common dimension or Collaborative Gating (note that this is equivalent to the MoEE model proposed in [2]).
-* **CE -CG** - The CE model without Collaborative Gating.
+* **CE - MW,P,CG** - The CE model without MoE weights, projecting to a common dimension or Collaborative Gating.
+* **CE - P,CG** - The CE model without projecting to a common dimension or Collaborative Gating (note that this is equivalent to the MoEE model proposed in [2]).
+* **CE - CG** - The CE model without Collaborative Gating.
 * **CE** - The full CE model.
+Note that in the table above some metrics have been removed to allow the number of parameters to be displayed---these additional metrics can be found in the linked logs.
 
 Next, we investigate the importance of different experts.
 
