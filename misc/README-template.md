@@ -89,8 +89,8 @@ We conduct several ablation studies to investigate the importance of different c
 
 **CE Design**: First, we investigate the importance of the parts used by the CE model.
 
-| Model | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
-| ---   | :--: | :-: | :-: | :--: | :-: | :----: | :---: |
+| Model | Task | R@1 | R@5 | R@10 | MdR | MnR | Params | Links |
+| ---   | :--: | :-: | :-: | :--: | :-: |  :-: |:----: | :---: |
 | Concat | t2v  | {{msrvtt-train-full-concat-ablation.short-t2v}} | {{msrvtt-train-full-concat-ablation.params}} | [config]({{msrvtt-train-full-concat-ablation.config}}), [model]({{msrvtt-train-full-concat-ablation.model}}), [log]({{msrvtt-train-full-concat-ablation.log}}) |
 | Concat + G | t2v  | {{msrvtt-train-full-concat-mix-ablation.short-t2v}} | {{msrvtt-train-full-concat-mix-ablation.params}} | [config]({{msrvtt-train-full-concat-mix-ablation.config}}), [model]({{msrvtt-train-full-concat-mix-ablation.model}}), [log]({{msrvtt-train-full-concat-mix-ablation.log}}) |
 | CE - MW,P,CG | t2v  | {{msrvtt-train-full-moee-minus-moe-weights.short-t2v}} | {{msrvtt-train-full-moee-minus-moe-weights.params}} | [config]({{msrvtt-train-full-moee-minus-moe-weights.config}}), [model]({{msrvtt-train-full-moee-minus-moe-weights.model}}), [log]({{msrvtt-train-full-moee-minus-moe-weights.log}}) |
