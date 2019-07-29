@@ -19,6 +19,7 @@
             "keep_missing_modalities": false,
             "test_caption_mode": "indep",
             "use_ce": false,
+            "mimic_ce_dims": true,
             "l2renorm": false,
             "randomise_feats": "",
             "vlad_clusters": {

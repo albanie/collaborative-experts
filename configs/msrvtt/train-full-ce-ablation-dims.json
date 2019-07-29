@@ -92,7 +92,7 @@
         "epochs": 100,
         "save_dir": "data/saved/",
         "save_period": 20,
-        "skip_first_n_saves": 0,
+        "skip_first_n_saves": 25,
         "verbosity": 2,
         "tensorboard": true,
         "monitor": "max val_t2v_metrics_geometric_mean_R1-R5-R10"

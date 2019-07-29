@@ -8,7 +8,7 @@
         "drop_feats": "",
         "text_feat": "openai",
         "text_dim": 768,
-        "modalities": ["rgb"],
+        "modalities": ["audio", "flow", "rgb", "scene", "ocr"],
         "ce_shared_dim": 512
     },
     "arch": {
@@ -16,8 +16,7 @@
         "args": {
             "keep_missing_modalities": false,
             "test_caption_mode": "indep",
-            "use_ce": false,
-            "mimic_ce_dims": true,
+            "use_ce": true,
             "l2renorm": false,
             "randomise_feats": "",
             "vlad_clusters": {

@@ -25,7 +25,7 @@
     "msrvtt-train-full-ce-only-rgb-audio": "2019-07-28_18-51-33",
     "msrvtt-train-full-ce-only-rgb-ocr": "2019-07-29_06-19-06",
     "msrvtt-train-full-ce-only-rgb-speech": "2019-07-29_07-09-18",
-    "msrvtt-train-full-ce-only-rgb-face": "TODO:e7-2b",
+    "msrvtt-train-full-ce-only-rgb-face": "2019-07-29_08-38-38",
 
     "msrvtt-train-full-ce-ablation-restrict-captions": "2019-07-29_07-25-56",
     "msrvtt-train-full-ce-ablation-restrict-captions-only-rgb": "2019-07-29_07-49-19"
