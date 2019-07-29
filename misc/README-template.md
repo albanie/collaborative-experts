@@ -93,7 +93,7 @@ We conduct several ablation studies to investigate the importance of different c
 | ----- | ---- | --- | --- | ---- | --- | ---- | ----- |
 | Concat | t2v  | {{msrvtt-train-full-concat-ablation.short-t2v}} | {{msrvtt-train-full-concat-ablation.params}} | [config]({{msrvtt-train-full-concat-ablation.config}}), [model]({{msrvtt-train-full-concat-ablation.model}}), [log]({{msrvtt-train-full-concat-ablation.log}}) |
 | Concat + G | t2v  | {{msrvtt-train-full-concat-mix-ablation.short-t2v}} | {{msrvtt-train-full-concat-mix-ablation.params}} | [config]({{msrvtt-train-full-concat-mix-ablation.config}}), [model]({{msrvtt-train-full-concat-mix-ablation.model}}), [log]({{msrvtt-train-full-concat-mix-ablation.log}}) |
-| CE - P,CG,MW | t2v  | {{msrvtt-train-full-moee-minus-moe-weights.short-t2v}} | {{msrvtt-train-full-moee-minus-moe-weights.params}} | [config]({{msrvtt-train-full-moee-minus-moe-weights.config}}), [model]({{msrvtt-train-full-moee-minus-moe-weights.model}}), [log]({{msrvtt-train-full-moee-minus-moe-weights.log}}) |
+| CE - MW,P,CG | t2v  | {{msrvtt-train-full-moee-minus-moe-weights.short-t2v}} | {{msrvtt-train-full-moee-minus-moe-weights.params}} | [config]({{msrvtt-train-full-moee-minus-moe-weights.config}}), [model]({{msrvtt-train-full-moee-minus-moe-weights.model}}), [log]({{msrvtt-train-full-moee-minus-moe-weights.log}}) |
 | CE - P,CG | t2v  | {{msrvtt-train-full-moee.short-t2v}} | {{msrvtt-train-full-moee.params}} | [config]({{msrvtt-train-full-moee.config}}), [model]({{msrvtt-train-full-moee.model}}), [log]({{msrvtt-train-full-moee.log}}) |
 | CE - CG  | t2v  | {{msrvtt-train-full-ce-ablation-dims.short-t2v}} | {{msrvtt-train-full-ce-ablation-dims.params}} | [config]({{msrvtt-train-full-ce-ablation-dims.config}}), [model]({{msrvtt-train-full-ce-ablation-dims.model}}), [log]({{msrvtt-train-full-ce-ablation-dims.log}}) |
 | CE    | t2v  | {{msrvtt-train-full-ce.short-t2v}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
@@ -144,11 +144,11 @@ For each dataset, the Collaborative Experts model makes use of a collection of p
 
   | Dataset           | Experts  |  Details and links | Archive size | sha1sum |
  |:-------------:|:-----:|:----:|:---:|:---:|
-| MSRVTT | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/msrvtt/README.md)| 19.6 GiB | 959bda588793ef05f348d16de26da84200c5a469 |
-| LSMDC | audio, face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 6.1 GiB |  | 7ce018e981752db9e793e449c2ba5bc88217373d
-| MSVD | face, flow, ocr, rgb, scene | [README](misc/datasets/msvd/README.md)| 2.1 GiB | 6071827257c14de455b3a13fe1e885c2a7887c9e
-| DiDeMo | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/didemo/README.md)| 2.3 GiB | 6fd4bcc68c1611052de2499fd8ab3f488c7c195b
-| ActivityNet | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/activity-net/README.md)| 3.8 GiB | b16685576c97cdec2783fb89ea30ca7d17abb021
+| MSRVTT | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/msrvtt/README.md)| 19.6 GiB | <sup><sub>959bda588793ef05f348d16de26da84200c5a469</sub></sup> |
+| LSMDC | audio, face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 6.1 GiB | <sup><sub>7ce018e981752db9e793e449c2ba5bc88217373d</sub></sup> |
+| MSVD | face, flow, ocr, rgb, scene | [README](misc/datasets/msvd/README.md)| 2.1 GiB | <sup><sub>6071827257c14de455b3a13fe1e885c2a7887c9e</sub></sup> | 
+| DiDeMo | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/didemo/README.md)| 2.3 GiB | <sup><sub>6fd4bcc68c1611052de2499fd8ab3f488c7c195b</sub></sup> | 
+| ActivityNet | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/activity-net/README.md)| 3.8 GiB | <sup><sub>b16685576c97cdec2783fb89ea30ca7d17abb021</sub></sup> | 
 
 ### Evaluating a pretrained model
 
