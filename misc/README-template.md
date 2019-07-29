@@ -41,7 +41,7 @@ In the results reported below, the same model is used for both the t2v and v2t e
 | CE    | 1k-B  | v2t  | {{msrvtt-train-miech-ce.v2t}} | [config]({{msrvtt-train-miech-ce.config}}), [model]({{msrvtt-train-miech-ce.model}}), [log]({{msrvtt-train-miech-ce.log}}) |
 | MoEE* | 1k-B  | v2t  | {{msrvtt-train-miech-miechfeats-moee.v2t}} | [config]({{msrvtt-train-miech-miechfeats-moee.config}}), [model]({{msrvtt-train-miech-miechfeats-moee.model}}), [log]({{msrvtt-train-miech-miechfeats-moee.log}}) |
 
-Models marked with * use the features made available with the MoEE model of [2] (without OCR, speech and scene features), unstarred models on the `1k-B` and `Full` splits make use of OCR, speech and scene features, as well slightly stronger text encodings (GPT, rather than word2vec - see [1] for details). The MoEE model is implemented as a baseline and as a sanity check that our codebase approximately reproduces [2] (the [MoEE paper](https://arxiv.org/abs/1804.02516)).
+Models marked with * use the features made available with the MoEE model of [2] (without OCR, speech and scene features), unstarred models on the `1k-B` and `Full` splits make use of OCR, speech and scene features, as well slightly stronger text encodings (GPT, rather than word2vec - see [1] for details). The MoEE model is implemented as a sanity check that our codebase approximately reproduces [2] (the [MoEE paper](https://arxiv.org/abs/1804.02516)).
 
 
 See the [MSRVTT README](misc/datasets/msrvtt/README.md) for links to the train/val/test lists of each split.
@@ -135,6 +135,7 @@ We can also study their cumulative effect (experts are added in the order of imp
 
 | Experts | Captions | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
 | ----- | ---- | ---- | --- | --- | ---- | --- | ---- | ----- |
+| RGB   | 1 | t2v | {{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.params}} | [config]({{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.config}}), [model]({{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.model}}), [log]({{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.log}}) |
 | RGB   | 20 | t2v  | {{msrvtt-train-full-ce-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-only-rgb.params}} | [config]({{msrvtt-train-full-ce-only-rgb.config}}), [model]({{msrvtt-train-full-ce-only-rgb.model}}), [log]({{msrvtt-train-full-ce-only-rgb.log}}) |
 | All   | 20 | t2v | {{msrvtt-train-full-ce.short-t2v}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
 
