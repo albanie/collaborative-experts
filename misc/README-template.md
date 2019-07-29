@@ -1,6 +1,9 @@
 ## Collaborative Experts
 
-This repo provides code for learning and evaluating joint video-text embeddings for the task of video retrieval.  Our approach is described in the [collaborative experts paper](link).  
+This repo provides code for learning and evaluating joint video-text embeddings for the task of video retrieval.  Our approach is described in the BMVC 2019 paper "Use What You Have: Video retrieval using representations from collaborative experts" ([link](https://www.robots.ox.ac.uk/~vgg/research/collaborative-experts/)).
+
+`TODO(Samuel) - update link to point to arxiv`
+
 
 ![CE diagram](figs/CE-diagram.png)
 
@@ -80,7 +83,9 @@ See the [ActivityNet README](misc/datasets/activity-net/README.md) for descripti
 
 ### Ablation studies
 
-We conduct several ablation studies to investigate the importance of different components in the Collaborative Experts design.  Each ablation is conducted on the `Full` MSRVTT split. First, we investigate the importance of the parts used by the CE model.
+We conduct several ablation studies to investigate the importance of different components in the Collaborative Experts design.  Each ablation is conducted on the `Full` MSRVTT split. 
+
+**CE Design**: First, we investigate the importance of the parts used by the CE model.
 
 | Model | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
 | ----- | ---- | --- | --- | ---- | --- | ---- | ----- |
@@ -100,26 +105,48 @@ Each row adds an additional component to the model.  The names refer to the foll
 * **CE** - The full CE model.
 Note that in the table above some metrics have been removed to allow the number of parameters to be displayed---these additional metrics can be found in the linked logs.
 
-Next, we investigate the importance of different experts.
+**Importance of Different Experts**: The next ablation investigates the value of each of the different experts towards the final embedding.  Since not all experts are available in every video, we pair each expert with RGB, to give an approximation of their usefulness.
 
 | Experts | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
 | ----- | ---- | --- | --- | ---- | --- | ---- | ----- |
-| RG    | t2v  | {{msrvtt-train-full-ce-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-only-rgb.params}} | [config]({{msrvtt-train-full-ce-only-rgb.config}}), [model]({{msrvtt-train-full-ce-only-rgb.model}}), [log]({{msrvtt-train-full-ce-only-rgb.log}}) |
-| RG,SC    | t2v  | {{msrvtt-train-full-ce-only-rgb-scene.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-scene.params}} | [config]({{msrvtt-train-full-ce-only-rgb-scene.config}}), [model]({{msrvtt-train-full-ce-only-rgb-scene.model}}), [log]({{msrvtt-train-full-ce-only-rgb-scene.log}}) |
-| RG,SC,MO    | t2v  | {{msrvtt-train-full-ce-only-rgb-scene-flow.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-scene-flow.params}} | [config]({{msrvtt-train-full-ce-only-rgb-scene-flow.config}}), [model]({{msrvtt-train-full-ce-only-rgb-scene-flow.model}}), [log]({{msrvtt-train-full-ce-only-rgb-scene-flow.log}}) |
-| RG,SC,MO,AU,OC,SP,FA    | t2v  | {{msrvtt-train-full-ce.short-t2v}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
+| RGB    | t2v  | {{msrvtt-train-full-ce-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-only-rgb.params}} | [config]({{msrvtt-train-full-ce-only-rgb.config}}), [model]({{msrvtt-train-full-ce-only-rgb.model}}), [log]({{msrvtt-train-full-ce-only-rgb.log}}) |
+| RGB + Scene | t2v  | {{msrvtt-train-full-ce-only-rgb-scene.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-scene.params}} | [config]({{msrvtt-train-full-ce-only-rgb-scene.config}}), [model]({{msrvtt-train-full-ce-only-rgb-scene.model}}), [log]({{msrvtt-train-full-ce-only-rgb-scene.log}}) |
+| RGB + Flow | t2v  | {{msrvtt-train-full-ce-only-rgb-flow.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-flow.params}} | [config]({{msrvtt-train-full-ce-only-rgb-flow.config}}), [model]({{msrvtt-train-full-ce-only-rgb-flow.model}}), [log]({{msrvtt-train-full-ce-only-rgb-flow.log}}) |
+| RGB + Audio | t2v  | {{msrvtt-train-full-ce-only-rgb-audio.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-audio.params}} | [config]({{msrvtt-train-full-ce-only-rgb-audio.config}}), [model]({{msrvtt-train-full-ce-only-rgb-audio.model}}), [log]({{msrvtt-train-full-ce-only-rgb-audio.log}}) |
+| RGB + OCR | t2v  | {{msrvtt-train-full-ce-only-rgb-ocr.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-ocr.params}} | [config]({{msrvtt-train-full-ce-only-rgb-ocr.config}}), [model]({{msrvtt-train-full-ce-only-rgb-ocr.model}}), [log]({{msrvtt-train-full-ce-only-rgb-ocr.log}}) |
+| RGB + Speech | t2v  | {{msrvtt-train-full-ce-only-rgb-speech.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-speech.params}} | [config]({{msrvtt-train-full-ce-only-rgb-speech.config}}), [model]({{msrvtt-train-full-ce-only-rgb-speech.model}}), [log]({{msrvtt-train-full-ce-only-rgb-speech.log}}) |
+| RGB + Face | t2v  | {{msrvtt-train-full-ce-only-rgb-face.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-face.params}} | [config]({{msrvtt-train-full-ce-only-rgb-face.config}}), [model]({{msrvtt-train-full-ce-only-rgb-face.model}}), [log]({{msrvtt-train-full-ce-only-rgb-face.log}}) |
+
+We can also study their cumulative effect (experts are added in the order of importance suggested by the table above). In the table below, each expert name is abbreviated to its first two letters.
+
+| Experts | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
+| ----- | ---- | --- | --- | ---- | --- | ---- | ----- |
+| RGB    | t2v  | {{msrvtt-train-full-ce-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-only-rgb.params}} | [config]({{msrvtt-train-full-ce-only-rgb.config}}), [model]({{msrvtt-train-full-ce-only-rgb.model}}), [log]({{msrvtt-train-full-ce-only-rgb.log}}) |
+| RG+Scene    | t2v  | {{msrvtt-train-full-ce-only-rgb-scene.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-scene.params}} | [config]({{msrvtt-train-full-ce-only-rgb-scene.config}}), [model]({{msrvtt-train-full-ce-only-rgb-scene.model}}), [log]({{msrvtt-train-full-ce-only-rgb-scene.log}}) |
+| <sup><sub>RGB+Scene+Flow</sub></sup>    | t2v  | {{msrvtt-train-full-ce-only-rgb-scene-flow.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-scene-flow.params}} | [config]({{msrvtt-train-full-ce-only-rgb-scene-flow.config}}), [model]({{msrvtt-train-full-ce-only-rgb-scene-flow.model}}), [log]({{msrvtt-train-full-ce-only-rgb-scene-flow.log}}) |
+| RG,SC,FL,AU    | t2v  | {{msrvtt-train-full-ce-only-rgb-scene-flow-audio.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-scene-flow-audio.params}} | [config]({{msrvtt-train-full-ce-only-rgb-scene-flow-audio.config}}), [model]({{msrvtt-train-full-ce-only-rgb-scene-flow-audio.model}}), [log]({{msrvtt-train-full-ce-only-rgb-scene-flow-audio.log}}) |
+| RG,SC,FL,AU,OC    | t2v  | {{msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr.params}} | [config]({{msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr.config}}), [model]({{msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr.model}}), [log]({{msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr.log}}) |
+| RG,SC,FL,AU,OC,SP    | t2v  | {{msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr-speech.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr-speech.params}} | [config]({{msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr-speech.config}}), [model]({{msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr-speech.model}}), [log]({{msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr-speech.log}}) |
+| <sup><sub>RGB+Scene+Flow+Audio+OCR+Speech+Face</sub></sup>    | t2v  | {{msrvtt-train-full-ce.short-t2v}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
+
+**Training with more captions:** Rather than varying the number of experts, we can also investigate how performance changes.
+
+| Experts | Caps | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
+| ----- | ---- | ---- | --- | --- | ---- | --- | ---- | ----- |
+| RGB   | 20 | t2v  | {{msrvtt-train-full-ce-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-only-rgb.params}} | [config]({{msrvtt-train-full-ce-only-rgb.config}}), [model]({{msrvtt-train-full-ce-only-rgb.model}}), [log]({{msrvtt-train-full-ce-only-rgb.log}}) |
+| All   | 20 | t2v | {{msrvtt-train-full-ce.short-t2v}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
 
 ### Expert Zoo
 
 For each dataset, the Collaborative Experts model makes use of a collection of pretrained "expert" feature extractors (see the paper for more precise descriptions). Some experts have been obtained from other sources (described where applicable), rather than extracted by us.  To reproduce the experiments listed above, the experts for each dataset have been bundled into compressed tar files.  These can be downloaded and unpacked with a [utility script](misc/sync_experts.py) (recommended -- see example usage below), which will store them in the locations expected by the training code. Each set of experts has a brief README, which also provides a link from which they can be downloaded directly.
 
-  | Dataset           | Experts  |  Details and links | Archive size |
- |:-------------:|:-----:|:----:|:---:|
-| MSRVTT | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/msrvtt/README.md)| 19.6 GiB
-| LSMDC | audio, face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 6.1 GiB
-| MSVD | face, flow, ocr, rgb, scene | [README](misc/datasets/msvd/README.md)| 2.1 GiB
-| DiDeMo | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/didemo/README.md)| 2.3 GiB
-| ActivityNet | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/activity-net/README.md)| 3.8 GiB
+  | Dataset           | Experts  |  Details and links | Archive size | sha1sum |
+ |:-------------:|:-----:|:----:|:---:|:---:|
+| MSRVTT | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/msrvtt/README.md)| 19.6 GiB | 959bda588793ef05f348d16de26da84200c5a469 |
+| LSMDC | audio, face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 6.1 GiB |  | 7ce018e981752db9e793e449c2ba5bc88217373d
+| MSVD | face, flow, ocr, rgb, scene | [README](misc/datasets/msvd/README.md)| 2.1 GiB | 6071827257c14de455b3a13fe1e885c2a7887c9e
+| DiDeMo | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/didemo/README.md)| 2.3 GiB | 6fd4bcc68c1611052de2499fd8ab3f488c7c195b
+| ActivityNet | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/activity-net/README.md)| 3.8 GiB | b16685576c97cdec2783fb89ea30ca7d17abb021
 
 ### Evaluating a pretrained model
 

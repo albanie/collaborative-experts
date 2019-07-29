@@ -1,6 +1,9 @@
 ## Collaborative Experts
 
-This repo provides code for learning and evaluating joint video-text embeddings for the task of video retrieval.  Our approach is described in the [collaborative experts paper](link).  
+This repo provides code for learning and evaluating joint video-text embeddings for the task of video retrieval.  Our approach is described in the BMVC 2019 paper "Use What You Have: Video retrieval using representations from collaborative experts" ([link](https://www.robots.ox.ac.uk/~vgg/research/collaborative-experts/)).
+
+`TODO(Samuel) - update link to point to arxiv`
+
 
 ![CE diagram](figs/CE-diagram.png)
 
@@ -80,7 +83,9 @@ See the [ActivityNet README](misc/datasets/activity-net/README.md) for descripti
 
 ### Ablation studies
 
-We conduct several ablation studies to investigate the importance of different components in the Collaborative Experts design.  Each ablation is conducted on the `Full` MSRVTT split. First, we investigate the importance of the parts used by the CE model.
+We conduct several ablation studies to investigate the importance of different components in the Collaborative Experts design.  Each ablation is conducted on the `Full` MSRVTT split. 
+
+**CE Design**: First, we investigate the importance of the parts used by the CE model.
 
 | Model | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
 | ----- | ---- | --- | --- | ---- | --- | ---- | ----- |
@@ -100,26 +105,48 @@ Each row adds an additional component to the model.  The names refer to the foll
 * **CE** - The full CE model.
 Note that in the table above some metrics have been removed to allow the number of parameters to be displayed---these additional metrics can be found in the linked logs.
 
-Next, we investigate the importance of different experts.
+**Importance of Different Experts**: The next ablation investigates the value of each of the different experts towards the final embedding.  Since not all experts are available in every video, we pair each expert with RGB, to give an approximation of their usefulness.
 
 | Experts | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
 | ----- | ---- | --- | --- | ---- | --- | ---- | ----- |
-| RG    | t2v  | 4.7<sub>(0.0)</sub> | 15.9<sub>(0.3)</sub> | 24.6<sub>(0.2)</sub> | 42.0<sub>(0.0)</sub> | 63M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb/2019-07-28_16-56-14/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb/2019-07-28_16-56-14/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce-only-rgb/2019-07-28_16-56-14/info.log) |
-| RG,SC    | t2v  | 5.0<sub>(0.0)</sub> | 16.6<sub>(0.1)</sub> | 25.4<sub>(0.3)</sub> | 40.0<sub>(1.0)</sub> | 30.34M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-scene/2019-07-28_17-16-32/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-scene/2019-07-28_17-16-32/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce-only-rgb-scene/2019-07-28_17-16-32/info.log) |
-| RG,SC,MO    | t2v  | 5.8<sub>(0.1)</sub> | 18.6<sub>(0.1)</sub> | 28.2<sub>(0.1)</sub> | 33.0<sub>(0.0)</sub> | 44.01M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-scene-flow/2019-07-28_17-28-48/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-scene-flow/2019-07-28_17-28-48/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce-only-rgb-scene-flow/2019-07-28_17-28-48/info.log) |
-| RG,SC,MO,AU,OC,SP,FA    | t2v  | 22.5<sub>(0.1)</sub> | 52.1<sub>(0.2)</sub> | 65.5<sub>(0.1)</sub> | 5.0<sub>(0.0)</sub> | 107.74M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce/07-25_17-19-34/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce/07-25_17-19-34/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce/07-25_17-19-34/info.log) |
+| RGB    | t2v  | 4.3<sub>(0.0)</sub> | 14.8<sub>(0.1)</sub> | 23.1<sub>(0.0)</sub> | 46.3<sub>(0.6)</sub> | 14.5M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb/2019-07-29_07-10-18/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb/2019-07-29_07-10-18/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce-only-rgb/2019-07-29_07-10-18/info.log) |
+| RGB + Scene | t2v  | 5.0<sub>(0.0)</sub> | 16.6<sub>(0.1)</sub> | 25.4<sub>(0.3)</sub> | 40.0<sub>(1.0)</sub> | 30.34M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-scene/2019-07-28_17-16-32/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-scene/2019-07-28_17-16-32/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce-only-rgb-scene/2019-07-28_17-16-32/info.log) |
+| RGB + Flow | t2v  | 5.6<sub>(0.1)</sub> | 18.4<sub>(0.1)</sub> | 28.1<sub>(0.1)</sub> | 33.0<sub>(0.0)</sub> | 29.74M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-flow/2019-07-28_19-00-02/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-flow/2019-07-28_19-00-02/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce-only-rgb-flow/2019-07-28_19-00-02/info.log) |
+| RGB + Audio | t2v  | 7.1<sub>(0.1)</sub> | 22.1<sub>(0.2)</sub> | 32.5<sub>(0.1)</sub> | 25.0<sub>(0.0)</sub> | 30.27M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-audio/2019-07-28_18-51-33/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-audio/2019-07-28_18-51-33/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce-only-rgb-audio/2019-07-28_18-51-33/info.log) |
+| RGB + OCR | t2v  | 7.1<sub>(0.1)</sub> | 22.6<sub>(0.1)</sub> | 33.4<sub>(0.1)</sub> | 24.3<sub>(0.6)</sub> | 34.15M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-ocr/2019-07-29_06-19-06/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-ocr/2019-07-29_06-19-06/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce-only-rgb-ocr/2019-07-29_06-19-06/info.log) |
+| RGB + Speech | t2v  | TODO | TODO | [config](TODO), [model](TODO), [log](TODO) |
+| RGB + Face | t2v  | TODO | TODO | [config](TODO), [model](TODO), [log](TODO) |
+
+We can also study their cumulative effect (experts are added in the order of importance suggested by the table above). In the table below, each expert name is abbreviated to its first two letters.
+
+| Experts | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
+| ----- | ---- | --- | --- | ---- | --- | ---- | ----- |
+| RGB    | t2v  | 4.3<sub>(0.0)</sub> | 14.8<sub>(0.1)</sub> | 23.1<sub>(0.0)</sub> | 46.3<sub>(0.6)</sub> | 14.5M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb/2019-07-29_07-10-18/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb/2019-07-29_07-10-18/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce-only-rgb/2019-07-29_07-10-18/info.log) |
+| RG+Scene    | t2v  | 5.0<sub>(0.0)</sub> | 16.6<sub>(0.1)</sub> | 25.4<sub>(0.3)</sub> | 40.0<sub>(1.0)</sub> | 30.34M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-scene/2019-07-28_17-16-32/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-scene/2019-07-28_17-16-32/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce-only-rgb-scene/2019-07-28_17-16-32/info.log) |
+| <sup><sub>RGB+Scene+Flow</sub></sup>    | t2v  | 5.8<sub>(0.1)</sub> | 18.6<sub>(0.1)</sub> | 28.2<sub>(0.1)</sub> | 33.0<sub>(0.0)</sub> | 44.01M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-scene-flow/2019-07-28_17-28-48/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-scene-flow/2019-07-28_17-28-48/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce-only-rgb-scene-flow/2019-07-28_17-28-48/info.log) |
+| RG,SC,FL,AU    | t2v  | TODO | TODO | [config](TODO), [model](TODO), [log](TODO) |
+| RG,SC,FL,AU,OC    | t2v  | 12.0<sub>(0.1)</sub> | 33.4<sub>(0.3)</sub> | 46.2<sub>(0.1)</sub> | 13.0<sub>(0.0)</sub> | 76.27M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr/2019-07-28_18-36-39/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr/2019-07-28_18-36-39/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr/2019-07-28_18-36-39/info.log) |
+| RG,SC,FL,AU,OC,SP    | t2v  | 16.0<sub>(0.0)</sub> | 41.4<sub>(0.3)</sub> | 55.1<sub>(0.3)</sub> | 8.0<sub>(0.0)</sub> | 94.34M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr-speech/2019-07-28_18-48-10/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr-speech/2019-07-28_18-48-10/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr-speech/2019-07-28_18-48-10/info.log) |
+| <sup><sub>RGB+Scene+Flow+Audio+OCR+Speech+Face</sub></sup>    | t2v  | 22.5<sub>(0.1)</sub> | 52.1<sub>(0.2)</sub> | 65.5<sub>(0.1)</sub> | 5.0<sub>(0.0)</sub> | 107.74M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce/07-25_17-19-34/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce/07-25_17-19-34/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce/07-25_17-19-34/info.log) |
+
+**Training with more captions:** Rather than varying the number of experts, we can also investigate how performance changes.
+
+| Experts | Caps | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
+| ----- | ---- | ---- | --- | --- | ---- | --- | ---- | ----- |
+| RGB   | 20 | t2v  | 4.3<sub>(0.0)</sub> | 14.8<sub>(0.1)</sub> | 23.1<sub>(0.0)</sub> | 46.3<sub>(0.6)</sub> | 14.5M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb/2019-07-29_07-10-18/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce-only-rgb/2019-07-29_07-10-18/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce-only-rgb/2019-07-29_07-10-18/info.log) |
+| All   | 20 | t2v | 22.5<sub>(0.1)</sub> | 52.1<sub>(0.2)</sub> | 65.5<sub>(0.1)</sub> | 5.0<sub>(0.0)</sub> | 107.74M | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce/07-25_17-19-34/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-full-ce/07-25_17-19-34/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-full-ce/07-25_17-19-34/info.log) |
 
 ### Expert Zoo
 
 For each dataset, the Collaborative Experts model makes use of a collection of pretrained "expert" feature extractors (see the paper for more precise descriptions). Some experts have been obtained from other sources (described where applicable), rather than extracted by us.  To reproduce the experiments listed above, the experts for each dataset have been bundled into compressed tar files.  These can be downloaded and unpacked with a [utility script](misc/sync_experts.py) (recommended -- see example usage below), which will store them in the locations expected by the training code. Each set of experts has a brief README, which also provides a link from which they can be downloaded directly.
 
-  | Dataset           | Experts  |  Details and links | Archive size |
- |:-------------:|:-----:|:----:|:---:|
-| MSRVTT | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/msrvtt/README.md)| 19.6 GiB
-| LSMDC | audio, face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 6.1 GiB
-| MSVD | face, flow, ocr, rgb, scene | [README](misc/datasets/msvd/README.md)| 2.1 GiB
-| DiDeMo | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/didemo/README.md)| 2.3 GiB
-| ActivityNet | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/activity-net/README.md)| 3.8 GiB
+  | Dataset           | Experts  |  Details and links | Archive size | sha1sum |
+ |:-------------:|:-----:|:----:|:---:|:---:|
+| MSRVTT | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/msrvtt/README.md)| 19.6 GiB | 959bda588793ef05f348d16de26da84200c5a469 |
+| LSMDC | audio, face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 6.1 GiB |  | 7ce018e981752db9e793e449c2ba5bc88217373d
+| MSVD | face, flow, ocr, rgb, scene | [README](misc/datasets/msvd/README.md)| 2.1 GiB | 6071827257c14de455b3a13fe1e885c2a7887c9e
+| DiDeMo | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/didemo/README.md)| 2.3 GiB | 6fd4bcc68c1611052de2499fd8ab3f488c7c195b
+| ActivityNet | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/activity-net/README.md)| 3.8 GiB | b16685576c97cdec2783fb89ea30ca7d17abb021
 
 ### Evaluating a pretrained model
 

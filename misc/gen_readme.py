@@ -78,6 +78,9 @@ def parse_log(log_path):
 def parse_results(experiments, save_dir):
     log_results = {}
     for exp_name, timestamp in experiments.items():
+        if timestamp.startswith("TODO"):
+            log_results[exp_name] = {"timestamp": "TODO", "results": {}}
+            continue
         log_path = Path(save_dir) / "log" / exp_name / timestamp / "info.log"
         assert log_path.exists(), f"missing log file for {exp_name}: {log_path}"
         results = parse_log(log_path)
@@ -116,7 +119,9 @@ def generate_readme(experiments, readme_template, root_url, readme_dest, results
             groups = match.groups()
             assert len(groups) == 1, "expected single group"
             exp_name, target = groups[0].split(".")
-            if target in {"config", "model", "log"}:
+            if results[exp_name]["timestamp"] == "TODO":
+                token = "TODO"
+            elif target in {"config", "model", "log"}:
                 token = generate_url(root_url, target, exp_name, experiments=experiments)
             elif target in {"t2v", "v2t"}:
                 token = generate_results_string(target, exp_name, results)

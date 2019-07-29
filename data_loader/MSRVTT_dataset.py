@@ -99,6 +99,16 @@ class MSRVTT(BaseDataset):
         self.features = canon_feats
         self.raw_captions = memcache(Path(self.data_dir) / "processing/raw-captions.pkl")
         self.text_features = memcache(text_feat_path)
+        if self.restrict_train_captions:
+            # hash the video names to avoid O(n) lookups in long lists
+            train_list = set(self.train_list)
+            for key, val in self.text_features.items():
+                if key not in train_list:
+                    continue
+                msg = "expected text features to be lists with length 19 or 20"
+                assert isinstance(val, list) and len(val) in {19, 20}, msg
+                # restrict to the first N captions (deterministic)
+                self.text_features[key] = val[:self.restrict_train_captions]
 
     def sanity_checks(self):
         if self.num_test_captions == 20:

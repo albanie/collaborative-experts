@@ -8,11 +8,25 @@
     "msrvtt-train-miech-ce": "2019-07-26_15-04-54",
     "msrvtt-train-jsfusion-ce": "2019-07-26_15-18-46",
     "msrvtt-train-miech-miechfeats-moee": "2019-07-26_15-16-18",
-    "msrvtt-train-full-moee-minus-moe-weights": "2019-07-28_14-20-52",
+
     "msrvtt-train-full-concat-ablation": "2019-07-28_16-10-22",
     "msrvtt-train-full-concat-mix-ablation": "2019-07-28_14-22-10",
+    "msrvtt-train-full-moee-minus-moe-weights": "2019-07-28_14-20-52",
+    "msrvtt-train-full-ce-ablation-dims": "2019-07-28_18-36-09",
 
-    "msrvtt-train-full-ce-only-rgb": "2019-07-28_16-56-14",
+    "msrvtt-train-full-ce-only-rgb": "2019-07-29_07-10-18",
     "msrvtt-train-full-ce-only-rgb-scene": "2019-07-28_17-16-32",
-    "msrvtt-train-full-ce-only-rgb-scene-flow": "2019-07-28_17-28-48"
+    "msrvtt-train-full-ce-only-rgb-scene-flow": "2019-07-28_17-28-48",
+    "msrvtt-train-full-ce-only-rgb-scene-flow-audio": "TODO:s7-0",
+    "msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr": "2019-07-28_18-36-39",
+    "msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr-speech": "2019-07-28_18-48-10",
+
+    "msrvtt-train-full-ce-only-rgb-flow": "2019-07-28_19-00-02",
+    "msrvtt-train-full-ce-only-rgb-audio": "2019-07-28_18-51-33",
+    "msrvtt-train-full-ce-only-rgb-ocr": "2019-07-29_06-19-06",
+    "msrvtt-train-full-ce-only-rgb-speech": "TODO:e7-3a",
+    "msrvtt-train-full-ce-only-rgb-face": "TODO:e7-2b",
+
+    "msrvtt-train-full-ce-ablation-restrict-captions": "TODO:e7-3a",
+    "msrvtt-train-full-ce-ablation-restrict-captions-only-rgb": "TODO:e7-2b"
 }

@@ -34,22 +34,27 @@ class BaseDataset(Dataset):
 
     def __init__(self, data_dir, feat_aggregation, raw_input_dims, num_test_captions,
                  split_name, text_dim, text_feat, rgb_model_name, fuse_captions,
-                 max_text_words, max_expert_tokens, verbose=False):
+                 max_text_words, max_expert_tokens, restrict_train_captions,
+                 verbose=False):
 
         # TODO(samuel) - document difference between max_text_words vs max_expert_tokens
         self.text_feat = text_feat
         self.data_dir = data_dir
         self.text_dim = text_dim
+        self.restrict_train_captions = restrict_train_captions
         self.max_text_words = max_text_words
         self.max_expert_tokens = max_expert_tokens
         self.fuse_captions = fuse_captions
         self.num_test_captions = num_test_captions
         self.rgb_model_name = rgb_model_name
-        self.restrict_test_captions = None
         self.feat_aggregation = feat_aggregation
         self.root_feat = Path(data_dir) / "symlinked-feats"
-        self.rgb_shots = 1
         self.experts = set(raw_input_dims.keys())
+        self.rgb_shots = 1
+
+        # This attribute can be overloaded by different datasets, so it must be set
+        # before the `load_features() method call`
+        self.restrict_test_captions = None
 
         # Use a single caption per video when forming training minibatches (different
         # captions from the same video may still be used across different minibatches)

@@ -13,12 +13,13 @@ from utils.util import HashableDict, HashableOrderedDict
 @functools.lru_cache(maxsize=64, typed=False)
 def dataset_loader(dataset_name, data_dir, raw_input_dims, num_test_captions, text_dim,
                    feat_aggregation, split_name, text_feat, rgb_model_name,
-                   fuse_captions, max_text_words, max_expert_tokens):
+                   fuse_captions, max_text_words, max_expert_tokens,
+                   restrict_train_captions):
     print(f"refreshing cache for {dataset_name} data loader")
     dataset_classes = {
-        "MSRVTT": MSRVTT, 
-        "MSVD": MSVD, 
+        "MSVD": MSVD,
         "LSMDC": LSMDC,
+        "MSRVTT": MSRVTT,
         "DiDeMo": DiDeMo,
         "ActivityNet": ActivityNet,
     }
@@ -34,6 +35,7 @@ def dataset_loader(dataset_name, data_dir, raw_input_dims, num_test_captions, te
         max_text_words=max_text_words,
         num_test_captions=num_test_captions,
         raw_input_dims=raw_input_dims,
+        restrict_train_captions=restrict_train_captions,
     )
     return dataset
 
@@ -43,7 +45,7 @@ class ExpertDataLoader:
     def __init__(self, dataset_name, data_dir, num_workers, batch_size, raw_input_dims,
                  rgb_model_name, split_name, feat_aggregation, num_test_captions,
                  text_feat, text_dim, fuse_captions, max_expert_tokens, max_text_words,
-                 clear_lru_cache=False):
+                 restrict_train_captions=0, clear_lru_cache=False):
 
         # Ensure that the dictionaries are hashable to allow use of caching
         raw_input_dims = HashableOrderedDict(raw_input_dims)
@@ -66,6 +68,7 @@ class ExpertDataLoader:
             raw_input_dims=raw_input_dims,
             num_test_captions=num_test_captions,
             feat_aggregation=feat_aggregation,
+            restrict_train_captions=restrict_train_captions,
         )
         print("cache info", dataset_loader.cache_info())
         train_loader = DataLoader(
