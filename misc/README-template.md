@@ -7,12 +7,14 @@ This repo provides code for learning and evaluating joint video-text embeddings 
 
 ![CE diagram](figs/CE-diagram.png)
 
-In brief, the *Collaborative Experts* framework aims to achieve robustness through two mechanisms:
-1. Extracting information from a wide range of modalities, including those that are typically always available in video (such as RGB) as well as more "specific" clues which may only occasionally be present (such as overlaid text).
+
+
+**High-level Overview**: The *Collaborative Experts* framework aims to achieve robustness through two mechanisms:
+1. The use of information from a wide range of modalities, including those that are typically always available in video (such as RGB) as well as more "specific" clues which may only occasionally be present (such as overlaid text).
 2. A module that aims to combine these modalities into a fixed size representation that in a manner that is robust to noise.
 
-
 **Requirements:** The code assumes PyTorch 1.1 and Python 3.7 (other versions may work, but have not been tested).  See the section on dependencies towards the end of this file for specific package requirements.
+
 
 ### Pretrained video embeddings
 
@@ -129,9 +131,9 @@ We can also study their cumulative effect (experts are added in the order of imp
 | RG,SC,FL,AU,OC,SP    | t2v  | {{msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr-speech.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr-speech.params}} | [config]({{msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr-speech.config}}), [model]({{msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr-speech.model}}), [log]({{msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr-speech.log}}) |
 | <sup><sub>RGB+Scene+Flow+Audio+OCR+Speech+Face</sub></sup>    | t2v  | {{msrvtt-train-full-ce.short-t2v}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
 
-**Training with more captions:** Rather than varying the number of experts, we can also investigate how performance changes.
+**Training with more captions:** Rather than varying the number of experts, we can also investigate how performance changes as we change the number of training captions available per-video.
 
-| Experts | Caps | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
+| Experts | Captions | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
 | ----- | ---- | ---- | --- | --- | ---- | --- | ---- | ----- |
 | RGB   | 20 | t2v  | {{msrvtt-train-full-ce-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-only-rgb.params}} | [config]({{msrvtt-train-full-ce-only-rgb.config}}), [model]({{msrvtt-train-full-ce-only-rgb.model}}), [log]({{msrvtt-train-full-ce-only-rgb.log}}) |
 | All   | 20 | t2v | {{msrvtt-train-full-ce.short-t2v}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |

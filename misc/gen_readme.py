@@ -35,15 +35,17 @@ def sync_files(experiments, save_dir, webserver, web_dir):
         # copy experiment artifacts
         for filetype, fnames in filetypes.items():
             for fname in fnames:
+                if rel_dir.startswith("TODO"):
+                    continue
                 rel_path = Path(rel_dir) / fname
                 local_path = Path(save_dir) / filetype / key / rel_path
                 server_path = Path(web_dir).expanduser() / filetype / key / rel_path
                 dest = f"{webserver}:{str(server_path)}"
                 print(f"{key} -> {webserver} [{local_path} -> {server_path}]")
                 subprocess.call(["ssh", webserver, "mkdir -p", str(server_path.parent)])
-                scp_args = ["scp", str(local_path), dest]
-                print(f"running command {' '.join(scp_args)}")
-                subprocess.call(scp_args)
+                rsync_args = ["rsync", "-hvrPt", str(local_path), dest]
+                print(f"running command {' '.join(rsync_args)}")
+                subprocess.call(rsync_args)
 
            
 def parse_log(log_path):
