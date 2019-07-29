@@ -137,6 +137,7 @@ We can also study their cumulative effect (experts are added in the order of imp
 | -----   | :------: | :--: | :-: | :-: | :--: | :-: | :----: | :---: |
 | RGB   | 1 | t2v | {{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.params}} | [config]({{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.config}}), [model]({{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.model}}), [log]({{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.log}}) |
 | RGB   | 20 | t2v  | {{msrvtt-train-full-ce-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-only-rgb.params}} | [config]({{msrvtt-train-full-ce-only-rgb.config}}), [model]({{msrvtt-train-full-ce-only-rgb.model}}), [log]({{msrvtt-train-full-ce-only-rgb.log}}) |
+| All   | 1 | t2v | {{msrvtt-train-full-ce-ablation-restrict-captions.short-t2v}} | {{msrvtt-train-full-ce-ablation-restrict-captions.params}} | [config]({{msrvtt-train-full-ce-ablation-restrict-captions.config}}), [model]({{msrvtt-train-full-ce-ablation-restrict-captions.model}}), [log]({{msrvtt-train-full-ce-ablation-restrict-captions.log}}) |
 | All   | 20 | t2v | {{msrvtt-train-full-ce.short-t2v}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
 
 ### Expert Zoo
