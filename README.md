@@ -41,7 +41,7 @@ In the results reported below, the same model is used for both the t2v and v2t e
 | CE    | 1k-B  | v2t  | 31.5<sub>(0.7)</sub> | 66.0<sub>(0.7)</sub> | 77.5<sub>(0.7)</sub> | 95.0<sub>(0.3)</sub> | 3.0<sub>(0.0)</sub> | 11.4<sub>(0.2)</sub> | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-miech-ce/2019-07-26_15-04-54/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-miech-ce/2019-07-26_15-04-54/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-miech-ce/2019-07-26_15-04-54/info.log) |
 | MoEE* | 1k-B  | v2t  | 17.7<sub>(0.3)</sub> | 45.9<sub>(0.3)</sub> | 59.4<sub>(0.2)</sub> | 87.2<sub>(0.8)</sub> | 6.7<sub>(0.6)</sub> | 28.7<sub>(0.4)</sub> | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-miech-miechfeats-moee/2019-07-26_15-16-18/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/msrvtt-train-miech-miechfeats-moee/2019-07-26_15-16-18/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/msrvtt-train-miech-miechfeats-moee/2019-07-26_15-16-18/info.log) |
 
-Models marked with * use the features made available with the MoEE model of [2] (without OCR, speech and scene features), unstarred models on the `1k-B` and `Full` splits make use of OCR, speech and scene features, as well slightly stronger text encodings (GPT, rather than word2vec - see the paper for details). The MoEE model is implemented as a baseline and as a sanity check that our codebase approximately reproduces [2] (the [MoEE paper](https://arxiv.org/abs/1804.02516)).
+Models marked with * use the features made available with the MoEE model of [2] (without OCR, speech and scene features), unstarred models on the `1k-B` and `Full` splits make use of OCR, speech and scene features, as well slightly stronger text encodings (GPT, rather than word2vec - see [1] for details). The MoEE model is implemented as a baseline and as a sanity check that our codebase approximately reproduces [2] (the [MoEE paper](https://arxiv.org/abs/1804.02516)).
 
 
 See the [MSRVTT README](misc/datasets/msrvtt/README.md) for links to the train/val/test lists of each split.
@@ -107,7 +107,7 @@ Each row adds an additional component to the model.  The names refer to the foll
 * **CE** - The full CE model.
 Note that in the table above some metrics have been removed to allow the number of parameters to be displayed---these additional metrics can be found in the linked logs.
 
-**Importance of Different Experts**: The next ablation investigates the value of each of the different experts towards the final embedding.  Since not all experts are available in every video, we pair each expert with RGB, to give an approximation of their usefulness.
+**Importance of Different Experts**: The next ablation investigates the value of each of the different experts towards the final embedding.  Since not all experts are available in every video, we pair each expert with RGB, to give an approximation of their usefulness.  We use term "RGB" to denote features extracted from the RGB signal using a classification model (typically a [Squeeze-and-Excitation](https://arxiv.org/abs/1709.01507) network) pretrained on ImageNet (more details for the RGB and other experts can be found in [1]).
 
 | Experts | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
 | ----- | ---- | --- | --- | ---- | --- | ---- | ----- |
@@ -140,7 +140,7 @@ We can also study their cumulative effect (experts are added in the order of imp
 
 ### Expert Zoo
 
-For each dataset, the Collaborative Experts model makes use of a collection of pretrained "expert" feature extractors (see the paper for more precise descriptions). Some experts have been obtained from other sources (described where applicable), rather than extracted by us.  To reproduce the experiments listed above, the experts for each dataset have been bundled into compressed tar files.  These can be downloaded and unpacked with a [utility script](misc/sync_experts.py) (recommended -- see example usage below), which will store them in the locations expected by the training code. Each set of experts has a brief README, which also provides a link from which they can be downloaded directly.
+For each dataset, the Collaborative Experts model makes use of a collection of pretrained "expert" feature extractors (see [1] for more precise descriptions). Some experts have been obtained from other sources (described where applicable), rather than extracted by us.  To reproduce the experiments listed above, the experts for each dataset have been bundled into compressed tar files.  These can be downloaded and unpacked with a [utility script](misc/sync_experts.py) (recommended -- see example usage below), which will store them in the locations expected by the training code. Each set of experts has a brief README, which also provides a link from which they can be downloaded directly.
 
   | Dataset           | Experts  |  Details and links | Archive size | sha1sum |
  |:-------------:|:-----:|:----:|:---:|:---:|
