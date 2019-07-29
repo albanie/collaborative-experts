@@ -144,11 +144,11 @@ For each dataset, the Collaborative Experts model makes use of a collection of p
 
   | Dataset           | Experts  |  Details and links | Archive size | sha1sum |
  |:-------------:|:-----:|:----:|:---:|:---:|
-| MSRVTT | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/msrvtt/README.md)| 19.6 GiB | <sup><sub>959bda588793ef05f348d16de26da84200c5a469</sub></sup> |
-| LSMDC | audio, face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 6.1 GiB | <sup><sub>7ce018e981752db9e793e449c2ba5bc88217373d</sub></sup> |
-| MSVD | face, flow, ocr, rgb, scene | [README](misc/datasets/msvd/README.md)| 2.1 GiB | <sup><sub>6071827257c14de455b3a13fe1e885c2a7887c9e</sub></sup> | 
-| DiDeMo | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/didemo/README.md)| 2.3 GiB | <sup><sub>6fd4bcc68c1611052de2499fd8ab3f488c7c195b</sub></sup> | 
-| ActivityNet | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/activity-net/README.md)| 3.8 GiB | <sup><sub>b16685576c97cdec2783fb89ea30ca7d17abb021</sub></sup> | 
+| MSRVTT | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/msrvtt/README.md)| 19.6 GiB | <sup><sub><sup><sub>959bda588793ef05f348d16de26da84200c5a469</sub></sup></sub></sup> |
+| LSMDC | audio, face, flow, ocr, rgb, scene | [README](misc/datasets/lsmdc/README.md)| 6.1 GiB | <sup><sub><sup><sub>7ce018e981752db9e793e449c2ba5bc88217373d</sub></sup></sub></sup> |
+| MSVD | face, flow, ocr, rgb, scene | [README](misc/datasets/msvd/README.md)| 2.1 GiB | <sup><sub><sup><sub>6071827257c14de455b3a13fe1e885c2a7887c9e</sub></sup></sub></sup> | 
+| DiDeMo | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/didemo/README.md)| 2.3 GiB | <sup><sub><sup><sub>6fd4bcc68c1611052de2499fd8ab3f488c7c195b</sub></sup></sub></sup> | 
+| ActivityNet | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/activity-net/README.md)| 3.8 GiB | <sup><sub><sup><sub>b16685576c97cdec2783fb89ea30ca7d17abb021</sub></sup></sub></sup> | 
 
 ### Evaluating a pretrained model
 
