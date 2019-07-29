@@ -3,8 +3,7 @@
 This folder contains a collection of features, extracted from the MSRVTT [3] dataset as part of the paper:
 *Use what you have: Video retrieval using representations from collaborative experts*.
 
-To help reproduce the results of the paper, it also includes some features made publicly available by [Antoine Miech](https://www.di.ens.fr/~miech/) (these features listed below).
-For more details on the specific models used to compute the features, please see [1] for descriptions, or the [code repo](https://github.com/albanie/collaborative-experts).
+For more details on the specific models used to compute the features, please see [1] for descriptions, or the [code repo](https://github.com/albanie/collaborative-experts).   With the kind permission of [Antoine Miech](https://www.di.ens.fr/~miech/) we also include some features made publicly available as part of the release of [2] (these features listed below). These features are required to reproduce some of the experiments in [1].
 
 ### Training splits
 

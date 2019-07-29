@@ -51,7 +51,8 @@ class BaseDataset(Dataset):
         self.rgb_shots = 1
         self.experts = set(raw_input_dims.keys())
 
-        print("USING SINGLE CAPTION PER TRAINING VIDEO")
+        # Use a single caption per video when forming training minibatches (different
+        # captions from the same video may still be used across different minibatches)
         self.captions_per_video = 1
 
         # TODO(Samuel) - is a global fixed ordering still necessary?
