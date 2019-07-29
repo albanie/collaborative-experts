@@ -199,8 +199,9 @@ class CEModule(nn.Module):
 
             self.f_reason_1 = nn.Linear(same_dim, same_dim)
             self.f_reason_2 = nn.Linear(same_dim, same_dim)
+            # TODO(Samuel): Some of these modules are no longer used, so we can remove
+            # them to save parameters
             self.f_reason_3 = nn.Linear(same_dim, same_dim)
-
             self.batch_norm_g1 = nn.BatchNorm1d(same_dim)
             self.batch_norm_g2 = nn.BatchNorm1d(same_dim)
 
