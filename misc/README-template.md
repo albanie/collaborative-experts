@@ -95,7 +95,7 @@ We conduct several ablation studies to investigate the importance of different c
 | Concat + G | t2v  | {{msrvtt-train-full-concat-mix-ablation.short-t2v}} | {{msrvtt-train-full-concat-mix-ablation.params}} | [config]({{msrvtt-train-full-concat-mix-ablation.config}}), [model]({{msrvtt-train-full-concat-mix-ablation.model}}), [log]({{msrvtt-train-full-concat-mix-ablation.log}}) |
 | CE - P,CG,MW | t2v  | {{msrvtt-train-full-moee-minus-moe-weights.short-t2v}} | {{msrvtt-train-full-moee-minus-moe-weights.params}} | [config]({{msrvtt-train-full-moee-minus-moe-weights.config}}), [model]({{msrvtt-train-full-moee-minus-moe-weights.model}}), [log]({{msrvtt-train-full-moee-minus-moe-weights.log}}) |
 | CE - P,CG | t2v  | {{msrvtt-train-full-moee.short-t2v}} | {{msrvtt-train-full-moee.params}} | [config]({{msrvtt-train-full-moee.config}}), [model]({{msrvtt-train-full-moee.model}}), [log]({{msrvtt-train-full-moee.log}}) |
-| CE - CG | t2v  | - | - |
+| CE - CG  | t2v  | {{msrvtt-train-full-ce-ablation-dims.short-t2v}} | {{msrvtt-train-full-ce-ablation-dims.params}} | [config]({{msrvtt-train-full-ce-ablation-dims.config}}), [model]({{msrvtt-train-full-ce-ablation-dims.model}}), [log]({{msrvtt-train-full-ce-ablation-dims.log}}) |
 | CE    | t2v  | {{msrvtt-train-full-ce.short-t2v}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
 
 Each row adds an additional component to the model.  The names refer to the following model designs:

@@ -17,7 +17,7 @@
     "msrvtt-train-full-ce-only-rgb": "2019-07-29_07-10-18",
     "msrvtt-train-full-ce-only-rgb-scene": "2019-07-28_17-16-32",
     "msrvtt-train-full-ce-only-rgb-scene-flow": "2019-07-28_17-28-48",
-    "msrvtt-train-full-ce-only-rgb-scene-flow-audio": "TODO:s7-0",
+    "msrvtt-train-full-ce-only-rgb-scene-flow-audio": "2019-07-29_07-15-23",
     "msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr": "2019-07-28_18-36-39",
     "msrvtt-train-full-ce-only-rgb-scene-flow-audio-ocr-speech": "2019-07-28_18-48-10",
 
@@ -27,6 +27,6 @@
     "msrvtt-train-full-ce-only-rgb-speech": "2019-07-29_07-09-18",
     "msrvtt-train-full-ce-only-rgb-face": "TODO:e7-2b",
 
-    "msrvtt-train-full-ce-ablation-restrict-captions": "TODO:e7-3a",
+    "msrvtt-train-full-ce-ablation-restrict-captions": "TODO:s7-1",
     "msrvtt-train-full-ce-ablation-restrict-captions-only-rgb": "2019-07-29_07-49-19"
 }
