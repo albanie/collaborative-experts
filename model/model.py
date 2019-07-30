@@ -210,7 +210,7 @@ class CEModule(nn.Module):
             gated_vid_embds = [GatedEmbeddingUnitReasoning(same_dim) for _ in in_dims]
             text_out_dims = [same_dim for _ in agg_dims]
         elif self.mimic_ce_dims:  # ablation study
-            gated_vid_embds = [GatedEmbeddingUnit(same_dim, same_dim, use_bn=True)
+            gated_vid_embds = [MimicCEGatedEmbeddingUnit(same_dim, same_dim, use_bn=True)
                                for _ in modalities]
             text_out_dims = [same_dim for _ in agg_dims]
         elif self.concat_mix_experts:  # ablation study
@@ -220,9 +220,7 @@ class CEModule(nn.Module):
             gated_vid_embds = [GatedEmbeddingUnit(in_dim, out_dim, use_bn=True)]
         elif self.concat_experts:  # ablation study
             # We do not use learnable parameters for the video combination, (we simply
-            # use a high dimensional inner product). This also means that there is
-            # no projection to reduce dimensionality on the text, which ultimately
-            # leads to many more parameters on the text side of the embedding
+            # use a high dimensional inner product).
             gated_vid_embds = []
         else:
             gated_vid_embds = [GatedEmbeddingUnit(in_dim, dim, use_bn) for
@@ -434,6 +432,17 @@ class GatedEmbeddingUnit(nn.Module):
 
     def forward(self, x):
         x = self.fc(x)
+        x = self.cg(x)
+        x = F.normalize(x)
+        return x
+
+
+class MimicCEGatedEmbeddingUnit(nn.Module):
+    def __init__(self, input_dimension, output_dimension, use_bn):
+        super().__init__()
+        self.cg = ContextGating(input_dimension, add_batch_norm=use_bn)
+
+    def forward(self, x):
         x = self.cg(x)
         x = F.normalize(x)
         return x
