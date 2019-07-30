@@ -128,8 +128,7 @@ def generate_readme(experiments, readme_template, root_url, readme_dest, results
             elif target in {"t2v", "v2t"}:
                 token = generate_results_string(target, exp_name, results)
             elif target in {"short-t2v", "short-v2t"}:
-                # drop = {"R50", "MeanR"}
-                drop = {"R50"}
+                drop = {"R50", "MeanR"}
                 target_ = target.split("-")[1]
                 token = generate_results_string(target_, exp_name, results, drop=drop)
             elif target in {"params"}:

@@ -89,8 +89,8 @@ We conduct several ablation studies to investigate the importance of different c
 
 **CE Design**: First, we investigate the importance of the parts used by the CE model.
 
-| Model | Task | R@1 | R@5 | R@10 | MdR | MnR | Params | Links |
-| ---   | :--: | :-: | :-: | :--: | :-: |  :-: |:----: | :---: |
+| Model | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
+| ---   | :--: | :-: | :-: | :--: | :-: | :----: | :---: |
 | Concat | t2v  | {{msrvtt-train-full-concat-ablation.short-t2v}} | {{msrvtt-train-full-concat-ablation.params}} | [config]({{msrvtt-train-full-concat-ablation.config}}), [model]({{msrvtt-train-full-concat-ablation.model}}), [log]({{msrvtt-train-full-concat-ablation.log}}) |
 | Concat + G | t2v  | {{msrvtt-train-full-concat-mix-ablation.short-t2v}} | {{msrvtt-train-full-concat-mix-ablation.params}} | [config]({{msrvtt-train-full-concat-mix-ablation.config}}), [model]({{msrvtt-train-full-concat-mix-ablation.model}}), [log]({{msrvtt-train-full-concat-mix-ablation.log}}) |
 | CE - MW,P,CG | t2v  | {{msrvtt-train-full-moee-minus-moe-weights.short-t2v}} | {{msrvtt-train-full-moee-minus-moe-weights.params}} | [config]({{msrvtt-train-full-moee-minus-moe-weights.config}}), [model]({{msrvtt-train-full-moee-minus-moe-weights.model}}), [log]({{msrvtt-train-full-moee-minus-moe-weights.log}}) |
@@ -109,8 +109,8 @@ Note that in the table above some metrics have been removed to allow the number 
 
 **Importance of Different Experts**: The next ablation investigates the value of each of the different experts towards the final embedding.  Since not all experts are available in every video, we pair each expert with RGB, to give an approximation of their usefulness.  We use term "RGB" to denote features extracted from the RGB signal using a classification model (typically a [Squeeze-and-Excitation](https://arxiv.org/abs/1709.01507) network) pretrained on ImageNet (more details for the RGB and other experts can be found in [1]).
 
-| Experts | Task | R@1 | R@5 | R@10 | MdR | MR | Params | Links |
-| -----   | :--: | :-: | :-: | :--: | :-: | :----: | :----: | :---: |
+| Experts | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
+| -----   | :--: | :-: | :-: | :--: | :-: | :----: | :---: |
 | RGB    | t2v  | {{msrvtt-train-full-ce-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-only-rgb.params}} | [config]({{msrvtt-train-full-ce-only-rgb.config}}), [model]({{msrvtt-train-full-ce-only-rgb.model}}), [log]({{msrvtt-train-full-ce-only-rgb.log}}) |
 | RGB + Scene | t2v  | {{msrvtt-train-full-ce-only-rgb-scene.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-scene.params}} | [config]({{msrvtt-train-full-ce-only-rgb-scene.config}}), [model]({{msrvtt-train-full-ce-only-rgb-scene.model}}), [log]({{msrvtt-train-full-ce-only-rgb-scene.log}}) |
 | RGB + Flow | t2v  | {{msrvtt-train-full-ce-only-rgb-flow.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-flow.params}} | [config]({{msrvtt-train-full-ce-only-rgb-flow.config}}), [model]({{msrvtt-train-full-ce-only-rgb-flow.model}}), [log]({{msrvtt-train-full-ce-only-rgb-flow.log}}) |
@@ -128,8 +128,8 @@ Note that in the table above some metrics have been removed to allow the number 
 
 We can also study their cumulative effect (experts are added in the order of importance suggested by the table above).
 
-| Experts | Task | R@1 | R@5 | R@10 | MdR | MR  | Params | Links |
-| -----   | :--: | :-: | :-: | :--: | :-: | :-: | :----: | :---: |
+| Experts | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
+| -----   | :--: | :-: | :-: | :--: | :-: | :----: | :---: |
 | RGB    | t2v  | {{msrvtt-train-full-ce-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-only-rgb.params}} | [config]({{msrvtt-train-full-ce-only-rgb.config}}), [model]({{msrvtt-train-full-ce-only-rgb.model}}), [log]({{msrvtt-train-full-ce-only-rgb.log}}) |
 | Prev. + Scene    | t2v  | {{msrvtt-train-full-ce-only-rgb-scene.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-scene.params}} | [config]({{msrvtt-train-full-ce-only-rgb-scene.config}}), [model]({{msrvtt-train-full-ce-only-rgb-scene.model}}), [log]({{msrvtt-train-full-ce-only-rgb-scene.log}}) |
 | Prev. + Flow    | t2v  | {{msrvtt-train-full-ce-only-rgb-scene-flow.short-t2v}} | {{msrvtt-train-full-ce-only-rgb-scene-flow.params}} | [config]({{msrvtt-train-full-ce-only-rgb-scene-flow.config}}), [model]({{msrvtt-train-full-ce-only-rgb-scene-flow.model}}), [log]({{msrvtt-train-full-ce-only-rgb-scene-flow.log}}) |
@@ -147,7 +147,7 @@ We can also study their cumulative effect (experts are added in the order of imp
 
 **Training with more captions:** Rather than varying the number of experts, we can also investigate how performance changes as we change the number of training captions available per-video.
 
-| Experts | Captions | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
+| Experts | Caps. | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
 | -----   | :------: | :--: | :-: | :-: | :--: | :-: | :----: | :---: |
 | RGB   | 1 | t2v | {{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.params}} | [config]({{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.config}}), [model]({{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.model}}), [log]({{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.log}}) |
 | RGB   | 20 | t2v  | {{msrvtt-train-full-ce-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-only-rgb.params}} | [config]({{msrvtt-train-full-ce-only-rgb.config}}), [model]({{msrvtt-train-full-ce-only-rgb.model}}), [log]({{msrvtt-train-full-ce-only-rgb.log}}) |
