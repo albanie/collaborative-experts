@@ -5,7 +5,7 @@ This repo provides code for learning and evaluating joint video-text embeddings 
 `TODO(Samuel) - update link to point to arxiv`
 
 
-![CE diagram](figs/CE-diagram.png)
+![CE diagram](figs/CE.png)
 
 
 
@@ -97,10 +97,16 @@ We conduct several ablation studies to investigate the importance of different c
 | CE - P,CG | t2v  | {{msrvtt-train-full-moee.short-t2v}} | {{msrvtt-train-full-moee.params}} | [config]({{msrvtt-train-full-moee.config}}), [model]({{msrvtt-train-full-moee.model}}), [log]({{msrvtt-train-full-moee.log}}) |
 | CE - CG  | t2v  | {{msrvtt-train-full-ce-ablation-dims.short-t2v}} | {{msrvtt-train-full-ce-ablation-dims.params}} | [config]({{msrvtt-train-full-ce-ablation-dims.config}}), [model]({{msrvtt-train-full-ce-ablation-dims.model}}), [log]({{msrvtt-train-full-ce-ablation-dims.log}}) |
 | CE    | t2v  | {{msrvtt-train-full-ce.short-t2v}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
+| Concat | v2t  | {{msrvtt-train-full-concat-ablation.short-v2t}} | {{msrvtt-train-full-concat-ablation.params}} | [config]({{msrvtt-train-full-concat-ablation.config}}), [model]({{msrvtt-train-full-concat-ablation.model}}), [log]({{msrvtt-train-full-concat-ablation.log}}) |
+| Concat + G | v2t  | {{msrvtt-train-full-concat-mix-ablation.short-v2t}} | {{msrvtt-train-full-concat-mix-ablation.params}} | [config]({{msrvtt-train-full-concat-mix-ablation.config}}), [model]({{msrvtt-train-full-concat-mix-ablation.model}}), [log]({{msrvtt-train-full-concat-mix-ablation.log}}) |
+| CE - MW,P,CG | v2t  | {{msrvtt-train-full-moee-minus-moe-weights.short-v2t}} | {{msrvtt-train-full-moee-minus-moe-weights.params}} | [config]({{msrvtt-train-full-moee-minus-moe-weights.config}}), [model]({{msrvtt-train-full-moee-minus-moe-weights.model}}), [log]({{msrvtt-train-full-moee-minus-moe-weights.log}}) |
+| CE - P,CG | v2t  | {{msrvtt-train-full-moee.short-v2t}} | {{msrvtt-train-full-moee.params}} | [config]({{msrvtt-train-full-moee.config}}), [model]({{msrvtt-train-full-moee.model}}), [log]({{msrvtt-train-full-moee.log}}) |
+| CE - CG  | v2t  | {{msrvtt-train-full-ce-ablation-dims.short-v2t}} | {{msrvtt-train-full-ce-ablation-dims.params}} | [config]({{msrvtt-train-full-ce-ablation-dims.config}}), [model]({{msrvtt-train-full-ce-ablation-dims.model}}), [log]({{msrvtt-train-full-ce-ablation-dims.log}}) |
+| CE    | v2t  | {{msrvtt-train-full-ce.short-v2t}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
 
 Each row adds an additional component to the model.  The names refer to the following model designs:
 * **Concat**: A barebones concatenation model.  After aggregating each expert across time (which still requires some parameters for the variable-length VLAD layers), the experts are concatenated and compared directly against the aggregated text embeddings.  Note: this model uses a slightly greater number of VLAD clusters than the others to allow the concatentated embedding to match the dimensionality of the text.
-* **Concat-Gate**: The experts are concatenated (similarly to the previous model), but are then passed through a single large context gating module before matching against the text embedding.
+* **Concat-G**: The experts are concatenated (similarly to the previous model), but are then passed through a single large context gating module before matching against the text embedding.
 * **CE - MW,P,CG** - The CE model without MoE weights, projecting to a common dimension or Collaborative Gating.
 * **CE - P,CG** - The CE model without projecting to a common dimension or Collaborative Gating (note that this is equivalent to the MoEE model proposed in [2]).
 * **CE - CG** - The CE model without Collaborative Gating (CG). * **CE** - The full CE model.  Note: CG adds almost no parameters because it effectively moves one of the linear layers out of the Gated Embedding Units used in `CE - CG` into the CG layers but since the Gated Embedding Units used in `CE - CG` each have an extra linear layer, the total parameters of the two models work out to be approximately the same.
