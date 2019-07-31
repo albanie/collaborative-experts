@@ -109,7 +109,7 @@ Each row adds an additional component to the model.  The names refer to the foll
 * **Concat-G**: The experts are concatenated (similarly to the previous model), but are then passed through a single large context gating module before matching against the text embedding.
 * **CE - MW,P,CG** - The CE model without MoE weights, projecting to a common dimension or Collaborative Gating.
 * **CE - P,CG** - The CE model without projecting to a common dimension or Collaborative Gating (note that this is equivalent to the MoEE model proposed in [2]).
-* **CE - CG** - The CE model without Collaborative Gating (CG). * **CE** - The full CE model.  Note: CG adds almost no parameters because it effectively moves one of the linear layers out of the Gated Embedding Units used in `CE - CG` into the CG layers but since the Gated Embedding Units used in `CE - CG` each have an extra linear layer, the total parameters of the two models work out to be approximately the same.
+* **CE - CG** - The CE model without Collaborative Gating (CG). * **CE** - The full CE model.
 
 Note that in the table above some metrics have been removed to allow the number of parameters to be displayed---these additional metrics can be found in the linked logs.
 

@@ -12,7 +12,7 @@
     "msrvtt-train-full-concat-ablation": "2019-07-28_16-10-22",
     "msrvtt-train-full-concat-mix-ablation": "2019-07-28_14-22-10",
     "msrvtt-train-full-moee-minus-moe-weights": "2019-07-28_14-20-52",
-    "msrvtt-train-full-ce-ablation-dims": "2019-07-28_18-36-09",
+    "msrvtt-train-full-ce-ablation-dims": "2019-07-30_17-01-27",
 
     "msrvtt-train-full-ce-only-rgb": "2019-07-29_07-10-18",
     "msrvtt-train-full-ce-only-rgb-scene": "2019-07-28_17-16-32",
