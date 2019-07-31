@@ -49,6 +49,7 @@ def main(config):
         loss = config.init(name="loss", module=module_loss)
         metrics = [getattr(module_metric, met) for met in config['metrics']]
         trainable_params = filter(lambda p: p.requires_grad, model.parameters())
+
         optimizer = config.init('optimizer', torch.optim, trainable_params)
         lr_scheduler = config.init('lr_scheduler', torch.optim.lr_scheduler, optimizer)
         visualizer = config.init(
