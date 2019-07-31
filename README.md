@@ -2,8 +2,6 @@
 
 This repo provides code for learning and evaluating joint video-text embeddings for the task of video retrieval.  Our approach is described in the BMVC 2019 paper "Use What You Have: Video retrieval using representations from collaborative experts" ([link](https://www.robots.ox.ac.uk/~vgg/research/collaborative-experts/)).
 
-`TODO(Samuel) - update link to point to arxiv`
-
 
 ![CE diagram](figs/CE.png)
 
