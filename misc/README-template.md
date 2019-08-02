@@ -2,7 +2,10 @@
 
 This repo provides code for learning and evaluating joint video-text embeddings for the task of video retrieval.  Our approach is described in the BMVC 2019 paper "Use What You Have: Video retrieval using representations from collaborative experts" ([paper](https://arxiv.org/abs/1907.13487), [project page](https://www.robots.ox.ac.uk/~vgg/research/collaborative-experts/)).
 
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/use-what-you-have-video-retrieval-using/video-retrieval-on-lsmdc)](https://paperswithcode.com/sota/video-retrieval-on-lsmdc?p=use-what-you-have-video-retrieval-using)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/use-what-you-have-video-retrieval-using/video-retrieval-on-activitynet)](https://paperswithcode.com/sota/video-retrieval-on-activitynet?p=use-what-you-have-video-retrieval-using) 
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/use-what-you-have-video-retrieval-using/video-retrieval-on-lsmdc)](https://paperswithcode.com/sota/video-retrieval-on-lsmdc?p=use-what-you-have-video-retrieval-using) 
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/use-what-you-have-video-retrieval-using/video-retrieval-on-didemo)](https://paperswithcode.com/sota/video-retrieval-on-didemo?p=use-what-you-have-video-retrieval-using) [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/use-what-you-have-video-retrieval-using/video-retrieval-on-msr-vtt)](https://paperswithcode.com/sota/video-retrieval-on-msr-vtt?p=use-what-you-have-video-retrieval-using) [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/use-what-you-have-video-retrieval-using/video-retrieval-on-msvd)](https://paperswithcode.com/sota/video-retrieval-on-msvd?p=use-what-you-have-video-retrieval-using)
+
 
 
 ![CE diagram](figs/CE.png)
