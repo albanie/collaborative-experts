@@ -7,7 +7,9 @@
         "face_dim": 128,
         "drop_feats": "scene,ocr,speech",
         "text_feat": "w2v",
-        "text_dim": 300
+        "text_dim": 300,
+        "modalities": ["audio", "face", "flow", "rgb"],
+        "ce_shared_dim": 512
     },
     "arch": {
         "type": "CENet",
@@ -33,9 +35,12 @@
             "data_dir": "data/MSRVTT",
             "batch_size": 64,
             "split_name": "miech",
+            "fuse_captions": false,
             "num_workers": 4,
             "num_test_captions": 1,
-            "rgb_model_name": "senet154",
+            "max_text_words": 30,
+            "max_expert_tokens": 30,
+            "rgb_model_name": "resnet",
             "feat_aggregation": {
                 "scene": "avg",
                 "rgb": "avg",
