@@ -1,3 +1,5 @@
+data/activity-net/symlinked-feats/raw-captions-train-val_1.pkl
+data/activity-net/symlinked-feats/raw-captions-train-val_2.pkl
 data/activity-net/symlinked-feats/train_list.txt
 data/activity-net/symlinked-feats/val_1_list.txt
 data/activity-net/symlinked-feats/val_2_list.txt

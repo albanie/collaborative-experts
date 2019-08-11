@@ -1,3 +1,4 @@
+data/didemo/symlinked-feats/raw-captions.pkl
 data/didemo/symlinked-feats/train_list.txt
 data/didemo/symlinked-feats/val_list.txt
 data/didemo/symlinked-feats/test_list.txt

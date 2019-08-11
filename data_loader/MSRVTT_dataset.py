@@ -97,7 +97,7 @@ class MSRVTT(BaseDataset):
                 raw_dim = self.raw_input_dims[expert]
                 canon_feats[expert] = self.canonical_features(feats, raw_dim=raw_dim)
         self.features = canon_feats
-        self.raw_captions = memcache(Path(self.data_dir) / "processing/raw-captions.pkl")
+        self.raw_captions = memcache(Path(root_feat) / "raw-captions.pkl")
         self.text_features = memcache(text_feat_path)
         if self.restrict_train_captions:
             # hash the video names to avoid O(n) lookups in long lists

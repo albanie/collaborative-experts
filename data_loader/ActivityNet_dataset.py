@@ -20,7 +20,7 @@ class ActivityNet(BaseDataset):
 
         train_list_path = pjoin(self.root_feat, train_list_path)
         test_list_path = pjoin(self.root_feat, test_list_path)
-        self.raw_captions_path = Path(self.data_dir) / "processing" / raw_caps_name
+        self.raw_captions_path = Path(self.root_feat) / raw_caps_name
 
         print("loading training/val splits....")
         tic = time.time()

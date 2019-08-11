@@ -55,7 +55,7 @@ class DiDeMo(BaseDataset):
         text_features = memcache(text_feat_path)
         self.features = features
         self.text_features = text_features
-        self.raw_captions = memcache(Path(self.data_dir) / "processing/raw-captions.pkl")
+        self.raw_captions = memcache(root_feat / "raw-captions.pkl")
 
     def sanity_checks(self):
         msg = (f"Expected to have single test caption for DiDemo, since we assume"
