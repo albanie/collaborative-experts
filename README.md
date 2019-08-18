@@ -1,4 +1,3 @@
-## Collaborative Experts
 
 This repo provides code for learning and evaluating joint video-text embeddings for the task of video retrieval.  Our approach is described in the BMVC 2019 paper "Use What You Have: Video retrieval using representations from collaborative experts" ([paper](https://arxiv.org/abs/1907.13487), [project page](https://www.robots.ox.ac.uk/~vgg/research/collaborative-experts/)).
 
@@ -29,8 +28,6 @@ We provide pretrained models for each dataset to reproduce the results reported 
 * `v2t` denotes that a video query is used to retrieve text video descriptions
 
 In the results reported below, the same model is used for both the t2v and v2t evaluations.  Each metric is reported as the mean and standard deviation (in parentheses) across three training runs.
-
-**Reference results:** The results below are close to those in [1] for MSRVTT, LSMDC, MSRVTT (the mean performance should vary by at most +/- 0.6 across different metrics from those reported).  The performance for ActivityNet and DiDeMo has improved, in some cases quite significantly, after removing some bugs in the training code.
 
 
 **MSRVTT Benchmark**
