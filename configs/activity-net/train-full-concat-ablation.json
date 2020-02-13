@@ -1,0 +1,13 @@
+{
+    "inherit_from": "configs/data_loader_activity-net.json",
+    "arch": {
+        "type": "CENet",
+        "args": {
+            "use_ce": "",
+            "concat_experts": true,
+            "vlad_clusters": {
+                "text": 39
+            }
+        }
+    }
+}

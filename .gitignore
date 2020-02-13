@@ -1,0 +1,31 @@
+# symlinked data
+data
+
+# ignore predictions
+pred
+
+# local dev files
+scratch/
+
+# nuisance files
+*.DS_Store
+.nfs*
+__pycache__
+
+# generated files
+misc/slurm/scripts/slurm-job.sh
+.vscode/tags
+
+# exclude files that are not for release
+h*
+
+# exclude unsupported datasets
+configs/mit
+configs/mmit
+data_loader/MIT*
+data_loader/MMIT*
+configs/templates
+
+slurm
+
+.vscode

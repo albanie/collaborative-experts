@@ -1,0 +1,13 @@
+
+**Training with more captions:** Rather than varying the number of experts, we can also investigate how performance changes as we change the number of training captions available per-video.
+
+| Experts | Caps. | Task | R@1 | R@5 | R@10 | MdR | Params | Links |
+| -----   | :------: | :--: | :-: | :-: | :--: | :-: | :----: | :---: |
+| RGB   | 1 | t2v | {{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.params}} | [config]({{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.config}}), [model]({{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.model}}), [log]({{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.log}}) |
+| RGB   | 20 | t2v  | {{msrvtt-train-full-ce-only-rgb.short-t2v}} | {{msrvtt-train-full-ce-only-rgb.params}} | [config]({{msrvtt-train-full-ce-only-rgb.config}}), [model]({{msrvtt-train-full-ce-only-rgb.model}}), [log]({{msrvtt-train-full-ce-only-rgb.log}}) |
+| All   | 1 | t2v | {{msrvtt-train-full-ce-ablation-restrict-captions.short-t2v}} | {{msrvtt-train-full-ce-ablation-restrict-captions.params}} | [config]({{msrvtt-train-full-ce-ablation-restrict-captions.config}}), [model]({{msrvtt-train-full-ce-ablation-restrict-captions.model}}), [log]({{msrvtt-train-full-ce-ablation-restrict-captions.log}}) |
+| All   | 20 | t2v | {{msrvtt-train-full-ce.short-t2v}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |
+| RGB   | 1 | v2t | {{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.short-v2t}} | {{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.params}} | [config]({{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.config}}), [model]({{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.model}}), [log]({{msrvtt-train-full-ce-ablation-restrict-captions-only-rgb.log}}) |
+| RGB   | 20 | v2t  | {{msrvtt-train-full-ce-only-rgb.short-v2t}} | {{msrvtt-train-full-ce-only-rgb.params}} | [config]({{msrvtt-train-full-ce-only-rgb.config}}), [model]({{msrvtt-train-full-ce-only-rgb.model}}), [log]({{msrvtt-train-full-ce-only-rgb.log}}) |
+| All   | 1 | v2t | {{msrvtt-train-full-ce-ablation-restrict-captions.short-v2t}} | {{msrvtt-train-full-ce-ablation-restrict-captions.params}} | [config]({{msrvtt-train-full-ce-ablation-restrict-captions.config}}), [model]({{msrvtt-train-full-ce-ablation-restrict-captions.model}}), [log]({{msrvtt-train-full-ce-ablation-restrict-captions.log}}) |
+| All   | 20 | v2t | {{msrvtt-train-full-ce.short-v2t}} | {{msrvtt-train-full-ce.params}} | [config]({{msrvtt-train-full-ce.config}}), [model]({{msrvtt-train-full-ce.model}}), [log]({{msrvtt-train-full-ce.log}}) |

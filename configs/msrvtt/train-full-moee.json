@@ -1,0 +1,76 @@
+{
+    "inherit_from": "configs/data_loader_msrvtt.json",
+    "arch": {
+        "type": "CENet",
+        "args": {
+            "keep_missing_modalities": false,
+            "use_ce": "",
+            "use_mish": 1,
+            "use_bn_reason": 1,
+            "num_g_layers": 1,
+            "num_h_layers": 1,
+            "include_self": 0,
+            "l2renorm": false,
+            "randomise_feats": "",
+            "vlad_clusters": {
+                "ocr": 20,
+                "text": 50,
+                "audio": 27,
+                "speech": 45,
+                "detection-sem": 50
+            },
+            "ghost_clusters": {
+                "text": 2,
+                "ocr": 0,
+                "audio": 2,
+                "speech": 2
+            },
+            "mimic_ce_dims": 0,
+            "test_caption_mode": "indep"
+        }
+    },
+    "experts": {
+        "drop_feats": "",
+        "text_feat": "openai",
+        "text_agg": "vlad",
+        "text_dim": 768,
+        "modalities": [
+            "imagenet.resnext101_32x48d.0",
+            "r2p1d.r2p1d-ig65m.0",
+            "imagenet.senet154.0",
+            "scene.densenet161.0",
+            "i3d.i3d.0",
+            "face",
+            "ocr",
+            "audio",
+            "speech"
+        ],
+        "ce_shared_dim": 768,
+        "face_dim": 512
+    },
+    "data_loader": {
+        "type": "ExpertDataLoader",
+        "args": {
+            "dataset_name": "MSRVTT",
+            "split_name": "full-val",
+            "fuse_captions": false,
+            "num_test_captions": 1,
+            "max_tokens": {
+                "ocr": 3,
+                "text": 19,
+                "audio": 17,
+                "speech": 32,
+                "openpose": 50,
+                "detection": 12,
+                "detection-sem": 100
+            }
+        }
+    },
+    "loss": {
+        "type": "MaxMarginRankingLoss",
+        "args": {
+            "margin": 0.12638433919050676,
+            "fix_norm": true
+        }
+    }
+}

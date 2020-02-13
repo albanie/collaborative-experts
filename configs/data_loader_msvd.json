@@ -1,0 +1,87 @@
+{
+    "inherit_from": "configs/base_config.json",
+    "eval_mode": "test_run",
+    "experts": {
+        "face_dim": 512,
+        "modalities": [
+            "imagenet.resnext101_32x48d.0",
+            "imagenet.senet154.0",
+            "r2p1d.r2p1d-ig65m.0",
+            "scene.densenet161.0",
+            "i3d.i3d.0",
+            "face",
+            "ocr"
+        ]
+    },
+    "arch": {
+        "type": "CENet",
+        "args": {
+            "test_caption_mode": "indep",
+            "use_ce": "pairwise",
+            "use_mish": 1,
+            "use_bn_reason": 1,
+            "num_g_layers": 3,
+            "num_h_layers": 0,
+            "include_self": 1,
+            "l2renorm": false,
+            "randomise_feats": "",
+            "vlad_clusters": {
+                "ocr": 75,
+                "text": 12,
+                "audio": 16,
+                "speech": 32,
+                "detection-sem": 50
+            },
+            "ghost_clusters": {
+                "text": 0,
+                "ocr": 1
+            },
+            "mimic_ce_dims": 0
+        }
+    },
+    "optimizer": {
+        "type": "Ranger",
+        "args": {
+            "lr": 0.01,
+            "weight_decay": 5E-05
+        }
+    },
+    "loss": {
+        "type": "MaxMarginRankingLoss",
+        "args": {
+            "margin": 0.30764700456522676,
+            "fix_norm": true
+        }
+    },
+    "data_loader": {
+        "type": "ExpertDataLoader",
+        "args":{
+            "dataset_name": "MSVD",
+            "data_dir": "data/MSVD",
+            "trn_cat": 0,
+            "batch_size": 16,
+            "split_name": "dev",
+            "fuse_captions": false,
+            "num_test_captions": 81,
+            "max_tokens": {
+                "ocr": 30, 
+                "text": 30
+            }
+        }
+    },
+    "trainer": {
+        "epochs": 300
+    },
+    "eval_settings": {
+        "data_loader": {
+            "args": {
+                "split_name": "official"
+            }
+        },
+        "tester": {
+            "save_dir": "data/saved/",
+            "verbosity": 2
+        },
+        "disable_gpu": true
+    }
+}

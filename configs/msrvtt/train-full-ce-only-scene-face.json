@@ -1,0 +1,9 @@
+{
+    "inherit_from": "configs/data_loader_msrvtt.json",
+    "experts": {
+        "modalities": [
+            "scene.densenet161.0",
+            "face"
+        ]
+    }
+}

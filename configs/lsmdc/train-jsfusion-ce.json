@@ -1,0 +1,1 @@
+{"inherit_from": "configs/data_loader_lsmdc.json", "eval_mode": "fixed_num_epochs", "data_loader": {"type": "ExpertDataLoader", "args": {"dataset_name": "MSRVTT", "split_name": "jsfusion"}}, "eval_settings": false}

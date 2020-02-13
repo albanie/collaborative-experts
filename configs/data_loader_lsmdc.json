@@ -1,0 +1,102 @@
+{
+    "inherit_from": "configs/base_config.json",
+    "eval_mode": "test_run",
+    "experts": {
+        "face_dim": 128,
+        "text_dim": 300,
+        "text_feat": "w2v",
+        "modalities": [
+            "imagenet.resnext101_32x48d.0",
+            "imagenet.senet154.0",
+            "scene.densenet161.0",
+            "r2p1d.r2p1d-ig65m.0",
+            "i3d.i3d.0",
+            "ocr",
+            "audio",
+            "speech",
+            "face"
+        ]
+    },
+    "arch": {
+        "args": {
+            "test_caption_mode": "indep",
+            "use_ce": "pairwise",
+            "use_mish": 1,
+            "use_bn_reason": 1,
+            "num_g_layers": 3,
+            "num_h_layers": 0,
+            "include_self": 1,
+            "l2renorm": false,
+            "vlad_clusters": {
+                "ocr": 30,
+                "text": 43,
+                "audio": 3,
+                "speech": 5,
+                "detection-sem": 50
+            },
+            "ghost_clusters": {
+                "text": 0,
+                "ocr": 0,
+                "audio": 2,
+                "speech": 2
+            },
+            "mimic_ce_dims": 0
+        }
+    },
+    "data_loader": {
+        "args":{
+            "dataset_name": "LSMDC",
+            "data_dir": "data/LSMDC",
+            "split_name": "full-val",
+            "batch_size": 256,
+            "fuse_captions": false,
+            "num_test_captions": 1,
+            "max_tokens": {
+                "ocr": 6,
+                "text": 36,
+                "speech": 35,
+                "audio": 11,
+                "detection": 12,
+                "detection-sem": 100,
+                "openpose": 50
+            }
+        }
+    },
+    "visualizer": {
+        "args":{
+            "src_video_dir": "data/LSMDC/videos",
+            "vis_vid_freq": 1000,
+            "num_samples": 1
+        }
+    },
+    "optimizer": {
+        "type": "Ranger",
+        "args":{
+            "lr": 0.01,
+            "weight_decay": 1e-3
+        }
+    },
+    "loss": {
+        "type": "MaxMarginRankingLoss",
+        "args":{
+            "margin": 0.12132983763957966,
+            "fix_norm": true
+        }
+    },
+    "trainer": {
+        "epochs": 15
+    },
+    "eval_settings": {
+        "data_loader": {
+            "args":{
+                "split_name": "full-test",
+                "num_test_captions": 1
+            }
+        },
+        "tester": {
+            "save_dir": "data/saved/",
+            "verbosity": 2
+        },
+        "disable_gpu": true
+    }
+}

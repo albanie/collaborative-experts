@@ -1,0 +1,12 @@
+{
+    "inherit_from": "configs/data_loader_lsmdc.json",
+    "experts": {
+        "modalities": [
+            "imagenet.senet154.0",
+            "imagenet.resnext101_32x48d.0",
+            "scene.densenet161.0",
+            "i3d.i3d.0",
+            "audio"
+        ]
+    }
+}

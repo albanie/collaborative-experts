@@ -1,0 +1,17 @@
+{
+    "inherit_from": "configs/data_loader_msrvtt.json",
+    "eval_mode": "fixed_num_epochs",
+    "experts": {
+        "face_dim": 128,
+        "text_feat": "w2v",
+        "text_dim": 300
+    },
+    "data_loader": {
+        "type": "ExpertDataLoader",
+        "args":{
+            "dataset_name": "MSRVTT",
+            "split_name": "miech"
+        }
+    },
+    "eval_settings": false
+}

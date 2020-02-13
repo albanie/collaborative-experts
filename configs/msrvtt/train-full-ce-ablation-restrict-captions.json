@@ -1,0 +1,9 @@
+{
+    "inherit_from": "configs/data_loader_msrvtt.json",
+    "data_loader": {
+        "type": "ExpertDataLoader",
+        "args":{
+            "restrict_train_captions": 1
+        }
+    }
+}

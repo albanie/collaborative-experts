@@ -1,0 +1,11 @@
+{
+    "inherit_from": "configs/data_loader_lsmdc.json",
+    "experts": {
+        "text_feat": "w2v",
+        "text_dim": 300,
+        "modalities": [
+            "imagenet.senet154.0",
+            "imagenet.resnext101_32x48d.0"
+        ]
+    }
+}

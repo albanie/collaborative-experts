@@ -1,0 +1,9 @@
+{
+    "inherit_from": "configs/data_loader_msvd.json",
+    "experts": {
+        "modalities": [
+            "scene.densenet161.0",
+            "r2p1d.r2p1d-ig65m.0"
+        ]
+    }
+}

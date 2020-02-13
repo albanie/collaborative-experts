@@ -1,0 +1,16 @@
+{
+    "inherit_from": "configs/data_loader_didemo.json",
+    "experts": {
+        "modalities": [
+            "scene.densenet161.0",
+            "speech",
+            "audio",
+            "i3d.i3d.0",
+            "imagenet.senet154.0",
+            "r2p1d.r2p1d-ig65m.0",
+            "imagenet.resnext101_32x48d.0",
+            "ocr",
+            "face"
+        ]
+    }
+}

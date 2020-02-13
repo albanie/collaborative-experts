@@ -1,0 +1,94 @@
+{
+    "inherit_from": "configs/base_config.json",
+    "eval_mode": "test_run",
+    "experts": {
+        "face_dim": 512,
+        "ce_shared_dim": 768,
+        "modalities": [
+            "imagenet.resnext101_32x48d.0",
+            "imagenet.senet154.0",
+            "scene.densenet161.0",
+            "r2p1d.r2p1d-ig65m.0",
+            "i3d.i3d.0",
+            "face",
+            "ocr",
+            "audio",
+            "speech"
+        ]
+    },
+    "arch": {
+        "args": {
+            "test_caption_mode": "indep",
+            "use_ce": "pairwise",
+            "use_mish": 1,
+            "use_bn_reason": 1,
+            "num_g_layers": 3,
+            "num_h_layers": 0,
+            "include_self": 1,
+            "l2renorm": false,
+            "randomise_feats": "",
+            "vlad_clusters": {
+                "ocr": 13,
+                "text": 8,
+                "audio": 16,
+                "speech": 55,
+                "detection-sem": 50
+            },
+            "ghost_clusters": {
+                "text": 0,
+                "ocr": 1,
+                "audio": 1,
+                "speech": 1
+            },
+            "mimic_ce_dims": 0
+        }
+    },
+    "data_loader": {
+        "args":{
+            "dataset_name": "DiDeMo",
+            "data_dir": "data/DiDeMo",
+            "batch_size": 64,
+            "split_name": "val",
+            "fuse_captions": true,
+            "num_test_captions": 1,
+            "max_tokens": {
+                "ocr": 8,
+                "text": 48,
+                "audio": 23,
+                "speech": 48,
+                "openpose": 50,
+                "detection": 12,
+                "detection-sem": 100
+            }
+        }
+    },
+    "trainer": {
+        "epochs": 30
+    },
+    "optimizer": {
+        "type": "Ranger",
+        "args": {
+            "lr": 0.1,
+            "weight_decay": 0.001
+        }
+    },
+    "loss": {
+        "type": "MaxMarginRankingLoss",
+        "args": {
+            "margin": 0.16642835966287484,
+            "fix_norm": true
+        }
+    },
+    "eval_settings": {
+        "data_loader": {
+            "args":{
+                "split_name": "test"
+            }
+        },
+        "tester": {
+            "save_dir": "data/saved/",
+            "verbosity": 2
+        },
+        "disable_gpu": true
+    }
+}

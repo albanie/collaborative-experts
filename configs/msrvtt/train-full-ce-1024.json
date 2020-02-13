@@ -1,0 +1,6 @@
+{
+    "inherit_from": "configs/data_loader_msrvtt.json",
+    "experts": {
+        "ce_shared_dim": 1024
+    }
+}

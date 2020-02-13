@@ -1,0 +1,13 @@
+{
+    "inherit_from": "configs/data_loader_msrvtt.json",
+    "experts": {
+        "modalities": [
+            "scene.densenet161.0",
+            "speech",
+            "audio",
+            "i3d.i3d.0",
+            "imagenet.senet154.0",
+            "imagenet.resnext101_32x48d.0"
+        ]
+    }
+}

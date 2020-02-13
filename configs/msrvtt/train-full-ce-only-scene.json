@@ -1,0 +1,15 @@
+{
+    "inherit_from": "configs/data_loader_msrvtt.json",
+    "experts": {
+        "modalities": [
+            "scene.densenet161.0"
+        ]
+    },
+    "arch": {
+        "type": "CENet",
+        "args": {
+            "use_ce": "",
+            "mimic_ce_dims": 1
+        }
+    }
+}

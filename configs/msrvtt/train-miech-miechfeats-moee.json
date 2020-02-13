@@ -1,0 +1,29 @@
+{
+    "inherit_from": "configs/data_loader_msrvtt.json",
+    "eval_mode": "fixed_num_epochs",
+    "eval_settings": false,
+    "arch": {
+        "type": "CENet",
+        "args": {
+            "use_ce": ""
+        }
+    },
+    "experts": {
+        "face_dim": 128,
+        "text_feat": "w2v",
+        "text_dim": 300,
+        "modalities": [
+            "antoine-rgb",
+            "flow",
+            "audio",
+            "face"
+        ]
+    },
+    "data_loader": {
+        "type": "ExpertDataLoader",
+        "args":{
+            "dataset_name": "MSRVTT",
+            "split_name": "miech"
+        }
+    }
+}

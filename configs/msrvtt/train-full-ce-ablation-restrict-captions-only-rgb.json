@@ -1,0 +1,20 @@
+{
+    "inherit_from": "configs/data_loader_msrvtt.json",
+    "experts": {
+        "modalities": [
+            "imagenet.senet154.0"
+        ]
+    },
+    "arch": {
+        "type": "CENet",
+        "args": {
+            "use_ce": ""
+        }
+    },
+    "data_loader": {
+        "type": "ExpertDataLoader",
+        "args":{
+            "restrict_train_captions": 1
+        }
+    }
+}

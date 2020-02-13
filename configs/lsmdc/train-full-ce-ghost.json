@@ -1,0 +1,18 @@
+{
+    "inherit_from": "configs/data_loader_lsmdc.json",
+    "arch": {
+        "type": "CENet",
+        "args": {
+            "use_ce": "pairwise",
+            "l2renorm": false,
+            "randomise_feats": "",
+            "vlad_clusters": {
+                "text": 30
+            },
+            "ghost_clusters": {
+                "text": 1
+            },
+            "mimic_ce_dims": 0
+        }
+    }
+}

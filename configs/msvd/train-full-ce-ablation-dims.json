@@ -1,0 +1,10 @@
+{
+    "inherit_from": "configs/data_loader_msvd.json",
+    "arch": {
+        "type": "CENet",
+        "args": {
+            "use_ce": "",
+            "mimic_ce_dims": true
+        }
+    }
+}

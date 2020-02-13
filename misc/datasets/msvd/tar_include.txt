@@ -1,0 +1,15 @@
+data/MSVD/structured-symlinks/aggregated_face_feats/face-avg.pickle
+data/MSVD/structured-symlinks/aggregated_i3d_25fps_256px_stride25_offset0_inner_stride1/i3d-avg.pickle
+data/MSVD/structured-symlinks/aggregated_imagenet_25fps_256px_stride1_offset0/resnext101_32x48d-avg.pickle
+data/MSVD/structured-symlinks/aggregated_imagenet_25fps_256px_stride1_offset0/senet154-avg.pickle
+data/MSVD/structured-symlinks/aggregated_ocr_feats/ocr-w2v.pickle
+data/MSVD/structured-symlinks/aggregated_openpose_feats/MSVD_Openpose_ALL_18_Normalised_stride3.pkl
+data/MSVD/structured-symlinks/aggregated_r2p1d_30fps_256px_stride32_offset0_inner_stride1/r2p1d-ig65m-avg.pickle
+data/MSVD/structured-symlinks/aggregated_scene_25fps_256px_stride1_offset0/densenet161-avg.pickle
+data/MSVD/structured-symlinks/aggregated_text_feats/openai-caption-test.pkl
+data/MSVD/structured-symlinks/aggregated_text_feats/openai-caption-train.pkl
+data/MSVD/structured-symlinks/aggregated_text_feats/openai-caption-val.pkl
+data/MSVD/structured-symlinks/raw-captions.pkl
+data/MSVD/structured-symlinks/test_list.txt
+data/MSVD/structured-symlinks/train_list.txt
+data/MSVD/structured-symlinks/val_list.txt

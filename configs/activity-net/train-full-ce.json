@@ -1,0 +1,3 @@
+{
+    "inherit_from": "configs/data_loader_activity-net.json"
+}

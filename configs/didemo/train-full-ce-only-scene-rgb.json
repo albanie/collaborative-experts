@@ -1,0 +1,9 @@
+{
+    "inherit_from": "configs/data_loader_didemo.json",
+    "experts": {
+        "modalities": [
+            "scene.densenet161.0",
+            "imagenet.senet154.0"
+        ]
+    }
+}

@@ -1,0 +1,15 @@
+data/DiDeMo/structured-symlinks/aggregated_audio_feats/vggish-audio-raw.pickle
+data/DiDeMo/structured-symlinks/aggregated_facefeats_25fps_256px_stride1/face-avg.pickle
+data/DiDeMo/structured-symlinks/aggregated_i3d_25fps_256px_stride25_offset0_inner_stride1/i3d-avg.pickle
+data/DiDeMo/structured-symlinks/aggregated_imagenet_25fps_256px_stride1_offset0/resnext101_32x48d-avg.pickle
+data/DiDeMo/structured-symlinks/aggregated_imagenet_25fps_256px_stride1_offset0/senet154-avg.pickle
+data/DiDeMo/structured-symlinks/aggregated_ocr_feats/ocr-feats.pkl
+data/DiDeMo/structured-symlinks/aggregated_r2p1d_30fps_256px_stride32_offset0_inner_stride1/r2p1d-ig65m-avg.pickle
+data/DiDeMo/structured-symlinks/aggregated_scene_25fps_256px_stride1_offset0/densenet161-avg.pickle
+data/DiDeMo/structured-symlinks/aggregated_speech_feats/stt_w2v.pickle
+data/DiDeMo/structured-symlinks/aggregated_text_feats/openai-feats.pkl
+data/DiDeMo/structured-symlinks/antoine/i3d-i3d-max-fps25-stride25.pickle
+data/DiDeMo/structured-symlinks/raw-captions.pkl
+data/DiDeMo/structured-symlinks/test_list.txt
+data/DiDeMo/structured-symlinks/train_list.txt
+data/DiDeMo/structured-symlinks/val_list.txt
