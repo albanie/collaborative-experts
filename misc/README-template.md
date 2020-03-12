@@ -116,7 +116,7 @@ For example, to reproduce the MSVD results described above, run the following se
 python3 misc/sync_experts.py --dataset MSVD
 
 # find the name of a pretrained model using the links in the tables above 
-export MODEL=data/models/msvd-train-full-ce/296d24f9/seed-0/2020-01-26_02-02-33/trained_model.pth
+export MODEL=data/models/msvd-train-full-ce/5bb8dda1/seed-0/2020-01-30_12-29-56/trained_model.pth
 
 # create a local directory and download the model into it 
 mkdir -p $(dirname "${MODEL}")
