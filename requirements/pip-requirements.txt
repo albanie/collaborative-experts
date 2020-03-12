@@ -44,3 +44,4 @@ wcwidth==0.1.7
 Werkzeug==0.15.5
 wrapt==1.11.2
 zsvision
+psutil
