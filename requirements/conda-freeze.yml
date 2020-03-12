@@ -76,8 +76,6 @@ dependencies:
     - pycodestyle==2.5.0
     - pyflakes==2.1.1
     - scipy==1.3.0
-    - tensorboard==1.14.0
-    - tensorboardx==1.8
     - typed-ast==1.4.0
     - urwid==2.0.1
     - werkzeug==0.15.5
