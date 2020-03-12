@@ -160,15 +160,7 @@ Note that the visualising the results in this manner requires that you also down
 
 ### Dependencies
 
-If you have enough disk space, the recommended approach to installing the dependencies for this project is to create a conda enviroment via the `requirements/conda-requirements.txt`:
-
-```
-conda env create -f requirements/conda-freeze.yml
-```
-
-Otherwise, if you'd prefer to take a leaner approach, you can either:
-1. `pip/conda install` each missing package each time you hit an `ImportError`
-2. manually inspect the slightly more readable `requirements/pip-requirements.txt`
+Dependencies can be installed via `pip install -r requirements/pip-requirements.txt`.
 
 
 ### References
