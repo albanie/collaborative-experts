@@ -17,7 +17,8 @@ misc/slurm/scripts/slurm-job.sh
 .vscode/tags
 
 # exclude files that are not for release
-h*
+hp*
+hc*
 
 # exclude unsupported datasets
 configs/mit
