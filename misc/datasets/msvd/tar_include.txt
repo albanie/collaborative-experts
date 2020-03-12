@@ -9,6 +9,7 @@ data/MSVD/structured-symlinks/aggregated_scene_25fps_256px_stride1_offset0/dense
 data/MSVD/structured-symlinks/aggregated_text_feats/openai-caption-test.pkl
 data/MSVD/structured-symlinks/aggregated_text_feats/openai-caption-train.pkl
 data/MSVD/structured-symlinks/aggregated_text_feats/openai-caption-val.pkl
+data/MSVD/structured-symlinks/dict_youtube_mapping.pkl
 data/MSVD/structured-symlinks/raw-captions.pkl
 data/MSVD/structured-symlinks/test_list.txt
 data/MSVD/structured-symlinks/train_list.txt

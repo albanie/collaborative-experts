@@ -1,19 +1,23 @@
-import time
 import copy
 from os.path import join as pjoin
 from pathlib import Path
-import numpy as np
-from utils import memory_summary
-from utils.util import memcache
+from typing import Dict
 from collections import defaultdict
+
+import numpy as np
+from zsvision.zs_beartype import beartype
+
+from utils import memory_summary
+from utils.util import memcache, concat_features
 from base.base_dataset import BaseDataset
-from utils.util import memcache, ensure_tensor, concat_features
+
 
 
 class MSVD(BaseDataset):
 
     @staticmethod
-    def dataset_paths(split_name, text_feat):
+    @beartype
+    def dataset_paths(split_name: str, text_feat: str) -> Dict:
         train_list_path = "train_list.txt"
         if split_name == "official":
             test_list_path = "test_list.txt"
@@ -55,30 +59,11 @@ class MSVD(BaseDataset):
         }
         return feature_info
 
-    # def configure_train_test_splits(self, split_name):
-    #     self.paths = MSVD.dataset_paths(
-    #         root_feat=self.root_feat,
-    #         split_name=split_name,
-    #         text_feat=self.text_feat,
-    #     )
-    #     print("loading training/val splits....")
-    #     tic = time.time()
-    #     for subset, path in self.paths["subset_list_paths"].items():
-    #         subset_list_path = Path(self.root_feat) / path
-    #         with open(subset_list_path) as f:
-    #             self.partition_lists[subset] = f.read().splitlines()
-    #     print("done in {:.3f}s".format(time.time() - tic))
-    #     self.split_name = split_name
-
     def load_features(self):
         root_feat = Path(self.root_feat)
         feat_names = {key: self.visual_feat_paths(key) for key in
                       self.paths["feature_names"]}
         feat_names.update(self.paths["custom_paths"])
-        # modern, custom = MSVD.supported_features(split_name=self.split_name)
-        # feat_names = {key: self.visual_feat_paths(key) for key in modern}
-        # feat_names.update(custom)
-        # restrict to required experts
         features = {}
         for expert, rel_names in feat_names.items():
             if expert not in self.ordered_experts:

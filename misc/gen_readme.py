@@ -8,18 +8,22 @@ python find_latest_checkpoints.py --dataset lsmdc
 """
 import re
 import json
-import tqdm
 import argparse
-import subprocess
 import importlib
-from millify import millify
-import numpy as np
+import subprocess
 from pathlib import Path
 from itertools import zip_longest
 from collections import OrderedDict
+from typing import Dict
+
+import tqdm
+import numpy as np
+from millify import millify
+from zsvision.zs_beartype import beartype
 
 
-def generate_url(root_url, target, exp_name, experiments):
+@beartype
+def generate_url(root_url: str, target: str, exp_name: str, experiments: Dict) -> str:
     path_store = {
         "log": {"parent": "log", "fname": "summary-seed-0_seed-1_seed-2.json"},
         "config": {"parent": "models", "fname": "config.json"},
@@ -139,7 +143,7 @@ def generate_tar_lists(save_dir, experiments):
             modern_feat_agg = {key: val for key, val in feat_aggregation.items()
                                if key in paths["feature_names"]}
             feat_paths = model_specs2path(modern_feat_agg, keep)
-            split_paths.update(set([root_feat / x for x in feat_paths]))
+            split_paths.update({root_feat / x for x in feat_paths})
             for key, feat_list in paths["custom_paths"].items():
                 for feat_path in feat_list:
                     split_paths.add(root_feat / feat_path)
@@ -151,15 +155,16 @@ def generate_tar_lists(save_dir, experiments):
                 text_paths = [root_feat / x for x in paths["text_feat_paths"].values()]
                 split_paths.update(set(text_paths))
             split_paths.add(root_feat / paths["raw_captions_path"])
+            if "dict_youtube_mapping_path" in paths:
+                split_paths.add(root_feat / paths["dict_youtube_mapping_path"])
             all_feat_paths[dataset_name].update(split_paths)
 
-    # feat_paths = model_specs2path(feat_aggregation, keep)
     for dataset_name, paths in all_feat_paths.items():
         tar_include_list = Path("misc") / "datasets" / dataset_name / "tar_include.txt"
         tar_include_list.parent.mkdir(exist_ok=True, parents=True)
         with open(tar_include_list, "w") as f:
             for path in sorted(paths):
-                print(f"Writing {key} > {path} to {tar_include_list}")
+                print(f"Writing {path} to {tar_include_list}")
                 f.write(f"{path}\n")
 
 
