@@ -80,38 +80,16 @@ class MSRVTT(BaseDataset):
         }
         return feature_info
 
-
-    # def configure_train_test_splits(self, split_name):
-    #     print("loading training/val splits....")
-    #     tic = time.time()
-    #     for subset, path in paths.items():
-    #         subset_list_path = Path(self.root_feat) / path
-    #         with open(subset_list_path) as f:
-    #             self.partition_lists[subset] = f.read().splitlines()
-    #     print("done in {:.3f}s".format(time.time() - tic))
-    #     self.split_name = split_name
-
     def load_features(self):
         root_feat = Path(self.root_feat)
         feat_names = {key: self.visual_feat_paths(key) for key in
                       self.paths["feature_names"]}
         feat_names.update(self.paths["custom_paths"])
         features = {}
-        # # modern, custom = MSRVTT.supported_features(split_name=self.split_name)
-        # # feat_names = {key: self.visual_feat_paths(key) for key in modern}
-        # # feat_names.update(custom)
-        # features = {}
         for expert, rel_names in feat_names.items():
             if expert not in self.ordered_experts:
                 continue
             feat_paths = tuple([root_feat / rel_name for rel_name in rel_names])
-            # if expert == "speech":
-            #     # fix old-style speech
-            #     features_ = memcache(feat_paths[0])
-            #     for key, val in features_.items():
-            #         if (not hasattr(val, "size")) or val.size == 0:
-            #             features_[key] = np.nan
-            #     features[expert] = copy.deepcopy(features_)
             if len(feat_paths) == 1:
                 features[expert] = memcache(feat_paths[0])
             else:
@@ -130,20 +108,11 @@ class MSRVTT(BaseDataset):
                 # Make separate feature copies for each split to allow in-place filtering
                 features[expert] = copy.deepcopy(features_)
 
-        # text_feat_name = {
-        #     "w2v": "w2v_MSRVTT.pickle",
-        #     "openai": "w2v_MSRVTT_openAIGPT.pickle",
-        #     "bertxl": "w2v_MSRVTT_transformer.pickle",
-        # }[self.text_feat]
-        # text_feat_path = Path(self.root_feat) / f"aggregated_text_feats/{text_feat_name}"
         self.features = features
         if self.split_name == "jsfusion":
             self.restrict_test_captions = memcache(
                 root_feat / self.paths["js_test_cap_idx_path"])
 
-        # self.raw_captions = memcache(Path(self.root_feat) / "raw-captions.pkl")
-        # self.raw_captions = memcache(self.paths["raw_captions_path"])
-        # self.text_features = memcache(self.paths["text_feat_path"])
         self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
         self.text_features = memcache(root_feat / self.paths["text_feat_path"])
 
