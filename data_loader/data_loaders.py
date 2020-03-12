@@ -6,8 +6,6 @@ from data_loader.MSVD_dataset import MSVD
 from data_loader.LSMDC_dataset import LSMDC
 from data_loader.ActivityNet_dataset import ActivityNet
 from data_loader.DiDeMo_dataset import DiDeMo
-from data_loader.MMIT_dataset import MMIT
-from data_loader.MIT_dataset import MIT
 from utils.util import HashableDict, HashableOrderedDict, memcache
 
 
@@ -46,10 +44,6 @@ def dataset_loader(dataset_name, data_dir, raw_input_dims, num_test_captions, te
         dataset = DiDeMo(**kwargs)
     elif dataset_name == "ActivityNet":
         dataset = ActivityNet(**kwargs)
-    elif dataset_name == "MMIT":
-        dataset = MMIT(**kwargs)
-    elif dataset_name == "MIT":
-        dataset = MIT(**kwargs)
     return dataset
 
 

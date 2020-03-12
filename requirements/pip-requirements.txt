@@ -45,3 +45,5 @@ Werkzeug==0.15.5
 wrapt==1.11.2
 zsvision
 psutil
+humanize
+scikit-learn
