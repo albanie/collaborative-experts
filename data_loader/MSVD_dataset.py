@@ -42,8 +42,6 @@ class MSVD(BaseDataset):
         custom_paths = {
             "face": ["aggregated_face_feats/face-avg.pickle"],
             "ocr": ["aggregated_ocr_feats/ocr-w2v.pickle"],
-            "openpose": [("aggregated_openpose_feats/"
-                         "MSVD_Openpose_ALL_18_Normalised_stride3.pkl")],
         }
         text_feat_names = {key: f"{text_feat}-caption-{key}"
                            for key in {"train", "val", "test"}}
