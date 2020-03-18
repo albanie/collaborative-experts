@@ -1,9 +1,10 @@
 import copy
-import time
 from pathlib import Path
 
+from zsvision.zs_utils import memcache
+
 from utils import memory_summary
-from utils.util import memcache, ensure_tensor, concat_features
+from utils.util import concat_features
 from base.base_dataset import BaseDataset
 
 
@@ -82,20 +83,6 @@ class DiDeMo(BaseDataset):
         self.features = features
         self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
         self.text_features = memcache(root_feat / self.paths["text_feat_path"])
-        # self.raw_captions = memcache(Path(self.root_feat) / "raw-captions.pkl")
-        # self.text_features = memcache(text_feat_path)
-
-    # def configure_train_test_splits(self, split_name):
-    #     print("loading training/val splits....")
-    #     tic = time.time()
-        # for subset, path in zip(["train", "val"], [train_list_path, test_list_path]):
-        #     subset_list_path = Path(self.root_feat) / path
-        #     with open(subset_list_path) as f:
-        #         rows = f.read().splitlines()
-        #         # For DiDeMo, we need to remove additional video suffixes
-        #         self.partition_lists[subset] = [x.strip().split(".")[0] for x in rows]
-        # print("done in {:.3f}s".format(time.time() - tic))
-        # self.split_name = split_name
 
     def sanity_checks(self):
         msg = (f"Expected to have single test caption for DiDemo, since we assume"

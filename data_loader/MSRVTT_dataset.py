@@ -1,13 +1,11 @@
-import time
 import copy
-import numpy as np
 from pathlib import Path
-from utils.util import memcache
-from os.path import join as pjoin
-from base.base_dataset import BaseDataset
+
+from zsvision.zs_utils import memcache
+
 from utils import memory_summary
-from utils.util import memcache, ensure_tensor, concat_features
-from utils.datastructures import ExpertStore
+from utils.util import concat_features
+from base.base_dataset import BaseDataset
 
 
 class MSRVTT(BaseDataset):

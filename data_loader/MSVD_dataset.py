@@ -12,7 +12,6 @@ from utils.util import memcache, concat_features
 from base.base_dataset import BaseDataset
 
 
-
 class MSVD(BaseDataset):
 
     @staticmethod

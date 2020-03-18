@@ -1,18 +1,13 @@
 """ LSMDC dataset module.
 """
-
 import copy
-import time
-import torch as th
-import numpy as np
 from pathlib import Path
-from collections import OrderedDict, defaultdict
-from utils.util import ensure_tensor
-from torch.utils.data import Dataset
-from utils.util import memcache
-from base.base_dataset import BaseDataset
+
+from zsvision.zs_utils import memcache
+
 from utils import memory_summary
-from utils.util import memcache, ensure_tensor, concat_features
+from utils.util import concat_features
+from base.base_dataset import BaseDataset
 
 
 class LSMDC(BaseDataset):
@@ -61,27 +56,12 @@ class LSMDC(BaseDataset):
         }
         return feature_info
 
-    # def configure_train_test_splits(self, split_name):
-    #     print("loading training/val splits....")
-    #     tic = time.time()
-
-        # for subset, fname in subset_lists.items():
-        #     subset_list_path = Path(self.root_feat) / fname
-        #     with open(subset_list_path) as f:
-        #         self.partition_lists[subset] = f.read().splitlines()
-        # print(f"done in {time.time() - tic:.3f}s")
-        # self.split_name = split_name
-
     def load_features(self):
         root_feat = Path(self.root_feat)
         feat_names = {key: self.visual_feat_paths(key) for key in
                       self.paths["feature_names"]}
         feat_names.update(self.paths["custom_paths"])
         features = {}
-        # modern, custom = LSMDC.supported_features(split_name=self.split_name)
-        # feat_names = {key: self.visual_feat_paths(key) for key in modern}
-        # feat_names.update(custom)
-        # features = {}
         for expert, rel_names in feat_names.items():
             if expert not in self.ordered_experts:
                 continue
@@ -104,17 +84,8 @@ class LSMDC(BaseDataset):
                 features[expert] = copy.deepcopy(features_)
 
         self.features = features
-        # if self.text_feat == "openai":
-        #     text_feat_name = "openai-feats.pkl"
-        # elif self.text_feat == "w2v":
-        #     text_feat_name = "w2v.pkl"
-        # else:
-        #     raise ValueError(f"Text features {self.text_feat} not supported.")
-        # text_feat_path = Path(root_feat) / "aggregated_text_feats" / text_feat_name
         self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
         self.text_features = memcache(root_feat / self.paths["text_feat_path"])
-        # self.raw_captions = memcache(Path(self.root_feat) / "raw-captions.pkl")
-        # self.text_features = memcache(text_feat_path)
 
     def sanity_checks(self):
         msg = (f"Expected to have single test caption for LSMDC, since we assume "

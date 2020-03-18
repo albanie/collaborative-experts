@@ -1,16 +1,18 @@
 import time
+import inspect
+import functools
+from abc import abstractmethod
+from pathlib import Path
+from collections import OrderedDict
+
 import numpy as np
 import torch as th
-import functools
-import inspect
-from abc import abstractmethod
-from torch.utils.data import Dataset
-from utils.util import memcache, expert_tensor_storage
-from utils.util import ensure_tensor
-from collections import OrderedDict
-from pathlib import Path
 from numpy.random import randint
+from torch.utils.data import Dataset
+from zsvision.zs_utils import memcache
+
 import data_loader
+from utils.util import ensure_tensor, expert_tensor_storage
 
 # For SLURM usage, buffering makes it difficult to see events as they happen, so we set
 # the global print statement to enforce flushing
@@ -259,7 +261,6 @@ class BaseDataset(Dataset):
         print("done in {:.3f}s".format(time.time() - tic))
         self.split_name = split_name
 
-
     def collate_data(self, data):
         batch_size = len(data)
         tensors = {}
@@ -357,7 +358,7 @@ class BaseDataset(Dataset):
                     new_length = 1
                     num_frames = raw_frame_feats.shape[0]
                     avg_duration = ((num_frames - new_length + 1)
-                                     // self.trn_config[expert])
+                                    // self.trn_config[expert])
                     assert avg_duration > 0, "average duration must be positive"
                     if avg_duration > 0:
                         # maybe we could change to use average for each tiny segment

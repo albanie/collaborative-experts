@@ -23,7 +23,7 @@ import model.metric as module_metric
 import data_loader.data_loaders as module_data
 from utils import radam, ranger, cos_restart, set_seeds
 from trainer import Trainer
-from utils.util import compute_dims, compute_trn_config
+from utils.util import compute_dims, compute_trn_config, get_web_dir
 from parse_config import ConfigParser
 from logger.log_parser import log_summary
 import utils.visualizer as module_vis
@@ -117,11 +117,12 @@ def run_exp(config):
         else:
             lr_scheduler = config.init('lr_scheduler', cos_restart, optimizer)
 
+        web_dir = get_web_dir(config)
         visualizer = config.init(
             name='visualizer',
             module=module_vis,
             exp_name=config._exper_name,
-            web_dir=config._web_log_dir,
+            web_dir=web_dir,
         )
 
         trainer = Trainer(

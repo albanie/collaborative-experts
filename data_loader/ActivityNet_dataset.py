@@ -1,9 +1,9 @@
 import copy
-import time
 from pathlib import Path
 
 from utils import memory_summary
-from utils.util import memcache, concat_features
+from utils.util import concat_features
+from zsvision.zs_utils import memcache
 from base.base_dataset import BaseDataset
 
 
