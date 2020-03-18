@@ -7,24 +7,23 @@ import sys
 import json
 import time
 import pickle
+import random
 import socket
 import functools
+from typing import Dict
 from pathlib import Path
 from datetime import datetime
-import random
 from itertools import repeat
 from collections import OrderedDict
-from typing import Dict
 
 import numpy as np
 import torch
 import psutil
-import msgpack
 import humanize
-from zsvision.zs_utils import memcache
-from zsvision.zs_beartype import beartype
 import msgpack_numpy as msgpack_np
 from PIL import Image
+from zsvision.zs_utils import memcache
+from zsvision.zs_beartype import beartype
 
 import utils.datastructures as datastructures
 
@@ -98,42 +97,6 @@ def expert_tensor_storage(experts, feat_aggregation):
     for key, value in expert_storage.items():
         expert_storage[key] = value.intersection(set(experts))
     return expert_storage
-
-
-@functools.lru_cache(maxsize=64, typed=False)
-def concat_features(feat_paths, axis):
-    aggregates = [memcache(x) for x in feat_paths]
-    tic = time.time()
-    msg = "expected to concatenate datastructures of a single type"
-    assert len(set(type(x) for x in aggregates)) == 1, msg
-    if isinstance(aggregates[0], dict):
-        keys = aggregates[0]  # for now, we assume that all aggregates share keys
-        merged = {}
-        for key in keys:
-            merged[key] = np.concatenate([x[key] for x in aggregates], axis=axis)
-    elif isinstance(aggregates[0], datastructures.ExpertStore):
-        dims, stores = [], []
-        keys = aggregates[0].keys
-        for x in aggregates:
-            dims.append(x.dim)
-            stores.append(x.store)
-            try:
-                assert x.keys == keys, "all aggregates must share identical keys"
-            except Exception as E:
-                print(E)
-                import ipdb; ipdb.set_trace()
-        msg = "expected to concatenate ExpertStores with a common dimension"
-        assert len(set(dims)) == 1, msg
-        dim = dims[0]
-        merged = datastructures.ExpertStore(keys, dim=dim)
-        merged.store = np.concatenate(stores, axis=axis)
-    else:
-        raise ValueError(f"Unknown datastructure: {type(aggregates[0])}")
-    # Force memory clearance
-    for aggregate in aggregates:
-        del aggregate
-    print("done in {:.3f}s".format(time.time() - tic))
-    return merged
 
 
 def read_json(fname):

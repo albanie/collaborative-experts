@@ -2,8 +2,7 @@ import copy
 from pathlib import Path
 
 from utils import memory_summary
-from utils.util import concat_features
-from zsvision.zs_utils import memcache
+from zsvision.zs_utils import memcache, concat_features
 from base.base_dataset import BaseDataset
 
 

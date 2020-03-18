@@ -5,9 +5,9 @@ from collections import defaultdict
 
 import numpy as np
 from zsvision.zs_beartype import beartype
-from zsvision.zs_utils import memcache
+from zsvision.zs_utils import memcache, concat_features
 
-from utils.util import memory_summary, concat_features
+from utils.util import memory_summary
 from base.base_dataset import BaseDataset
 
 
