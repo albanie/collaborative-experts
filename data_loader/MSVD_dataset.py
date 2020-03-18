@@ -1,14 +1,13 @@
 import copy
-from os.path import join as pjoin
 from pathlib import Path
 from typing import Dict
 from collections import defaultdict
 
 import numpy as np
 from zsvision.zs_beartype import beartype
+from zsvision.zs_utils import memcache
 
-from utils import memory_summary
-from utils.util import memcache, concat_features
+from utils.util import memory_summary, concat_features
 from base.base_dataset import BaseDataset
 
 
@@ -94,7 +93,7 @@ class MSVD(BaseDataset):
         split_names = {"dev": "val", "official": "test"}
         text_features.update(memcache(
             root_feat / text_feat_paths[split_names[self.split_name]]))
-        key_map = memcache(pjoin(root_feat, self.paths["dict_youtube_mapping_path"]))
+        key_map = memcache(root_feat / self.paths["dict_youtube_mapping_path"])
         inverse_map = {}
         for key, value in key_map.items():
             inverse_map[value] = key
