@@ -80,10 +80,10 @@ class ActivityNet(BaseDataset):
                 features[expert] = copy.deepcopy(features_)
 
         self.features = features
-        self.text_features = memcache(self.paths["text_feat_paths"]["train"])
+        self.text_features = memcache(root_feat / self.paths["text_feat_paths"]["train"])
         self.text_features.update(
-            memcache(self.paths["text_feat_paths"][self.split_name]))
-        self.raw_captions = memcache(self.paths["raw_captions_path"])
+            memcache(root_feat / self.paths["text_feat_paths"][self.split_name]))
+        self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
 
     def sanity_checks(self):
         msg = (f"Expected to have single test caption for ANet, since we assume"
