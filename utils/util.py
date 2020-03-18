@@ -21,6 +21,7 @@ import torch
 import psutil
 import msgpack
 import humanize
+from zsvision.zs_utils import memcache
 from zsvision.zs_beartype import beartype
 import msgpack_numpy as msgpack_np
 from PIL import Image
@@ -37,9 +38,22 @@ def set_seeds(seed):
 
 
 @beartype
-def get_web_dir(config: Dict) -> Path:
+def get_web_dir(config) -> Path:
+    """Provide backwards compatible support for web directories
+
+    Args:
+        config: a configuration object containing experiment paths
+
+    Returns:
+        the path to the web directory
+    """
     web_dir = config._web_log_dir
-    import ipdb; ipdb.set_trace()
+    dataset = Path(config["data_loader"]["args"]["data_dir"]).stem
+    if dataset not in str(web_dir):
+        exp_name = Path(config._args.config).stem
+        web_dir = web_dir.parent.parent / f"{dataset}-{exp_name}" / web_dir.stem
+        web_dir.mkdir(exist_ok=True, parents=True)
+    return web_dir
 
 
 def memory_summary():
@@ -61,56 +75,6 @@ def flatten_dict(x, keysep="-"):
         else:
             flat_dict.update({key: val})
     return flat_dict
-
-
-def set_nested_key_val(key, val, target):
-    """Use a prefix key (e.g. key1.key2.key3) to set a value in a nested dict"""
-    # escape periods in keys
-    key = key.replace("_.", "&&")
-    subkeys = key.split(".")
-    subkeys = [x.replace("&&", ".") for x in subkeys]
-
-    nested = target
-    print("subkeys", subkeys)
-    for subkey in subkeys[:-1]:
-        try:
-            nested = nested.__getitem__(subkey)
-        except:
-            print(subkey)
-            import ipdb; ipdb.set_trace()
-    orig = nested[subkeys[-1]]
-    if orig == "":
-        if val == "":
-            val = 0
-        else:
-            val = str(val)
-    elif isinstance(orig, bool):
-        if val.lower() in {"0", "False"}:
-            val = False
-        else:
-            val = bool(val)
-    elif isinstance(orig, list):
-        if isinstance(val, str) and "," in val:
-            val = val.split(",")
-            # we use the convention that a trailing comma indicates a single item list
-            if len(val) == 2 and val[1] == "":
-                val.pop()
-            if val and not orig:
-                raise ValueError(f"Could not infer correct type from empty original list")
-            else:
-                val = [type(orig[0])(x) for x in val]
-        assert isinstance(val, list), "Failed to pass a list where expected"
-    elif isinstance(orig, int):
-        val = int(val)
-    elif isinstance(orig, float):
-        val = float(val)
-    elif isinstance(orig, str):
-        val = str(val)
-    else:
-        print(f"unrecognised type: {type(val)}")
-        import ipdb; ipdb.set_trace()
-    nested[subkeys[-1]] = val
-
 
 
 def expert_tensor_storage(experts, feat_aggregation):

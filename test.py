@@ -9,7 +9,7 @@ import model.metric as module_metric
 import model.model as module_arch
 from trainer import ctxt_mgr, verbose
 from parse_config import ConfigParser
-from utils.util import compute_dims, compute_trn_config
+from utils.util import compute_dims, compute_trn_config, get_web_dir
 from mergedeep import merge, Strategy
 
 
@@ -68,11 +68,12 @@ def evaluation(config, logger=None, trainer=None):
     logger.info(model)
 
     metrics = [getattr(module_metric, met) for met in config['metrics']]
+    web_dir = get_web_dir(config)
     visualizer = config.init(
         name='visualizer',
         module=module_vis,
         exp_name=config._exper_name,
-        web_dir=config._web_log_dir,
+        web_dir=web_dir,
     )
     ckpt_path = config._args.resume
     logger.info(f"Loading checkpoint: {ckpt_path} ...")

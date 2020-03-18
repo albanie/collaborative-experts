@@ -8,7 +8,8 @@ from operator import getitem
 from datetime import datetime
 from mergedeep import merge, Strategy
 from logger import setup_logging
-from utils import read_json, write_json, set_nested_key_val
+from utils import read_json, write_json
+from zsvision.zs_utils import set_nested_key_val
 
 
 class ConfigParser:
