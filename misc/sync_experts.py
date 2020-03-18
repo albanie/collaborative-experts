@@ -12,9 +12,6 @@ from pathlib import Path
 
 
 def upload_to_server(web_dir, dataset, webserver, root_feat_dir, refresh):
-    # NOTE: The compression step will take a long time. The last runs took:
-    # MSRVTT -> 00h29m43s, LSMDC -> 0022m21s, MSVD -> 00h03m28s
-    # DiDeMo -> 00h04m20s, ActivityNet ->  00h08m00s
     server_dir = Path(web_dir) / "data" / "features-v2"
     subprocess.call(["ssh", webserver, "mkdir -p", str(server_dir)])
     compressed_file = f"{dataset}-experts.tar.gz"
@@ -29,7 +26,6 @@ def upload_to_server(web_dir, dataset, webserver, root_feat_dir, refresh):
                             f" --files-from={tar_include}")
         print(f"running command {compression_args}")
         tic = time.time()
-        # TODO(Samuel): Figure out why using subprocess introduces tarring problems
         os.system(compression_args)
         duration = time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - tic))
         print(f"Finished compressing features in {duration}")
