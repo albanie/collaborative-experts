@@ -3,14 +3,8 @@ Exclude from autoreload
 %aimport -util.utils
 """
 import os
-import sys
 import json
-import time
-import pickle
 import random
-import socket
-import functools
-from typing import Dict
 from pathlib import Path
 from datetime import datetime
 from itertools import repeat
@@ -20,17 +14,17 @@ import numpy as np
 import torch
 import psutil
 import humanize
-import msgpack_numpy as msgpack_np
 from PIL import Image
-from zsvision.zs_utils import memcache
 from zsvision.zs_beartype import beartype
 
-import utils.datastructures as datastructures
 
-msgpack_np.patch()
+@beartype
+def set_seeds(seed: int):
+    """Set seeds for randomisation libraries.
 
-
-def set_seeds(seed):
+    Args:
+        seed: the seed value
+    """
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -245,6 +239,7 @@ class Timer:
     def reset(self):
         self.cache = datetime.now()
 
+
 def tensor2im(input_image, imtype=np.uint8):
     """"Converts a Tensor array into a numpy image array.
 
@@ -258,11 +253,11 @@ def tensor2im(input_image, imtype=np.uint8):
         else:
             return input_image
         # convert it into a numpy array
-        image_numpy = image_tensor[0].cpu().float().numpy()  
+        image_numpy = image_tensor[0].cpu().float().numpy()
         if image_numpy.shape[0] == 1:  # grayscale to RGB
             image_numpy = np.tile(image_numpy, (3, 1, 1))
         # post-processing: tranpose and scaling
-        image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0  
+        image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
     else:  # if it is a numpy array, do nothing
         image_numpy = input_image
     return image_numpy.astype(imtype)

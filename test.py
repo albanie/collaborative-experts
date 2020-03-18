@@ -1,16 +1,18 @@
-import argparse
-import torch
-import numpy as np
 import copy
 import random
-import data_loader.data_loaders as module_data
-import utils.visualizer as module_vis
-import model.metric as module_metric
+import argparse
+
+import numpy as np
+import torch
+from mergedeep import Strategy, merge
+
 import model.model as module_arch
-from trainer import ctxt_mgr, verbose
+import model.metric as module_metric
+import utils.visualizer as module_vis
+import data_loader.data_loaders as module_data
+from trainer import verbose, ctxt_mgr
+from utils.util import get_web_dir, compute_dims, compute_trn_config
 from parse_config import ConfigParser
-from utils.util import compute_dims, compute_trn_config, get_web_dir
-from mergedeep import merge, Strategy
 
 
 def evaluation(config, logger=None, trainer=None):
