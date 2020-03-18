@@ -27,17 +27,17 @@
             "l2renorm": false,
             "randomise_feats": "",
             "vlad_clusters": {
-                "ocr": 13,
-                "text": 8,
-                "audio": 16,
-                "speech": 55,
+                "ocr": 44,
+                "text": 39,
+                "audio": 6,
+                "speech": 100,
                 "detection-sem": 50
             },
             "ghost_clusters": {
                 "text": 0,
-                "ocr": 1,
-                "audio": 1,
-                "speech": 1
+                "ocr": 2,
+                "audio": 0,
+                "speech": 2
             }
         }
     },
@@ -50,10 +50,10 @@
             "fuse_captions": true,
             "num_test_captions": 1,
             "max_tokens": {
-                "ocr": 8,
-                "text": 48,
-                "audio": 23,
-                "speech": 48,
+                "ocr": 6,
+                "text": 49,
+                "audio": 4,
+                "speech": 29,
                 "openpose": 50,
                 "detection": 12,
                 "detection-sem": 100
@@ -61,7 +61,7 @@
         }
     },
     "trainer": {
-        "epochs": 200
+        "epochs": 150
     },
     "optimizer": {
         "type": "Ranger",
@@ -73,7 +73,7 @@
     "loss": {
         "type": "MaxMarginRankingLoss",
         "args": {
-            "margin": 0.16642835966287484,
+            "margin": 0.060496613740311816,
             "fix_norm": true
         }
     },
