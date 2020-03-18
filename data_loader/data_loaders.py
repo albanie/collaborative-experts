@@ -1,12 +1,15 @@
 import functools
+
 import torch
 from torch.utils.data import DataLoader
-from data_loader.MSRVTT_dataset import MSRVTT
+from zsvision.zs_utils import memcache
+
+from utils.util import HashableDict, HashableOrderedDict
 from data_loader.MSVD_dataset import MSVD
 from data_loader.LSMDC_dataset import LSMDC
-from data_loader.ActivityNet_dataset import ActivityNet
 from data_loader.DiDeMo_dataset import DiDeMo
-from utils.util import HashableDict, HashableOrderedDict, memcache
+from data_loader.MSRVTT_dataset import MSRVTT
+from data_loader.ActivityNet_dataset import ActivityNet
 
 
 @functools.lru_cache(maxsize=64, typed=False)
