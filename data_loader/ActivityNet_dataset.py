@@ -3,7 +3,7 @@ import time
 from pathlib import Path
 
 from utils import memory_summary
-from utils.util import memcache, ensure_tensor, concat_features
+from utils.util import memcache, concat_features
 from base.base_dataset import BaseDataset
 
 
@@ -51,21 +51,6 @@ class ActivityNet(BaseDataset):
             "raw_captions_path": raw_caps_name,
         }
         return feature_info
-
-    # def configure_train_test_splits(self, split_name):
-    #     self.paths = ActivityNet.dataset_paths(
-    #         root_feat=self.root_feat,
-    #         split_name=split_name,
-    #         text_feat=self.text_feat,
-    #     )
-    #     print("loading training/val splits....")
-    #     tic = time.time()
-    #     for subset, path in self.paths["subset_list_paths"].items():
-    #         subset_list_path = Path(self.root_feat) / path
-    #         with open(subset_list_path) as f:
-    #             self.partition_lists[subset] = f.read().splitlines()
-    #     print("done in {:.3f}s".format(time.time() - tic))
-    #     self.split_name = split_name
 
     def load_features(self):
         root_feat = self.root_feat
