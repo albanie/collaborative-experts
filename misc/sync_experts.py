@@ -25,7 +25,8 @@ def upload_to_server(web_dir, dataset, webserver, root_feat_dir, refresh):
     if not Path(compressed_path).exists() or refresh["compression"]:
         compression_args = (f"tar --dereference --create --verbose"
                             f" --file={str(compressed_path)}"
-                            f" --gzip  --files-from={tar_include}")
+                            f" --use-compress-program=pigz"
+                            f" --files-from={tar_include}")
         print(f"running command {compression_args}")
         tic = time.time()
         # TODO(Samuel): Figure out why using subprocess introduces tarring problems
