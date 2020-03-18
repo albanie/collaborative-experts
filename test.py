@@ -11,7 +11,7 @@ import model.metric as module_metric
 import utils.visualizer as module_vis
 import data_loader.data_loaders as module_data
 from trainer import verbose, ctxt_mgr
-from utils.util import get_web_dir, compute_dims, compute_trn_config
+from utils.util import update_src_web_video_dir, compute_dims, compute_trn_config
 from parse_config import ConfigParser
 
 
@@ -37,6 +37,14 @@ def evaluation(config, logger=None, trainer=None):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
+
+    update_src_web_video_dir(config)
+    visualizer = config.init(
+        name='visualizer',
+        module=module_vis,
+        exp_name=config._exper_name,
+        web_dir=config._web_log_dir,
+    )
 
     # We use cls defaults for backwards compatibility with the MMIT configs.  In the
     # long run this should be handled by the json configs themselves
@@ -70,13 +78,6 @@ def evaluation(config, logger=None, trainer=None):
     logger.info(model)
 
     metrics = [getattr(module_metric, met) for met in config['metrics']]
-    web_dir = get_web_dir(config)
-    visualizer = config.init(
-        name='visualizer',
-        module=module_vis,
-        exp_name=config._exper_name,
-        web_dir=web_dir,
-    )
     ckpt_path = config._args.resume
     logger.info(f"Loading checkpoint: {ckpt_path} ...")
     checkpoint = torch.load(ckpt_path)

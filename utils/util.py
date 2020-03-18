@@ -31,22 +31,24 @@ def set_seeds(seed: int):
 
 
 @beartype
-def get_web_dir(config) -> Path:
+def update_src_web_video_dir(config):
     """Provide backwards compatible support for web directories
 
     Args:
         config: a configuration object containing experiment paths
-
-    Returns:
-        the path to the web directory
     """
-    web_dir = config._web_log_dir
-    dataset = Path(config["data_loader"]["args"]["data_dir"]).stem
-    if dataset not in str(web_dir):
-        exp_name = Path(config._args.config).stem
-        web_dir = web_dir.parent.parent / f"{dataset}-{exp_name}" / web_dir.stem
-        web_dir.mkdir(exist_ok=True, parents=True)
-    return web_dir
+    src_video_dir = Path(config["visualizer"]["args"]["src_video_dir"])
+    dataset = config["data_loader"]["args"]["dataset_name"]
+    if dataset not in str(src_video_dir):
+        lookup = {
+            "ActivityNet": "activity-net/videos",
+            "MSRVTT": "MSRVTT/videos/all",
+            "MSVD": "MSVD/videos",
+            "DiDeMo": "DiDeMo/videos",
+            "LSMDC": "LSMDC/videos",
+        }
+        src_video_dir = Path(src_video_dir.parts[0]) / lookup[dataset]
+    config["visualizer"]["args"]["src_video_dir"] = Path(src_video_dir)
 
 
 def memory_summary():
