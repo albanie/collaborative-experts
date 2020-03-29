@@ -14,15 +14,15 @@ import subprocess
 from pathlib import Path
 from itertools import zip_longest
 from collections import OrderedDict
-from typing import Dict
+from typing import Dict, Tuple, Union, List
 
 import tqdm
 import numpy as np
 from millify import millify
-from zsvision.zs_beartype import beartype
+from typeguard import typechecked
 
 
-@beartype
+@typechecked
 def generate_url(root_url: str, target: str, exp_name: str, experiments: Dict) -> str:
     path_store = {
         "log": {"parent": "log", "fname": "summary-seed-0_seed-1_seed-2.json"},
@@ -68,7 +68,8 @@ def sync_files(experiments, save_dir, webserver, web_dir):
                 subprocess.call(rsync_args)
 
 
-def model_specs2path(feat_aggregation, keep, tag=None):
+@typechecked
+def model_specs2path(feat_aggregation: Dict, keep: set, tag: str = None) -> List[Path]:
     feat_paths = []
     for model_spec, aggs in feat_aggregation.items():
         if model_spec not in keep:
@@ -97,7 +98,10 @@ def model_specs2path(feat_aggregation, keep, tag=None):
     return feat_paths
 
 
-def dataset_paths(dataset, split_name, text_feat):
+@typechecked
+def dataset_paths(
+        dataset: str
+) -> Tuple[Path, Dict[str, Union[str, List[str], Dict, Path]]]:
     name_map = {
         "msvd": "MSVD",
         "lsmdc": "LSMDC",
@@ -105,18 +109,18 @@ def dataset_paths(dataset, split_name, text_feat):
         "didemo": "DiDeMo",
         "activity-net": "ActivityNet",
     }
-    class_name = name_map[dataset]
+    if dataset in set(name_map.values()):
+        class_name = dataset
+    else:
+        class_name = name_map[dataset]
     mod = importlib.import_module(f"data_loader.{class_name}_dataset")
     get_dataset_paths = getattr(getattr(mod, class_name), "dataset_paths")
     if dataset == "activity-net":
         data_dir = dataset
     else:
-        data_dir = name_map[dataset]
+        data_dir = class_name
     root_feat = Path(f"data/{data_dir}/structured-symlinks")
-    paths = get_dataset_paths(
-        split_name=split_name,
-        text_feat=text_feat,
-    )
+    paths = get_dataset_paths()
     return root_feat, paths
 
 
@@ -135,28 +139,26 @@ def generate_tar_lists(save_dir, experiments):
         if "eval_settings" in config and config["eval_settings"]:
             test_split = config["eval_settings"]["data_loader"]["args"]["split_name"]
             split_names.append(test_split)
-        keep = config["experts"]["modalities"]
+        keep = set(config["experts"]["modalities"])
         text_feat = config["experts"]["text_feat"]
+        root_feat, paths = dataset_paths(dataset_name)
+        modern_feat_agg = {key: val for key, val in feat_aggregation.items()
+                           if key in paths["feature_names"]}
+        feat_paths = model_specs2path(modern_feat_agg, keep)
+        all_feat_paths[dataset_name].update({root_feat / x for x in feat_paths})
+        for key, feat_list in paths["custom_paths"].items():
+            for feat_path in feat_list:
+                all_feat_paths[dataset_name].add(root_feat / feat_path)
+        text_paths = [root_feat / rel_path for rel_path in
+                      paths["text_feat_paths"][text_feat].values()]
+        all_feat_paths[dataset_name].update(set(text_paths))
+        all_feat_paths[dataset_name].add(root_feat / paths["raw_captions_path"])
+        if "dict_youtube_mapping_path" in paths:
+            all_feat_paths[dataset_name].add(
+                root_feat / paths["dict_youtube_mapping_path"])
         for split_name in split_names:
-            split_paths = set()
-            root_feat, paths = dataset_paths(dataset_name, split_name, text_feat)
-            modern_feat_agg = {key: val for key, val in feat_aggregation.items()
-                               if key in paths["feature_names"]}
-            feat_paths = model_specs2path(modern_feat_agg, keep)
-            split_paths.update({root_feat / x for x in feat_paths})
-            for key, feat_list in paths["custom_paths"].items():
-                for feat_path in feat_list:
-                    split_paths.add(root_feat / feat_path)
-            split_paths.update(set(root_feat / x for x in
-                               paths["subset_list_paths"].values()))
-            if "text_feat_path" in paths:
-                split_paths.add(root_feat / paths["text_feat_path"])
-            else:
-                text_paths = [root_feat / x for x in paths["text_feat_paths"].values()]
-                split_paths.update(set(text_paths))
-            split_paths.add(root_feat / paths["raw_captions_path"])
-            if "dict_youtube_mapping_path" in paths:
-                split_paths.add(root_feat / paths["dict_youtube_mapping_path"])
+            split_paths = set(root_feat / x for x in
+                              paths["subset_list_paths"][split_name].values())
             all_feat_paths[dataset_name].update(split_paths)
 
     for dataset_name, paths in all_feat_paths.items():
@@ -188,7 +190,7 @@ def parse_log(log_path):
             row = row.replace("INFO:summary:", "")
             tokens = row.split(" ")
             if tokens[-3] != f"{metric}:":
-                import ipdb; ipdb.set_trace()
+                raise ValueError(f"Unexpteced log format [{row}]")
             assert tokens[-3] == f"{metric}:", f"unexpected row format {row}"
             mean, std = float(tokens[-2].split(",")[0]), float(tokens[-1])
             results[group][metric] = (mean, std)
@@ -198,7 +200,7 @@ def parse_log(log_path):
     return results
 
 
-def parse_results(experiments, save_dir, backup_save_dirs):
+def parse_results(experiments, save_dir):
     log_results = {}
     for exp_name, meta in experiments.items():
         group_id, timestamp = meta
@@ -230,9 +232,9 @@ def generate_results_string(target, exp_name, results, latexify, drop=None):
             continue
         print(f"{metric}: {mean} ({std})")
         if latexify:
-            str_tokens = ["&$",  f"{mean}_{{\\pm{std}}}$"]
+            str_tokens = ["&$", f"{mean}_{{\\pm{std}}}$"]
             if prepad:
-                str_tokens.insert(1, "\prepad")
+                str_tokens.insert(1, r"\prepad")
             tokens.append(" ".join(str_tokens))
         else:
             tokens += [f"{mean}<sub>({std})</sub>"]
@@ -240,9 +242,9 @@ def generate_results_string(target, exp_name, results, latexify, drop=None):
 
 
 def generate_readme(experiments, readme_templates, root_url, readme_dests, results_path,
-                    save_dir, backup_save_dirs, latexify, keep_mnr):
+                    save_dir, latexify, keep_mnr):
 
-    results = parse_results(experiments, save_dir, backup_save_dirs)
+    results = parse_results(experiments, save_dir)
     with open(results_path, "w") as f:
         json.dump(results, f, indent=4, sort_keys=False)
 
@@ -292,14 +294,7 @@ def generate_readme(experiments, readme_templates, root_url, readme_dests, resul
             for match in re.finditer(regex, row):
                 groups = match.groups()
                 assert len(groups) == 1, "expected single group"
-                # if "latex" in groups[0]:
-                #     token = generate_latex_results_string(groups[0], results)
-                # else:
                 exp_name, target = groups[0].split(".")
-                try:
-                    x = results[exp_name]["timestamp"] == "TODO"
-                except:
-                    import ipdb; ipdb.set_trace()
                 if results[exp_name]["timestamp"] == "TODO":
                     token = "TODO"
                 elif target in {"config", "model", "log"}:
@@ -340,11 +335,6 @@ def generate_readme(experiments, readme_templates, root_url, readme_dests, resul
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--save_dir", default="data/saved")
-    parser.add_argument("--backup_save_dirs",
-                        default=[
-                            "/scratch/shared/slow/yangl/code/aaai/collaborative-experts/data/saved",
-                            "/scratch/shared/slow/yangl/code/aaai/collaborative-experts/data/curren_no/saved",
-                        ])
     parser.add_argument("--webserver", default="login.robots.ox.ac.uk")
     parser.add_argument("--results_path", default="misc/results.json")
     parser.add_argument("--experiments_path", default="misc/experiments.json")
@@ -394,7 +384,6 @@ def main():
             readme_dests=readme_dests,
             results_path=args.results_path,
             readme_templates=readme_templates,
-            backup_save_dirs=args.backup_save_dirs,
         )
 
 

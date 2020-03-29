@@ -1,6 +1,8 @@
 import copy
+from typing import Dict, Union, List
 from pathlib import Path
 
+from typeguard import typechecked
 from zsvision.zs_utils import memcache, concat_features
 
 from utils import memory_summary
@@ -10,15 +12,18 @@ from base.base_dataset import BaseDataset
 class DiDeMo(BaseDataset):
 
     @staticmethod
-    def dataset_paths(split_name, text_feat):
-        train_list_path = "train_list.txt"
-        if split_name == "val":
-            test_list_path = "val_list.txt"
-        elif split_name == "test":
-            test_list_path = "test_list.txt"
-        else:
-            raise ValueError(f"Unrecognised DiDeMo split: {split_name}")
-        subset_paths = {"train": train_list_path, "val": test_list_path}
+    @typechecked
+    def dataset_paths() -> Dict[str, Union[Path, str, Dict, List[str]]]:
+        subset_paths = {}
+        test_splits = {
+            "val": "val_list.txt",
+            "test": "test_list.txt",
+            "public_server_val": "public_server_val.txt",
+            "public_server_test": "public_server_test.txt",
+        }
+        for split_name, fname in test_splits.items():
+            subset_paths[split_name] = {"train": "train_list.txt", "val": fname}
+
         feature_names = [
             "imagenet.senet154.0",
             "scene.densenet161.0",
@@ -33,21 +38,22 @@ class DiDeMo(BaseDataset):
         custom_paths = {
             "audio": ["aggregated_audio_feats/vggish-audio-raw.pickle"],
             "ocr": ["aggregated_ocr_feats/ocr-feats.pkl"],
-            "flow": ["antoine/i3d-i3d-max-fps25-stride25.pickle"],
             "speech": ["aggregated_speech_feats/stt_w2v.pickle"],
             "face": ["aggregated_facefeats_25fps_256px_stride1/face-avg.pickle"],
         }
-        if text_feat == "openai":
-            text_feat_name = "openai-feats.pkl"
-        elif text_feat == "w2v":
-            text_feat_name = "w2v-text.pickle"
-        else:
-            raise ValueError(f"Text features {text_feat} not supported.")
+        text_feat_paths = {"openai": "openai-feats.pkl"}
+        text_feat_paths = {key: Path("aggregated_text_feats") / fname
+                           for key, fname in text_feat_paths.items()}
+        challenge_text_feat_paths = {
+            key: Path("aggregated_text_feats") / f"{key}{fname.suffix}"
+            for key, fname in text_feat_paths.items()
+        }
         feature_info = {
             "custom_paths": custom_paths,
             "feature_names": feature_names,
             "subset_list_paths": subset_paths,
-            "text_feat_path": Path("aggregated_text_feats") / text_feat_name,
+            "text_feat_paths": text_feat_paths,
+            "challenge_text_feat_paths": challenge_text_feat_paths,
             "raw_captions_path": "raw-captions.pkl",
         }
         return feature_info
@@ -80,8 +86,12 @@ class DiDeMo(BaseDataset):
                 features[expert] = copy.deepcopy(features_)
 
         self.features = features
-        self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
-        self.text_features = memcache(root_feat / self.paths["text_feat_path"])
+        if self.challenge_mode:
+            self.load_challenge_text_features()
+        else:
+            self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
+            text_feat_path = root_feat / self.paths["text_feat_path"][self.text_feat]
+            self.text_features = memcache(text_feat_path)
 
     def sanity_checks(self):
         msg = (f"Expected to have single test caption for DiDemo, since we assume"

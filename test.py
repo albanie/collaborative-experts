@@ -1,5 +1,7 @@
 import copy
 import random
+import json
+import pickle
 import argparse
 
 import numpy as np
@@ -13,6 +15,34 @@ import data_loader.data_loaders as module_data
 from trainer import verbose, ctxt_mgr
 from utils.util import update_src_web_video_dir, compute_dims, compute_trn_config
 from parse_config import ConfigParser
+from typeguard import typechecked
+
+
+@typechecked
+def compress_predictions(query_masks: np.ndarray, sims: np.ndarray, topk: int = 10):
+    """We store the indices of the top-k predictions, rather than the full similarity
+    matrix, to reduce storage requirements.
+
+    NOTE: The similarity matrix contains `num_queries x num_videos` elements, where
+    `num_queries = num_videos x max_num_queries_per_video`.  We first mask out
+    locations in the similarity matrix that correspond to invalid queries (these are
+    produced by videos with fewer than `max_num_queries_per_video` descriptions).
+    """
+
+    # validate the input shapes
+    assert query_masks.ndim == 2, "Expected query_masks to be a matrix"
+    query_num_videos, query_max_per_video = query_masks.shape
+    sims_queries, sims_num_videos = sims.shape
+    msg = (f"Expected sims and query masks to represent the same number of videos "
+           f"(found {sims_num_videos} v {query_num_videos}")
+    assert query_num_videos == sims_num_videos, msg
+    msg = (f"Expected sims and query masks to represent the same number of queries "
+           f"(found {sims_queries} v {query_num_videos * query_max_per_video}")
+    assert query_max_per_video * query_num_videos == sims_queries, msg
+
+    valid_sims = sims[query_masks.flatten().astype(np.bool)]
+    ranks = np.argsort(-valid_sims, axis=1)
+    return ranks[:, :topk]
 
 
 def evaluation(config, logger=None, trainer=None):
@@ -55,12 +85,14 @@ def evaluation(config, logger=None, trainer=None):
         module=module_data,
         logger=logger,
         raw_input_dims=raw_input_dims,
+        challenge_mode=config.get("challenge_mode", False),
         text_feat=config["experts"]["text_feat"],
         text_dim=config["experts"]["text_dim"],
         text_agg=config["experts"]["text_agg"],
         use_zeros_for_missing=config["experts"].get("use_zeros_for_missing", False),
         task=config.get("task", "retrieval"),
         cls_partitions=config.get("cls_partitions", cls_defaults),
+        eval_only=True,
     )
 
     model = config.init(
@@ -85,6 +117,17 @@ def evaluation(config, logger=None, trainer=None):
     if config['n_gpu'] > 1:
         model = torch.nn.DataParallel(model)
     model.load_state_dict(state_dict)
+    challenge_mode = config.get("challenge_mode", False)
+    challenge_msg = (
+        "\n"
+        "Evaluation ran on challenge features. To obtain a score, upload the similarity"
+        "matrix for each dataset to the test server after running the "
+        "`misc/cvpr2020-challenge/prepare_submission.py` script and following the "
+        "instructions at: "
+        "https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/"
+        "\n"
+    )
+
 
     # prepare model for testing.  Note that some datasets fail to fit the retrieval
     # set on the GPU, so we run them on the CPU
@@ -107,6 +150,18 @@ def evaluation(config, logger=None, trainer=None):
 
         sims = output["cross_view_conf_matrix"].data.cpu().float().numpy()
         dataset = data_loaders.dataset_name
+        if challenge_mode:
+            split = data_loaders.dataloaders["dataset"].split_name
+            prediction_path = config._log_dir / f"{dataset}-{split}-predictions.csv"
+            compressed_preds = compress_predictions(
+                query_masks=meta["query_masks"],
+                sims=sims,
+            )
+            np.savetxt(prediction_path, compressed_preds, delimiter=',', fmt="%d")
+            print(f"Saved similarity matrix predictions to {prediction_path}")
+            print(challenge_msg)
+            return
+
         nested_metrics = {}
         for metric in metrics:
             metric_name = metric.__name__
@@ -145,6 +200,6 @@ if __name__ == '__main__':
     args.add_argument("--custom_args", help="qualified key,val pairs")
     eval_config = ConfigParser(args)
 
-    msg = "For evaluation, a model checkpoint must be specified via the --resume flag"
-    assert eval_config._args.resume, msg
+    cfg_msg = "For evaluation, a model checkpoint must be specified via the --resume flag"
+    assert eval_config._args.resume, cfg_msg
     evaluation(eval_config)

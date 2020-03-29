@@ -2,14 +2,18 @@ import os
 import time
 import pprint
 import logging
+from typing import Dict
 from pathlib import Path
-from functools import reduce
-from operator import getitem
 from datetime import datetime
-from mergedeep import merge, Strategy
-from logger import setup_logging
-from utils import read_json, write_json
+from operator import getitem
+from functools import reduce
+
+from mergedeep import Strategy, merge
 from zsvision.zs_utils import set_nested_key_val
+from typeguard import typechecked
+
+from utils import read_json, write_json
+from logger import setup_logging
 
 
 class ConfigParser:
@@ -63,6 +67,11 @@ class ConfigParser:
             subdir = Path(args.group_id) / f"seed-{args.group_seed}" / timestamp
         else:
             subdir = timestamp
+
+        # store challenge experiments in a further subdirectory
+        if self._config.get("challenge_mode", False):
+            challenge_tag = "cvpr2020-challenge"
+            exper_name = f"{challenge_tag}/{exper_name}"
 
         self._save_dir = save_dir / 'models' / exper_name / subdir
         self._web_log_dir = save_dir / 'web' / exper_name / subdir
@@ -122,7 +131,9 @@ class ConfigParser:
             exper_name = f"{exper_name}-train-single-epoch"
         return exper_name
 
-    def load_config(self, cfg_fname):
+    @staticmethod
+    @typechecked
+    def load_config(cfg_fname: Path) -> Dict:
         config = read_json(cfg_fname)
         # apply inheritance through config hierarchy
         descendant, ancestors = config, []

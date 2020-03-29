@@ -1,0 +1,22 @@
+{
+    "MSRVTT": {
+        "public_server_val": "data/saved/log/cvpr2020-challenge/msrvtt-baseline-public-trainval-train-single-epoch/2020-03-29_05-40-55/MSRVTT-public_server_val-predictions.csv",
+        "public_server_test": "data/saved/log/cvpr2020-challenge/msrvtt-baseline-public-test/2020-03-26_09-39-22/MSRVTT-public_server_test-predictions.csv"
+    },
+    "ActivityNet": {
+        "public_server_val": "data/saved/log/cvpr2020-challenge/activity-net-baseline-public-trainval-train-single-epoch/2020-03-29_05-45-09/ActivityNet-public_server_val-predictions.csv",
+        "public_server_test": "data/saved/log/cvpr2020-challenge/activity-net-baseline-public-test/2020-03-26_09-42-45/ActivityNet-public_server_test-predictions.csv"
+    },
+    "DiDeMo": {
+        "public_server_val": "data/saved/log/cvpr2020-challenge/didemo-baseline-public-trainval-train-single-epoch/2020-03-29_05-46-35/DiDeMo-public_server_val-predictions.csv",
+        "public_server_test": "data/saved/log/cvpr2020-challenge/didemo-baseline-public-test/2020-03-26_09-44-56/DiDeMo-public_server_test-predictions.csv"
+    },
+    "LSMDC": {
+        "public_server_val": "data/saved/log/cvpr2020-challenge/lsmdc-baseline-public-trainval-train-single-epoch/2020-03-29_05-37-37/LSMDC-public_server_val-predictions.csv",
+        "public_server_test": "data/saved/log/cvpr2020-challenge/lsmdc-baseline-public-test/2020-03-26_09-45-46/LSMDC-public_server_test-predictions.csv"
+    },
+    "MSVD": {
+        "public_server_val": "data/saved/log/cvpr2020-challenge/msvd-baseline-public-trainval-train-single-epoch/2020-03-26_09-51-09/MSVD-public_server_val-predictions.csv",
+        "public_server_test": "data/saved/log/cvpr2020-challenge/msvd-baseline-public-test/2020-03-26_09-53-29/MSVD-public_server_test-predictions.csv"
+    }
+}

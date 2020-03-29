@@ -81,12 +81,14 @@ def run_exp(config):
             module=module_data,
             logger=logger,
             raw_input_dims=raw_input_dims,
+            challenge_mode=config.get("challenge_mode", False),
             text_feat=config["experts"]["text_feat"],
             text_dim=config["experts"]["text_dim"],
             text_agg=config["experts"]["text_agg"],
             use_zeros_for_missing=config["experts"].get("use_zeros_for_missing", False),
             task=config.get("task", "retrieval"),
-            cls_partitions=config.get("cls_partitions", cls_defaults)
+            cls_partitions=config.get("cls_partitions", cls_defaults),
+            eval_only=False,
         )
 
         if config.get("manual_linear_init", False):

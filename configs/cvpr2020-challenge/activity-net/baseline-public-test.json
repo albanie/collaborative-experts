@@ -1,0 +1,14 @@
+{
+    "inherit_from": "configs/cvpr2020-challenge/activity-net/baseline-public-trainval.json",
+    "eval_settings": {
+        "data_loader": {
+            "args": {
+                "split_name": "public_server_test"
+            }
+        },
+        "tester": {
+            "save_dir": "data/saved/",
+            "verbosity": 2
+        }
+    }
+}

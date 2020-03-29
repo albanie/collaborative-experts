@@ -1,10 +1,10 @@
 import copy
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union, List
 from collections import defaultdict
 
 import numpy as np
-from zsvision.zs_beartype import beartype
+from typeguard import typechecked
 from zsvision.zs_utils import memcache, concat_features
 
 from utils.util import memory_summary
@@ -14,16 +14,18 @@ from base.base_dataset import BaseDataset
 class MSVD(BaseDataset):
 
     @staticmethod
-    @beartype
-    def dataset_paths(split_name: str, text_feat: str) -> Dict:
-        train_list_path = "train_list.txt"
-        if split_name == "official":
-            test_list_path = "test_list.txt"
-        elif split_name == "dev":
-            test_list_path = "val_list.txt"
-        else:
-            raise ValueError(f"unrecognised MSVD split: {split_name}")
-        subset_paths = {"train": train_list_path, "val": test_list_path}
+    @typechecked
+    def dataset_paths() -> Dict[str, Union[str, List[str], Path, Dict]]:
+        subset_paths = {}
+        test_splits = {
+            "dev": "val_list.txt",
+            "official": "test_list.txt",
+            "public_server_val": "public_server_val.txt",
+            "public_server_test": "public_server_test.txt",
+        }
+        for split_name, fname in test_splits.items():
+            subset_paths[split_name] = {"train": "train_list.txt", "val": fname}
+
         feature_names = [
             "imagenet.senet154.0",
             "scene.densenet161.0",
@@ -41,15 +43,22 @@ class MSVD(BaseDataset):
             "face": ["aggregated_face_feats/face-avg.pickle"],
             "ocr": ["aggregated_ocr_feats/ocr-w2v.pickle"],
         }
-        text_feat_names = {key: f"{text_feat}-caption-{key}"
-                           for key in {"train", "val", "test"}}
-        text_feat_paths = {key: f"aggregated_text_feats/{val}.pkl"
-                           for key, val in text_feat_names.items()}
+        text_feat_paths = {}
+        challenge_text_feat_paths = {}
+        for text_feat in ("openai", "w2v"):
+            text_feat_names = {key: f"{text_feat}-caption-{key}"
+                               for key in {"train", "val", "test"}}
+            text_feat_paths[text_feat] = {key: f"aggregated_text_feats/{val}.pkl"
+                                          for key, val in text_feat_names.items()}
+            challenge_text_feat_paths[text_feat] = \
+                f"aggregated_text_feats/{text_feat}.pkl"
+
         feature_info = {
             "subset_list_paths": subset_paths,
             "feature_names": feature_names,
             "custom_paths": custom_paths,
             "text_feat_paths": text_feat_paths,
+            "challenge_text_feat_paths": challenge_text_feat_paths,
             "raw_captions_path": "raw-captions.pkl",
             "dict_youtube_mapping_path": "dict_youtube_mapping.pkl"
         }
@@ -88,17 +97,19 @@ class MSVD(BaseDataset):
                 features[expert] = copy.deepcopy(features_)
 
         self.features = features
-        text_feat_paths = self.paths["text_feat_paths"]
-        text_features = memcache(root_feat / text_feat_paths["train"])
-        split_names = {"dev": "val", "official": "test"}
-        text_features.update(memcache(
-            root_feat / text_feat_paths[split_names[self.split_name]]))
-        key_map = memcache(root_feat / self.paths["dict_youtube_mapping_path"])
-        inverse_map = {}
-        for key, value in key_map.items():
-            inverse_map[value] = key
-        self.text_features = {inverse_map[key]: val for key, val in text_features.items()}
-        self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
+        if self.challenge_mode:
+            self.load_challenge_text_features()
+        else:
+            text_feat_paths = self.paths["text_feat_paths"][self.text_feat]
+            text_features = memcache(root_feat / text_feat_paths["train"])
+            split_names = {"dev": "val", "official": "test"}
+            text_features.update(memcache(
+                root_feat / text_feat_paths[split_names[self.split_name]]))
+            key_map = memcache(root_feat / self.paths["dict_youtube_mapping_path"])
+            inverse_map = {val: key for key, val in key_map.items()}
+            self.text_features = {inverse_map[key]: val for key, val in
+                                  text_features.items()}
+            self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
 
         if "detection" in self.ordered_experts:
             # Example processing

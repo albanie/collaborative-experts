@@ -1,0 +1,9 @@
+{
+    "inherit_from": "configs/cvpr2020-challenge/data_loader_msrvtt.json",
+    "experts": {
+        "modalities": [
+            "i3d.i3d.0",
+            "imagenet.senet154.0"
+        ]
+    }
+}

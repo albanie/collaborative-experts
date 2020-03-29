@@ -3,6 +3,7 @@
     "seed": 0,
     "disable_nan_checks": false,
     "log_name": "info.json",
+    "challenge_mode": true,
     "experts": {
         "drop_feats": "",
         "text_feat": "openai",
@@ -40,10 +41,11 @@
     "data_loader": {
         "type": "ExpertDataLoader",
         "args":{
-            "trn_cat": false,
+            "trn_cat": 0,
             "batch_size": 32,
             "num_workers": 4,
-            "root_feat_folder": "challenge-release-1",
+            "root_feat_folder": "challenge-release-1-dummy",
+            "challenge_test_root_feat_folder": "challenge-release-2-dummy",
             "text_dropout": 0.0,
             "feat_aggregation": {
                 "imagenet.senet154.0": {
@@ -257,7 +259,7 @@
     "visualizer": {
         "type": "Visualizer",
         "args":{
-            "src_video_dir": "data/MSRVTT/challenge-release-1/videos/all",
+            "src_video_dir": "data/MSRVTT/videos/all",
             "vis_vid_freq": 1000,
             "num_samples": 100
         }

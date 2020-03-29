@@ -1,6 +1,10 @@
+import logging
 import functools
+from pathlib import Path
+from typing import Dict, List
 
 import torch
+from typeguard import typechecked
 from torch.utils.data import DataLoader
 from zsvision.zs_utils import memcache
 
@@ -13,16 +17,37 @@ from data_loader.ActivityNet_dataset import ActivityNet
 
 
 @functools.lru_cache(maxsize=64, typed=False)
-def dataset_loader(dataset_name, data_dir, raw_input_dims, num_test_captions, text_dim,
-                   feat_aggregation, split_name, text_feat, task, text_agg, logger,
-                   fuse_captions, max_tokens, spatial_feats, cls_partition,
-                   restrict_train_captions, use_zeros_for_missing, text_dropout):
+def dataset_loader(
+        text_dropout: float,
+        fuse_captions: bool,
+        spatial_feats: bool,
+        use_zeros_for_missing: bool,
+        challenge_mode: bool,
+        eval_only: bool,
+        task: str,
+        data_dir: str,
+        text_agg: str,
+        text_feat: str,
+        split_name: str,
+        dataset_name: str,
+        cls_partition: str,
+        root_feat_folder: str,
+        challenge_test_root_feat_folder: str,
+        text_dim: int,
+        num_test_captions: int,
+        restrict_train_captions: int,
+        logger: logging.Logger,
+        max_tokens: Dict[str, int],
+        raw_input_dims: HashableOrderedDict,
+        feat_aggregation: HashableDict,
+):
     print(f"refreshing cache for {dataset_name} data loader [{split_name}]")
     kwargs = dict(
         task=task,
-        data_dir=data_dir,
+        data_dir=Path(data_dir),
         text_dim=text_dim,
         logger=logger,
+        eval_only=eval_only,
         text_agg=text_agg,
         text_feat=text_feat,
         max_tokens=max_tokens,
@@ -32,6 +57,9 @@ def dataset_loader(dataset_name, data_dir, raw_input_dims, num_test_captions, te
         text_dropout=text_dropout,
         fuse_captions=fuse_captions,
         raw_input_dims=raw_input_dims,
+        challenge_mode=challenge_mode,
+        root_feat_folder=root_feat_folder,
+        challenge_test_root_feat_folder=challenge_test_root_feat_folder,
         feat_aggregation=feat_aggregation,
         num_test_captions=num_test_captions,
         use_zeros_for_missing=use_zeros_for_missing,
@@ -52,11 +80,37 @@ def dataset_loader(dataset_name, data_dir, raw_input_dims, num_test_captions, te
 
 class ExpertDataLoader:
 
-    def __init__(self, dataset_name, data_dir, num_workers, batch_size, raw_input_dims,
-                 split_name, feat_aggregation, num_test_captions, text_feat, text_dim,
-                 fuse_captions, max_tokens, use_zeros_for_missing, task, cls_partitions,
-                 trn_cat, text_agg, text_dropout, logger, spatial_feats=False,
-                 restrict_train_captions=0, drop_last=False, refresh_lru_cache=False):
+    @typechecked
+    def __init__(
+            self,
+            eval_only: bool,
+            fuse_captions: bool,
+            challenge_mode: bool,
+            use_zeros_for_missing: bool,
+            trn_cat: int,
+            text_dim: int,
+            batch_size: int,
+            num_workers: int,
+            num_test_captions: int,
+            task: str,
+            data_dir: str,
+            text_agg: str,
+            text_feat: str,
+            split_name: str,
+            dataset_name: str,
+            root_feat_folder: str,
+            challenge_test_root_feat_folder: str,
+            text_dropout: float,
+            cls_partitions: List[str],
+            max_tokens: Dict[str, int],
+            raw_input_dims: Dict[str, int],
+            feat_aggregation: Dict[str, Dict],
+            logger: logging.Logger,
+            spatial_feats: bool = False,
+            restrict_train_captions: int = 0,
+            drop_last: bool = False,
+            refresh_lru_cache: bool = False,
+    ):
 
         # Ensure that the dictionaries are hashable to allow use of caching
         raw_input_dims = HashableOrderedDict(raw_input_dims)
@@ -72,62 +126,50 @@ class ExpertDataLoader:
         if trn_cat:
             raise NotImplementedError(f"Support for trn cat will need to be re-added")
 
+        common_kwargs = dict(
+            task=task,
+            logger=logger,
+            data_dir=data_dir,
+            text_dim=text_dim,
+            text_agg=text_agg,
+            eval_only=eval_only,
+            text_feat=text_feat,
+            max_tokens=max_tokens,
+            dataset_name=dataset_name,
+            text_dropout=text_dropout,
+            fuse_captions=fuse_captions,
+            spatial_feats=spatial_feats,
+            split_name=split_name,
+            challenge_mode=challenge_mode,
+            root_feat_folder=root_feat_folder,
+            use_zeros_for_missing=use_zeros_for_missing,
+            challenge_test_root_feat_folder=challenge_test_root_feat_folder,
+            num_test_captions=num_test_captions,
+            raw_input_dims=raw_input_dims,
+            feat_aggregation=feat_aggregation,
+            restrict_train_captions=restrict_train_captions,
+        )
+
         if "retrieval" in task:
-            dataset = dataset_loader(
-                dataset_name=dataset_name,
-                task=task,
-                logger=logger,
-                data_dir=data_dir,
-                text_dim=text_dim,
-                text_agg=text_agg,
-                text_feat=text_feat,
-                max_tokens=max_tokens,
-                text_dropout=text_dropout,
-                use_zeros_for_missing=use_zeros_for_missing,
-                fuse_captions=fuse_captions,
-                spatial_feats=spatial_feats,
-                split_name=split_name,
-                raw_input_dims=raw_input_dims,
-                num_test_captions=num_test_captions,
-                feat_aggregation=feat_aggregation,
-                restrict_train_captions=restrict_train_captions,
-                cls_partition="train",
-            )
+            dataset = dataset_loader(cls_partition="train", **common_kwargs)
             x = dataset_loader.cache_info()  # pylint: disable=no-value-for-parameter
             logger.info(f"cache info {x}")
-            train_loader = DataLoader(
-                dataset=dataset,
-                batch_size=batch_size,
-                num_workers=num_workers,
-                collate_fn=dataset.collate_data,
-                drop_last=drop_last,
-                shuffle=True,
-            )
-            self.dataloaders = {"train": train_loader, "dataset": dataset}
+            self.dataloaders = {"dataset": dataset}
             self.dataloaders["retrieval"] = dataset.get_retrieval_data()
+            if not eval_only:
+                train_loader = DataLoader(
+                    dataset=dataset,
+                    batch_size=batch_size,
+                    num_workers=num_workers,
+                    collate_fn=dataset.collate_data,
+                    drop_last=drop_last,
+                    shuffle=True,
+                )
+                self.dataloaders["train"] = train_loader
         else:
             self.dataloaders = {}
             for cls_partition in cls_partitions:
-                cls_dataset = dataset_loader(
-                    dataset_name=dataset_name,
-                    task=task,
-                    logger=logger,
-                    data_dir=data_dir,
-                    text_dim=text_dim,
-                    text_agg=text_agg,
-                    text_feat=text_feat,
-                    max_tokens=max_tokens,
-                    text_dropout=text_dropout,
-                    fuse_captions=fuse_captions,
-                    spatial_feats=spatial_feats,
-                    split_name=split_name,
-                    raw_input_dims=raw_input_dims,
-                    feat_aggregation=feat_aggregation,
-                    num_test_captions=num_test_captions,
-                    use_zeros_for_missing=use_zeros_for_missing,
-                    restrict_train_captions=restrict_train_captions,
-                    cls_partition=cls_partition,
-                )
+                cls_dataset = dataset_loader(cls_partition=cls_partition, **common_kwargs)
                 x = dataset_loader.cache_info()  # pylint: disable=no-value-for-parameter
                 logger.info(f"cache info [{cls_partition}] {x}")
                 loader = DataLoader(

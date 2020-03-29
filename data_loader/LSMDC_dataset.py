@@ -2,7 +2,9 @@
 """
 import copy
 from pathlib import Path
+from typing import Dict, Union, List
 
+from typeguard import typechecked
 from zsvision.zs_utils import memcache, concat_features
 
 from utils import memory_summary
@@ -12,13 +14,17 @@ from base.base_dataset import BaseDataset
 class LSMDC(BaseDataset):
 
     @staticmethod
-    def dataset_paths(split_name, text_feat):
-        assert split_name in {"full-val", "full-test"}
-        subset_paths = {"train": "train_list.txt"}
-        if split_name == "full-val":
-            subset_paths["val"] = "val_list.txt"
-        else:
-            subset_paths["val"] = "test_list.txt"
+    @typechecked
+    def dataset_paths() -> Dict[str, Union[Path, str, Dict, List[str]]]:
+        subset_paths = {}
+        test_splits = {
+            "full-val": "val_list.txt",
+            "full-test": "test_list.txt",
+            "public_server_val": "public_server_val.txt",
+            "public_server_test": "public_server_test.txt",
+        }
+        for split_name, fname in test_splits.items():
+            subset_paths[split_name] = {"train": "train_list.txt", "val": fname}
 
         feature_names = [
             "imagenet.senet154.0",
@@ -37,20 +43,21 @@ class LSMDC(BaseDataset):
             "audio": ["aggregated_audio/vggish-raw.pickle"],
             "ocr": ["aggregated_ocr_feats/ocr-w2v.pkl"],
             "face": ["antoine/face-max-with-blank-val.pickle"],
-            "flow": ["antoine/i3d-i3d-max-fps25-stride25.pickle"],
             "speech": ["aggregated_speech/speech-w2v.pickle"],
         }
-        if text_feat == "openai":
-            text_feat_name = "openai-feats.pkl"
-        elif text_feat == "w2v":
-            text_feat_name = "w2v.pkl"
-        else:
-            raise ValueError(f"Text features {text_feat} not supported.")
+        text_feat_paths = {"openai": "openai-text.pickle", "w2v": "w2v-text.pickle"}
+        text_feat_paths = {key: Path("aggregated_text_feats") / fname
+                           for key, fname in text_feat_paths.items()}
+        challenge_text_feat_paths = {
+            key: Path("aggregated_text_feats") / f"{key}{fname.suffix}"
+            for key, fname in text_feat_paths.items()
+        }
         feature_info = {
             "custom_paths": custom_paths,
             "feature_names": feature_names,
             "subset_list_paths": subset_paths,
-            "text_feat_path": Path("aggregated_text_feats") / text_feat_name,
+            "text_feat_paths": text_feat_paths,
+            "challenge_text_feat_paths": challenge_text_feat_paths,
             "raw_captions_path": "raw-captions.pkl",
         }
         return feature_info
@@ -83,8 +90,12 @@ class LSMDC(BaseDataset):
                 features[expert] = copy.deepcopy(features_)
 
         self.features = features
-        self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
-        self.text_features = memcache(root_feat / self.paths["text_feat_path"])
+        if self.challenge_mode:
+            self.load_challenge_text_features()
+        else:
+            self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
+            text_feat_path = root_feat / self.paths["text_feat_path"][self.text_feat]
+            self.text_features = memcache(text_feat_path)
 
     def sanity_checks(self):
         msg = (f"Expected to have single test caption for LSMDC, since we assume "

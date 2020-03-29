@@ -1,7 +1,9 @@
 import time
 import inspect
+import logging
 import functools
 from abc import abstractmethod
+from typing import Dict, Union
 from pathlib import Path
 from collections import OrderedDict
 
@@ -9,10 +11,11 @@ import numpy as np
 import torch as th
 from numpy.random import randint
 from torch.utils.data import Dataset
-from zsvision.zs_utils import memcache
+from typeguard import typechecked
 
 import data_loader
 from utils.util import ensure_tensor, expert_tensor_storage
+from zsvision.zs_utils import memcache
 
 # For SLURM usage, buffering makes it difficult to see events as they happen, so we set
 # the global print statement to enforce flushing
@@ -21,15 +24,17 @@ print = functools.partial(print, flush=True)
 
 class BaseDataset(Dataset):
 
+    @staticmethod
     @abstractmethod
-    def sanity_checks(self):
-        """Run sanity checks on loaded data
+    @typechecked
+    def dataset_paths() -> Dict[str, Union[Path, str]]:
+        """Generates a datastructure containing all the paths required to load features
         """
         raise NotImplementedError
 
     @abstractmethod
-    def dataset_paths(self):
-        """Generates a datastructure containing all the paths required to load features
+    def sanity_checks(self):
+        """Run sanity checks on loaded data
         """
         raise NotImplementedError
 
@@ -39,17 +44,39 @@ class BaseDataset(Dataset):
         """
         raise NotImplementedError
 
-    def __init__(self, data_dir, feat_aggregation, raw_input_dims, num_test_captions,
-                 split_name, text_dim, text_feat, fuse_captions, text_agg, text_dropout,
-                 max_tokens, restrict_train_captions, spatial_feats, logger,
-                 use_zeros_for_missing, task, cls_partition):
-
+    @typechecked
+    def __init__(
+            self,
+            data_dir: Path,
+            fuse_captions: bool,
+            spatial_feats: bool,
+            challenge_mode: bool,
+            eval_only: bool,
+            use_zeros_for_missing: bool,
+            task: str,
+            text_agg: str,
+            text_feat: str,
+            split_name: str,
+            cls_partition: str,
+            root_feat_folder: str,
+            challenge_test_root_feat_folder: str,
+            text_dim: int,
+            num_test_captions: int,
+            restrict_train_captions: int,
+            max_tokens: Dict[str, int],
+            text_dropout: float,
+            logger: logging.Logger,
+            raw_input_dims: Dict[str, int],
+            feat_aggregation: Dict[str, Dict],
+    ):
         self.task = task
+        self.eval_only = eval_only
+        self.logger = logger
+        self.challenge_mode = challenge_mode
         self.text_feat = text_feat
         self.data_dir = data_dir
         self.text_dim = text_dim
         self.spatial_feats = spatial_feats
-        self.logger = logger
         self.text_dropout = text_dropout
         self.restrict_train_captions = restrict_train_captions
         self.max_tokens = max_tokens
@@ -57,7 +84,8 @@ class BaseDataset(Dataset):
         self.fuse_captions = fuse_captions
         self.num_test_captions = num_test_captions
         self.feat_aggregation = feat_aggregation
-        self.root_feat = Path(data_dir) / "structured-symlinks"
+        self.root_feat = data_dir / root_feat_folder
+        self.challenge_test_root_feat_folder = data_dir / challenge_test_root_feat_folder
         self.experts = set(raw_input_dims.keys())
 
         # This attributes can be overloaded by different datasets, so it must be set
@@ -231,9 +259,8 @@ class BaseDataset(Dataset):
                             self.logger.info(msg)
                         text_feats = candidates_sentences[test_caption_idx][: keep]
                         if text_feats.size == 0:
-                            print("WARNING-WARNING: EMPTY TEXT FEATURES!")
                             text_feats = 0
-                            import ipdb; ipdb.set_trace()
+                            raise ValueError("empty text features!")
                         self.text_retrieval[ii, test_caption_idx, :keep, :] = text_feats
 
         self.sanity_checks()
@@ -244,20 +271,25 @@ class BaseDataset(Dataset):
         Args:
             split_name (str): the name of the split
         """
-        self.paths = type(self).dataset_paths(
-            split_name=split_name,
-            text_feat=self.text_feat,
-        )
+        self.paths = type(self).dataset_paths()
         print("loading training/val splits....")
         tic = time.time()
-        for subset, path in self.paths["subset_list_paths"].items():
-            subset_list_path = Path(self.root_feat) / path
-            with open(subset_list_path) as f:
-                rows = f.read().splitlines()
+        for subset, path in self.paths["subset_list_paths"][split_name].items():
+            if self.challenge_mode and split_name == "public_server_test" \
+                    and subset == "val":
+                root_feat = Path(self.challenge_test_root_feat_folder)
+            else:
+                root_feat = Path(self.root_feat)
+            subset_list_path = root_feat / path
+            if subset == "train" and self.eval_only:
+                rows = []
+            else:
+                with open(subset_list_path) as f:
+                    rows = f.read().splitlines()
                 if isinstance(self, data_loader.DiDeMo_dataset.DiDeMo):
                     # For DiDeMo, we need to remove additional video suffixes
                     rows = [x.strip().split(".")[0] for x in rows]
-                self.partition_lists[subset] = rows
+            self.partition_lists[subset] = rows
         print("done in {:.3f}s".format(time.time() - tic))
         self.split_name = split_name
 
@@ -520,7 +552,22 @@ class BaseDataset(Dataset):
                         missing += 1
                     else:
                         sizes.append(len(val))
-                stat_str = (f"min: {np.min(sizes):4}, "
-                            f"max: {np.max(sizes):4}, "
-                            f"mean: {np.mean(sizes):.1f}")
-                print(f"{subset}: missing: {missing:4}, {stat_str} {expert}")
+                if sizes:
+                    stat_str = (f"min: {np.min(sizes):4}, "
+                                f"max: {np.max(sizes):4}, "
+                                f"mean: {np.mean(sizes):.1f}")
+                    print(f"{subset}: missing: {missing:4}, {stat_str} {expert}")
+
+    def load_challenge_text_features(self):
+        """Load the text features and raw captions to be used in the challenge.
+        """
+        text_feat_path = self.paths["challenge_text_feat_paths"][self.text_feat]
+        if self.split_name == "public_server_test":
+            text_path = self.challenge_test_root_feat_folder / text_feat_path
+            caption_path = (self.challenge_test_root_feat_folder /
+                            self.paths["raw_captions_path"])
+        else:
+            text_path = Path(self.root_feat) / text_feat_path
+            caption_path = Path(self.root_feat) / self.paths["raw_captions_path"]
+        self.text_features = memcache(text_path)
+        self.raw_captions = memcache(caption_path)

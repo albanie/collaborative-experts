@@ -11,7 +11,7 @@ import argparse
 from pathlib import Path
 
 
-def upload_to_server(web_dir, dataset, webserver, root_feat_dir, refresh):
+def upload_to_server(web_dir, dataset, webserver, refresh):
     server_dir = Path(web_dir) / "data" / "features-v2"
     subprocess.call(["ssh", webserver, "mkdir -p", str(server_dir)])
     compressed_file = f"{dataset}-experts.tar.gz"
@@ -85,7 +85,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    server_root_feat_dir = Path("data") / args.dataset / "symlinked-feats"
     refresh_targets = {
         "server": args.refresh_server,
         "compression": args.refresh_compression,
@@ -98,7 +97,6 @@ if __name__ == "__main__":
             dataset=args.dataset,
             refresh=refresh_targets,
             webserver=args.webserver,
-            root_feat_dir=server_root_feat_dir,
         )
     elif args.action == "fetch":
         fetch_from_server(

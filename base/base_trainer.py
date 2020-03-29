@@ -1,15 +1,14 @@
-import torch
-from abc import abstractmethod
 import re
-import time
 import copy
-from pathlib import Path
-from numpy import inf
-from logger import TensorboardWriter
-import numpy as np
-from utils.util import mkdir
+import time
 import pickle
-from sklearn.metrics import average_precision_score
+from abc import abstractmethod
+from pathlib import Path
+
+import numpy as np
+import torch
+
+from logger import TensorboardWriter
 
 
 class BaseTrainer:
@@ -50,8 +49,8 @@ class BaseTrainer:
             self.mnt_mode, self.mnt_metric = self.monitor.split()
             assert self.mnt_mode in ['min', 'max']
 
-            self.mnt_best = inf if self.mnt_mode == 'min' else -inf
-            self.early_stop = cfg_trainer.get('early_stop', inf)
+            self.mnt_best = np.inf if self.mnt_mode == 'min' else -np.inf
+            self.early_stop = cfg_trainer.get('early_stop', np.inf)
 
         self.start_epoch = 1
 
@@ -124,8 +123,8 @@ class BaseTrainer:
 
                 if improved:
                     self.mnt_best = log[self.mnt_metric]
-                    # TODO(Samuel): refactor the code so that we don't move the model
-                    # off the GPU or duplicate on the GPU (we should be able to safely
+                    # TODO(Samuel): refactor the code so that we don't move the model
+                    # off the GPU or duplicate on the GPU (we should be able to safely
                     # copy the state dict directly to CPU)
                     cpu_model = copy.deepcopy(self.model).cpu()
                     self.best_checkpoint = {"epoch": epoch, "model": cpu_model}
@@ -178,11 +177,10 @@ class BaseTrainer:
                                 pred_classes = [str(v) for v in sort_predict[kk, :]]
                                 vid_name = cached["vid_name"][kk]
                                 if key == "test":
-                                    vid_name = vid_name[kk].split('/')[-1]+'.mp4'
+                                    vid_name = vid_name[kk].split('/')[-1] + '.mp4'
                                 row = f"{vid_name} {' '.join(pred_classes)}"
                                 print(row, file=f)
                                 vid_names.append(vid_name)
-                    
                         save_name_path = log_dir / f"{key}_vid_name.pkl"
                         with open(save_name_path, 'wb') as f:
                             pickle.dump(vid_names, f)

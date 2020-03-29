@@ -1,25 +1,28 @@
 import copy
+from typing import Dict, Union, List
 from pathlib import Path
 
-from utils import memory_summary
 from zsvision.zs_utils import memcache, concat_features
+from typeguard import typechecked
+
+from utils import memory_summary
 from base.base_dataset import BaseDataset
 
 
 class ActivityNet(BaseDataset):
 
     @staticmethod
-    def dataset_paths(split_name, text_feat):
-        train_list_path = "train_list.txt"
-        if split_name == "val1":
-            test_list_path = "val_1_list.txt"
-            raw_caps_name = "raw-captions-train-val_1.pkl"
-        elif split_name == "val2":
-            test_list_path = "val_2_list.txt"
-            raw_caps_name = "raw-captions-train-val_2.pkl"
-        else:
-            raise ValueError(f"Unrecognised activity-net split: {split_name}")
-        subset_paths = {"train": train_list_path, "val": test_list_path}
+    @typechecked
+    def dataset_paths() -> Dict[str, Union[str, List[str], Path, Dict]]:
+        subset_paths = {}
+        test_splits = {
+            "val1": "val_1_list.txt",
+            "val": "val_list.txt",
+            "public_server_val": "public_server_val.txt",
+            "public_server_test": "public_server_test.txt",
+        }
+        for split_name, fname in test_splits.items():
+            subset_paths[split_name] = {"train": "train_list.txt", "val": fname}
 
         feature_names = [
             "imagenet.senet154.0",
@@ -38,16 +41,22 @@ class ActivityNet(BaseDataset):
             "ocr": ["aggregated_ocr_feats/ocr-w2v.pkl"],
             "face": ["aggregated_facefeats_25fps_256px_stride1/face-avg.pickle"],
         }
-        text_feat_names = {key: f"{text_feat}-{key}"
-                           for key in {"train", "val1", "val2"}}
-        text_feat_paths = {key: f"aggregated_text_feats/{val}.pkl"
-                           for key, val in text_feat_names.items()}
+        text_feat_paths = {}
+        challenge_text_feat_paths = {}
+        for text_feat in ("openai", ):
+            text_feat_names = {key: f"{text_feat}-{key}"
+                               for key in {"train", "val1"}}
+            text_feat_paths[text_feat] = {key: f"aggregated_text_feats/{val}.pkl"
+                                          for key, val in text_feat_names.items()}
+            challenge_text_feat_paths[text_feat] = \
+                f"aggregated_text_feats/{text_feat}.pkl"
         feature_info = {
-            "subset_list_paths": subset_paths,
-            "feature_names": feature_names,
             "custom_paths": custom_paths,
+            "feature_names": feature_names,
+            "subset_list_paths": subset_paths,
             "text_feat_paths": text_feat_paths,
-            "raw_captions_path": raw_caps_name,
+            "challenge_text_feat_paths": challenge_text_feat_paths,
+            "raw_captions_path": "raw-captions-train-val_1.pkl",
         }
         return feature_info
 
@@ -79,10 +88,14 @@ class ActivityNet(BaseDataset):
                 features[expert] = copy.deepcopy(features_)
 
         self.features = features
-        self.text_features = memcache(root_feat / self.paths["text_feat_paths"]["train"])
-        self.text_features.update(
-            memcache(root_feat / self.paths["text_feat_paths"][self.split_name]))
-        self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
+        if self.challenge_mode:
+            self.load_challenge_text_features()
+        else:
+            self.text_features = memcache(root_feat /
+                                          self.paths["text_feat_paths"]["train"])
+            self.text_features.update(
+                memcache(root_feat / self.paths["text_feat_paths"][self.split_name]))
+            self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
 
     def sanity_checks(self):
         msg = (f"Expected to have single test caption for ANet, since we assume"

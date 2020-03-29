@@ -15,10 +15,10 @@ import torch
 import psutil
 import humanize
 from PIL import Image
-from zsvision.zs_beartype import beartype
+from typeguard import typechecked
 
 
-@beartype
+@typechecked
 def set_seeds(seed: int):
     """Set seeds for randomisation libraries.
 
@@ -30,7 +30,6 @@ def set_seeds(seed: int):
     torch.manual_seed(seed)
 
 
-@beartype
 def update_src_web_video_dir(config):
     """Provide backwards compatible support for web directories
 
