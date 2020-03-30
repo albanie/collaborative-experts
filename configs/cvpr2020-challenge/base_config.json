@@ -44,8 +44,8 @@
             "trn_cat": 0,
             "batch_size": 32,
             "num_workers": 4,
-            "root_feat_folder": "challenge-release-1-dummy",
-            "challenge_test_root_feat_folder": "challenge-release-2-dummy",
+            "root_feat_folder": "challenge-release-1",
+            "challenge_test_root_feat_folder": "challenge-release-2",
             "text_dropout": 0.0,
             "feat_aggregation": {
                 "imagenet.senet154.0": {

@@ -1,7 +1,8 @@
 """Simple baselines for the CVPR2020 video pentathlon challenge
 
 %run -i misc/cvpr2020_challenge/train_baselines.py --mini_train --train_single_epoch
-ipy misc/cvpr2020_challenge/train_baselines.py -- --mini_train --train_single_epoch --yaspify
+ipy misc/cvpr2020_challenge/train_baselines.py -- --mini_train --train_single_epoch \
+    --yaspify
 """
 
 import sys
@@ -62,12 +63,13 @@ def parse_paths_from_logs(logs: List[str]) -> Dict[str, Path]:
 @typechecked
 def train_baselines(
         dest_dir: Path,
-        challenge_config_dir: Path, 
+        challenge_config_dir: Path,
         datasets: List[str],
         timestamp: str,
         mini_train: bool,
         train_single_epoch: bool,
         device: int,
+        slurm: bool,
         aggregate: bool = False,
 ):
     challenge_phase = "public_server_val"
@@ -105,6 +107,7 @@ def train_baselines(
         with open(dest_path, "w") as f:
             json.dump(outputs[key], f)
 
+    if not slurm:
         generate_predictions(
             refresh=True,
             validate=True,
@@ -145,6 +148,7 @@ def main():
         timestamp=timestamp,
         dest_dir=args.dest_dir,
         datasets=args.datasets,
+        slurm=args.slurm,
         mini_train=args.mini_train,
         train_single_epoch=args.train_single_epoch,
         challenge_config_dir=args.challenge_config_dir,
