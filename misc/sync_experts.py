@@ -20,6 +20,15 @@ from typeguard import typechecked
 
 
 @typechecked
+def get_archive_name(dataset: str, release: str) -> str:
+    if release.startswith("challenge-release"):
+        archive_name = f"{release}-{dataset}-experts.tar.gz"
+    else:
+        archive_name = f"{dataset}-experts.tar.gz"
+    return archive_name
+
+
+@typechecked
 def upload_to_server(
     web_dir: Path,
     dataset: str,
@@ -36,7 +45,7 @@ def upload_to_server(
     else:
         dataset_dir = Path("misc/datasets") / dataset.lower()
         tar_include = dataset_dir / "tar_include.txt"
-        compressed_file = f"{dataset}-experts.tar.gz"
+    compressed_file = get_archive_name(dataset=dataset, release=release)
     compressed_path = Path("data") / dataset / "webserver-files" / compressed_file
     if not compressed_path.parent.exists():
         compressed_path.parent.mkdir(exist_ok=True, parents=True)
@@ -68,6 +77,7 @@ def fetch_from_server(
         dataset: str,
         root_url: str,
         purge_tar_file: bool,
+        release: str,
         refresh: Dict[str, bool],
         access_code: str = None,
 ):
@@ -78,13 +88,12 @@ def fetch_from_server(
         return
 
     local_data_dir.mkdir(exist_ok=True, parents=True)
-    archive_name = f"{dataset}-experts.tar.gz"
+    archive_name = get_archive_name(dataset=dataset, release=release)
     local_archive = local_data_dir / archive_name
     if not local_archive.exists():
         if access_code:
             access_hash = hashlib.sha256(access_code.encode("utf-8")).hexdigest()[:10]
             archive_name = f"{access_hash}-{archive_name}"
-        import ipdb; ipdb.set_trace()
         src_url = f"{root_url}/features-v2/{archive_name}"
         wget_args = ["wget", f"--output-document={str(local_archive)}", src_url]
         print(f"running command: {' '.join(wget_args)}")
