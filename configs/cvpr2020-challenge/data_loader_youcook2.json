@@ -1,0 +1,179 @@
+{
+    "inherit_from": "configs/cvpr2020-challenge/base_config.json",
+    "eval_mode": "test_run",
+    "experts": {
+        "face_dim": 512,
+        "modalities": [
+            "imagenet.senet154.0",
+            "i3d.i3d.0",
+            "imagenet.resnext101_32x48d.0",
+            "r2p1d.r2p1d-ig65m-kinetics.0",
+            "r2p1d.r2p1d-ig65m.0",
+            "s3dg.s3dg.0",
+            "audio.vggish.0",
+            "ocr"
+        ],
+        "ce_shared_dim": 512
+    },
+    "arch": {
+        "type": "CENet",
+        "args": {
+            "test_caption_mode": "indep",
+            "use_ce": "pairwise",
+            "use_mish": 1,
+            "use_bn_reason": 1,
+            "num_g_layers": 3,
+            "num_h_layers": 0,
+            "include_self": 1,
+            "l2renorm": false,
+            "randomise_feats": "",
+            "vlad_clusters": {
+                "ocr": 75,
+                "text": 20,
+                "audio": 16,
+                "speech": 32,
+                "detection-sem": 50
+            },
+            "ghost_clusters": {
+                "text": 1,
+                "ocr": 1
+            },
+            "mimic_ce_dims": 0
+        }
+    },
+    "optimizer": {
+        "type": "Ranger",
+        "args": {
+            "lr": 0.01,
+            "weight_decay": 1E-03
+        }
+    },
+    "loss": {
+        "type": "MaxMarginRankingLoss",
+        "args": {
+            "margin": 0.2,
+            "fix_norm": true
+        }
+    },
+    "data_loader": {
+        "type": "ExpertDataLoader",
+        "args":{
+            "dataset_name": "YouCook2",
+            "data_dir": "data/YouCook2",
+            "trn_cat": 0,
+            "batch_size": 128,
+            "split_name": "val",
+            "fuse_captions": false,
+            "num_test_captions": 1,
+            "max_tokens": {
+                "ocr": 30, 
+                "text": 20,
+                "audio": 29
+            },
+            "feat_aggregation": {
+                "imagenet.senet154.0": {
+                    "fps": 25,
+                    "stride": 5,
+                    "pixel_dim": 256,
+                    "aggregate-axis": 1,
+                    "offset": 0,
+                    "temporal": "avg",
+                    "aggregate": "concat",
+                    "type": "embed",
+                    "feat_dims": {
+                        "embed": 2048,
+                        "logits": 1000
+                    }
+                },
+                "imagenet.resnext101_32x48d.0": {
+                    "fps": 25,
+                    "stride": 5,
+                    "offset": 0,
+                    "pixel_dim": 256,
+                    "temporal": "avg",
+                    "aggregate": "concat",
+                    "aggregate-axis": 1,
+                    "type": "embed",
+                    "feat_dims": {
+                        "embed": 2048,
+                        "logits": 1000
+                    }
+                },
+                "scene.densenet161.0": {
+                    "stride": 5,
+                    "fps": 25,
+                    "offset": 0,
+                    "temporal": "avg",
+                    "pixel_dim": 256,
+                    "aggregate": "concat",
+                    "aggregate-axis": 1,
+                    "type": "embed",
+                    "feat_dims": {
+                        "embed": 2208,
+                        "logits": 1000
+                    }
+                },
+                "i3d.i3d.0": {
+                    "fps": 25,
+                    "offset": 0,
+                    "stride": 25,
+                    "inner_stride": 1,
+                    "pixel_dim": 256,
+                    "temporal": "avg",
+                    "aggregate": "concat",
+                    "aggregate-axis": 1,
+                    "type": "embed",
+                    "feat_dims": {
+                        "embed": 1024,
+                        "logits": 400
+                    }
+                },
+                "r2p1d.r2p1d-ig65m.0": {
+                    "fps": 30,
+                    "offset": 0,
+                    "stride": 32,
+                    "inner_stride": 1,
+                    "pixel_dim": 256,
+                    "temporal": "avg",
+                    "aggregate": "concat",
+                    "aggregate-axis": 1,
+                    "type": "embed",
+                    "feat_dims": {
+                        "embed": 512,
+                        "logits": 359
+                    }
+                },
+                "r2p1d.r2p1d-ig65m-kinetics.0": {
+                    "fps": 30,
+                    "offset": 0,
+                    "stride": 32,
+                    "inner_stride": 1,
+                    "pixel_dim": 256,
+                    "temporal": "avg",
+                    "aggregate": "concat",
+                    "aggregate-axis": 1,
+                    "type": "embed",
+                    "feat_dims": {
+                        "embed": 512,
+                        "logits": 400
+                    }
+                }
+            }
+        }
+    },
+    "trainer": {
+        "epochs": 20
+    },
+    "eval_settings": {
+        "data_loader": {
+            "args": {
+                "split_name": "public_server_val"
+            }
+        },
+        "tester": {
+            "save_dir": "data/saved/",
+            "verbosity": 2
+        },
+        "disable_gpu": true
+    }
+}

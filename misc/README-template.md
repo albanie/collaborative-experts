@@ -14,6 +14,11 @@ This repo provides code for learning and evaluating joint video-text embeddings 
 **Important: A note on the updated results**: A previous version of the codebase (and paper) reported results on the retrieval benchmarks that included a signficant software bug leading to an overestimate of performance.  We are extremely grateful to Valentin Gabeur who discovered this bug (it has been corrected in the current codebase).
 
 
+### CVPR 2020: Pentathlon challenge
+
+We are hosting a video retrieval challenge as part of the [Video Pentathlon Workshop](https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/index.html).  Details relating to the challenge can be found [here](misc/challenge.md).
+
+
 ### Pretrained video embeddings
 
 We provide pretrained models for each dataset to reproduce the results reported in the paper [1] (references follow at the end of this README).  Each model is accompanied by training and evaluation logs.  Performance is evalauted for retrieval in both directions (joint-embeddings can be used for either of these two tasks):
@@ -42,15 +47,6 @@ Models marked with * use the features made available with the MoEE model of [2] 
 
 See the [MSRVTT README](misc/datasets/msrvtt/README.md) for links to the train/val/test lists of each split.
 
-**LSMDC Benchmark**
-
-| Model | Task | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
-| ------| ------| ---:| ---:| ----:| ----:|----:|----:|------:|
-| CE | t2v  | {{lsmdc-train-full-ce.t2v}} | [config]({{lsmdc-train-full-ce.config}}), [model]({{lsmdc-train-full-ce.model}}), [log]({{lsmdc-train-full-ce.log}}) |
-| CE | v2t  | {{lsmdc-train-full-ce.v2t}} | [config]({{lsmdc-train-full-ce.config}}), [model]({{lsmdc-train-full-ce.model}}), [log]({{lsmdc-train-full-ce.log}}) |
-
-See the [LSMDC README](misc/datasets/lsmdc/README.md) for descriptions of the train/test splits.
-
 **MSVD Benchmark**
 
 | Model | Task | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
@@ -77,6 +73,16 @@ See the [DiDeMo README](misc/datasets/didemo/README.md) for descriptions of the 
 | CE | v2t  | {{activity-net-train-full-ce.v2t}} | [config]({{activity-net-train-full-ce.config}}), [model]({{activity-net-train-full-ce.model}}), [log]({{activity-net-train-full-ce.log}}) |
 
 See the [ActivityNet README](misc/datasets/activity-net/README.md) for descriptions of the train/test splits.
+
+**LSMDC Benchmark**
+
+| Model | Task | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
+| ------| ------| ---:| ---:| ----:| ----:|----:|----:|------:|
+| CE | t2v  | {{lsmdc-train-full-ce.t2v}} | [config]({{lsmdc-train-full-ce.config}}), [model]({{lsmdc-train-full-ce.model}}), [log]({{lsmdc-train-full-ce.log}}) |
+| CE | v2t  | {{lsmdc-train-full-ce.v2t}} | [config]({{lsmdc-train-full-ce.config}}), [model]({{lsmdc-train-full-ce.model}}), [log]({{lsmdc-train-full-ce.log}}) |
+
+See the [LSMDC README](misc/datasets/lsmdc/README.md) for descriptions of the train/test splits. Please note that to obtain the features and descriptions for this dataset, you must obtain permission from MPII to use the data (this is process is described [here](https://www.mpi-inf.mpg.de/departments/computer-vision-and-machine-learning/research/vision-and-language/mpii-movie-description-dataset/request-access-to-mpii-movie-description-dataset/).  Once you have done so, please request that a member of the LSMDC team contacts us to confirm approval (via albanie at robots dot ox dot ac dot uk) - we can then provide you with a link to the features.
+
 
 
 <<misc/README-ablations-template.md:msrvtt:msrvtt>>

@@ -1,0 +1,36 @@
+{
+    "inherit_from": "configs/data_loader_youcook2.json",
+    "experts": {
+        "face_dim": 512,
+        "text_dim": 300,
+        "text_feat": "w2v",
+        "modalities": [
+            "imagenet.senet154.0",
+            "i3d.i3d.0",
+            "audio"
+        ],
+        "ce_shared_dim": 512
+    },
+    "arch": {
+        "args": {
+            "test_caption_mode": "indep",
+            "use_ce": "pairwise",
+            "vlad_clusters": {
+                "text": 20
+            }
+        }
+    },
+    "data_loader": {
+        "type": "ExpertDataLoader",
+        "args":{
+            "dataset_name": "YouCook2",
+            "data_dir": "data/YouCook2",
+            "trn_cat": 0,
+            "batch_size": 128,
+            "max_tokens": {
+                "ocr": 30, 
+                "text": 30
+            }
+        }
+    }
+}

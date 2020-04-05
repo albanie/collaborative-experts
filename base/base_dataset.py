@@ -127,10 +127,11 @@ class BaseDataset(Dataset):
             self.class_type = None
 
         self.raw_input_dims = raw_input_dims
-        # we store paths to enable visualisations
-        video_paths = [Path(data_dir) / f"videos/{x}.mp4" for x in
-                       self.partition_lists["val"]]
-        self.video_path_retrieval = video_paths
+
+        # we store default paths to enable visualisations (this can be overloaded by
+        # dataset-specific classes)
+        self.video_path_retrieval = [f"videos/{x}.mp4" for x
+                                     in self.partition_lists["val"]]
 
         # NOTE: We use nans rather than zeros to indicate missing faces, unless we wish
         # to test single modality strength, which requires passing zeroed features for

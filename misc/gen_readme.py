@@ -108,6 +108,7 @@ def dataset_paths(
         "msrvtt": "MSRVTT",
         "didemo": "DiDeMo",
         "activity-net": "ActivityNet",
+        "youcook2": "YouCook2",
     }
     if dataset in set(name_map.values()):
         class_name = dataset
@@ -343,10 +344,13 @@ def main():
     parser.add_argument("--keep_mnr", action="store_true")
     parser.add_argument("--readme_dest", default="README.md")
     parser.add_argument("--ablation_readme_dest", default="misc/ablations.md")
+    parser.add_argument("--challenge_readme_dest", default="misc/challenge.md")
     parser.add_argument("--ablation_readme_template",
                         default="misc/ablations-template.md")
+    parser.add_argument("--challenge_readme_template",
+                        default="misc/README-challenge-template.md")
     parser.add_argument("--task", default="generate_readme",
-                        choices=["gen_tar_lists", "sync_files", "generate_readme"])
+                        choices=["sync_files", "generate_readme"])
     parser.add_argument(
         "--web_dir",
         default="/projects/vgg/vgg/WWW/research/collaborative-experts/data",
@@ -360,12 +364,7 @@ def main():
     with open(args.experiments_path, "r") as f:
         experiments = json.load(f)
 
-    if args.task == "gen_tar_lists":
-        generate_tar_lists(
-            save_dir=args.save_dir,
-            experiments=experiments,
-        )
-    elif args.task == "sync_files":
+    if args.task == "sync_files":
         sync_files(
             web_dir=args.web_dir,
             save_dir=args.save_dir,
@@ -373,8 +372,16 @@ def main():
             experiments=experiments,
         )
     elif args.task == "generate_readme":
-        readme_dests = [args.readme_dest, args.ablation_readme_dest]
-        readme_templates = [args.readme_template, args.ablation_readme_template]
+        readme_dests = [
+            args.readme_dest,
+            args.ablation_readme_dest,
+            args.challenge_readme_dest,
+        ]
+        readme_templates = [
+            args.readme_template,
+            args.ablation_readme_template,
+            args.challenge_readme_template,
+        ]
         generate_readme(
             root_url=args.root_url,
             save_dir=args.save_dir,

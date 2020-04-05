@@ -56,4 +56,3 @@ There are undoubtedly many ways to improve upon the baseline. Here are just a fe
 * Trying out new text encodings: currently the system uses either word2vec or OpenAI embeddings and a simple NetVLAD text encoder: there are likely many better ways to encode queries/descriptions
 * Handling missing modalities: currently, missing modalities are simply zero-padded, but handling them in a "smart" way may help performance
 * There are surely many other things we haven't thought of :)
-

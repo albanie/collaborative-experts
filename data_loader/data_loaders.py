@@ -14,6 +14,7 @@ from data_loader.LSMDC_dataset import LSMDC
 from data_loader.DiDeMo_dataset import DiDeMo
 from data_loader.MSRVTT_dataset import MSRVTT
 from data_loader.ActivityNet_dataset import ActivityNet
+from data_loader.YouCook2_dataset import YouCook2
 
 
 @functools.lru_cache(maxsize=64, typed=False)
@@ -59,11 +60,11 @@ def dataset_loader(
         raw_input_dims=raw_input_dims,
         challenge_mode=challenge_mode,
         root_feat_folder=root_feat_folder,
-        challenge_test_root_feat_folder=challenge_test_root_feat_folder,
         feat_aggregation=feat_aggregation,
         num_test_captions=num_test_captions,
         use_zeros_for_missing=use_zeros_for_missing,
         restrict_train_captions=restrict_train_captions,
+        challenge_test_root_feat_folder=challenge_test_root_feat_folder,
     )
     if dataset_name == "MSRVTT":
         dataset = MSRVTT(**kwargs)
@@ -75,6 +76,8 @@ def dataset_loader(
         dataset = DiDeMo(**kwargs)
     elif dataset_name == "ActivityNet":
         dataset = ActivityNet(**kwargs)
+    elif dataset_name == "YouCook2":
+        dataset = YouCook2(**kwargs)
     return dataset
 
 
@@ -99,7 +102,6 @@ class ExpertDataLoader:
             split_name: str,
             dataset_name: str,
             root_feat_folder: str,
-            challenge_test_root_feat_folder: str,
             text_dropout: float,
             cls_partitions: List[str],
             max_tokens: Dict[str, int],
@@ -110,6 +112,7 @@ class ExpertDataLoader:
             restrict_train_captions: int = 0,
             drop_last: bool = False,
             refresh_lru_cache: bool = False,
+            challenge_test_root_feat_folder: str = "challenge",
     ):
 
         # Ensure that the dictionaries are hashable to allow use of caching

@@ -45,6 +45,7 @@ def update_src_web_video_dir(config):
             "MSVD": "MSVD/videos",
             "DiDeMo": "DiDeMo/videos",
             "LSMDC": "LSMDC/videos",
+            "YouCook2": "YouCook2/videos",
         }
         src_video_dir = Path(src_video_dir.parts[0]) / lookup[dataset]
     config["visualizer"]["args"]["src_video_dir"] = Path(src_video_dir)
@@ -161,13 +162,14 @@ def compute_dims(config, logger=None):
     msg = f"It is not valid to use both the `use_ce` and `mimic_ce_dims` options"
     assert not (arch_args["use_ce"] and arch_args.get("mimic_ce_dims", False)), msg
     for expert in ordered:
+        temporal = feat_agg[expert]["temporal"]
         if expert == "face":
             in_dim, out_dim = experts["face_dim"], experts["face_dim"]
-        elif expert == "audio":
+        elif expert == "audio" and temporal == "vlad":
             in_dim, out_dim = 128 * vlad_clusters["audio"], 128
-        elif expert == "speech":
+        elif expert == "speech" and temporal == "vlad":
             in_dim, out_dim = 300 * vlad_clusters["speech"], 300
-        elif expert == "ocr":
+        elif expert == "ocr" and temporal == "vlad":
             in_dim, out_dim = 300 * vlad_clusters["ocr"], 300
         elif expert == "detection":
             # allow for avg pooling
@@ -215,7 +217,8 @@ def compute_dims(config, logger=None):
         raw_dim = dim_pair[0]
         if expert in {"audio", "speech", "ocr", "detection", "detection-sem", "openpose",
                       "speech.mozilla.0"}:
-            raw_dim = raw_dim // vlad_clusters.get(expert, 1)
+            if feat_agg[expert]["temporal"] == "vlad":
+                raw_dim = raw_dim // vlad_clusters.get(expert, 1)
         raw_input_dims[expert] = raw_dim
 
     return expert_dims, raw_input_dims

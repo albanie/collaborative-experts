@@ -43,7 +43,7 @@
             "trn_cat": false,
             "batch_size": 32,
             "num_workers": 4,
-            "root_feat_folder": "challenge-release-1",
+            "root_feat_folder": "structured-symlinks",
             "text_dropout": 0.0,
             "feat_aggregation": {
                 "imagenet.senet154.0": {
@@ -117,6 +117,21 @@
                     "feat_dims": {
                         "embed": 2048,
                         "logits": 3339
+                    }
+                },
+                "s3dg.s3dg.0": {
+                    "fps": 10,
+                    "offset": 0,
+                    "stride": 16,
+                    "pixel_dim": 256,
+                    "inner_stride": 1,
+                    "temporal": "avg",
+                    "aggregate": "concat",
+                    "aggregate-axis": 1,
+                    "type": "embed",
+                    "feat_dims": {
+                        "embed": 1024,
+                        "logits": 512
                     }
                 },
                 "r2p1d.r2p1d-ig65m.0": {

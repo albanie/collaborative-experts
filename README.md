@@ -14,6 +14,11 @@ This repo provides code for learning and evaluating joint video-text embeddings 
 **Important: A note on the updated results**: A previous version of the codebase (and paper) reported results on the retrieval benchmarks that included a signficant software bug leading to an overestimate of performance.  We are extremely grateful to Valentin Gabeur who discovered this bug (it has been corrected in the current codebase).
 
 
+### CVPR 2020: Pentathlon challenge
+
+We are hosting a video retrieval challenge as part of the [Video Pentathlon Workshop](https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/index.html).  Details relating to the challenge can be found [here](misc/challenge.md).
+
+
 ### Pretrained video embeddings
 
 We provide pretrained models for each dataset to reproduce the results reported in the paper [1] (references follow at the end of this README).  Each model is accompanied by training and evaluation logs.  Performance is evalauted for retrieval in both directions (joint-embeddings can be used for either of these two tasks):
@@ -42,15 +47,6 @@ Models marked with * use the features made available with the MoEE model of [2] 
 
 See the [MSRVTT README](misc/datasets/msrvtt/README.md) for links to the train/val/test lists of each split.
 
-**LSMDC Benchmark**
-
-| Model | Task | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
-| ------| ------| ---:| ---:| ----:| ----:|----:|----:|------:|
-| CE | t2v  | <sub><sup>11.2<sub>(0.4)</sub></sup></sub> | <sub><sup>26.9<sub>(1.1)</sub></sup></sub> | <sub><sup>34.8<sub>(2.0)</sub></sup></sub> | <sub><sup>62.1<sub>(1.5)</sub></sup></sub> | <sub><sup>25.3<sub>(3.1)</sub></sup></sub> | <sub><sup>96.8<sub>(5.0)</sub></sup></sub> | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/lsmdc-train-full-ce/b314166a/seed-0/2020-01-22_09-13-44/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/lsmdc-train-full-ce/b314166a/seed-0/2020-01-22_09-13-44/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/lsmdc-train-full-ce/b314166a/seed-0/2020-01-22_09-13-44/summary-seed-0_seed-1_seed-2.json) |
-| CE | v2t  | <sub><sup>11.7<sub>(0.5)</sub></sup></sub> | <sub><sup>25.8<sub>(1.5)</sub></sup></sub> | <sub><sup>34.4<sub>(1.7)</sub></sup></sub> | <sub><sup>61.4<sub>(0.7)</sub></sup></sub> | <sub><sup>28.0<sub>(2.6)</sub></sup></sub> | <sub><sup>97.6<sub>(2.8)</sub></sup></sub> | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/lsmdc-train-full-ce/b314166a/seed-0/2020-01-22_09-13-44/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/lsmdc-train-full-ce/b314166a/seed-0/2020-01-22_09-13-44/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/lsmdc-train-full-ce/b314166a/seed-0/2020-01-22_09-13-44/summary-seed-0_seed-1_seed-2.json) |
-
-See the [LSMDC README](misc/datasets/lsmdc/README.md) for descriptions of the train/test splits.
-
 **MSVD Benchmark**
 
 | Model | Task | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
@@ -77,6 +73,16 @@ See the [DiDeMo README](misc/datasets/didemo/README.md) for descriptions of the 
 | CE | v2t  | <sub><sup>17.7<sub>(0.6)</sub></sup></sub> | <sub><sup>46.6<sub>(0.7)</sub></sup></sub> | <sub><sup>62.8<sub>(0.4)</sub></sup></sub> | <sub><sup>90.9<sub>(0.2)</sub></sup></sub> | <sub><sup>6.0<sub>(0.0)</sub></sup></sub> | <sub><sup>24.4<sub>(0.5)</sub></sup></sub> | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/activity-net-train-full-ce/cf5b1849/seed-0/2020-01-25_16-33-13/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/activity-net-train-full-ce/cf5b1849/seed-0/2020-01-25_16-33-13/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/activity-net-train-full-ce/cf5b1849/seed-0/2020-01-25_16-33-13/summary-seed-0_seed-1_seed-2.json) |
 
 See the [ActivityNet README](misc/datasets/activity-net/README.md) for descriptions of the train/test splits.
+
+**LSMDC Benchmark**
+
+| Model | Task | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
+| ------| ------| ---:| ---:| ----:| ----:|----:|----:|------:|
+| CE | t2v  | <sub><sup>11.2<sub>(0.4)</sub></sup></sub> | <sub><sup>26.9<sub>(1.1)</sub></sup></sub> | <sub><sup>34.8<sub>(2.0)</sub></sup></sub> | <sub><sup>62.1<sub>(1.5)</sub></sup></sub> | <sub><sup>25.3<sub>(3.1)</sub></sup></sub> | <sub><sup>96.8<sub>(5.0)</sub></sup></sub> | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/lsmdc-train-full-ce/b314166a/seed-0/2020-01-22_09-13-44/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/lsmdc-train-full-ce/b314166a/seed-0/2020-01-22_09-13-44/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/lsmdc-train-full-ce/b314166a/seed-0/2020-01-22_09-13-44/summary-seed-0_seed-1_seed-2.json) |
+| CE | v2t  | <sub><sup>11.7<sub>(0.5)</sub></sup></sub> | <sub><sup>25.8<sub>(1.5)</sub></sup></sub> | <sub><sup>34.4<sub>(1.7)</sub></sup></sub> | <sub><sup>61.4<sub>(0.7)</sub></sup></sub> | <sub><sup>28.0<sub>(2.6)</sub></sup></sub> | <sub><sup>97.6<sub>(2.8)</sub></sup></sub> | [config](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/lsmdc-train-full-ce/b314166a/seed-0/2020-01-22_09-13-44/config.json), [model](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/models/lsmdc-train-full-ce/b314166a/seed-0/2020-01-22_09-13-44/trained_model.pth), [log](http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/log/lsmdc-train-full-ce/b314166a/seed-0/2020-01-22_09-13-44/summary-seed-0_seed-1_seed-2.json) |
+
+See the [LSMDC README](misc/datasets/lsmdc/README.md) for descriptions of the train/test splits. Please note that to obtain the features and descriptions for this dataset, you must obtain permission from MPII to use the data (this is process is described [here](https://www.mpi-inf.mpg.de/departments/computer-vision-and-machine-learning/research/vision-and-language/mpii-movie-description-dataset/request-access-to-mpii-movie-description-dataset/).  Once you have done so, please request that a member of the LSMDC team contacts us to confirm approval (via albanie at robots dot ox dot ac dot uk) - we can then provide you with a link to the features.
+
 
 
 

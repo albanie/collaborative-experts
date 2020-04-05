@@ -53,6 +53,7 @@ class MSRVTT(BaseDataset):
             "imagenet.senet154.0",
             "scene.densenet161.0",
             "i3d.i3d.0",
+            "s3dg.s3dg.0",
             "imagenet.resnext101_32x48d.0",
             "trn.moments-trn.0",
             "r2p1d.r2p1d-ig65m.0",
@@ -60,21 +61,18 @@ class MSRVTT(BaseDataset):
             "moments_3d.moments-resnet3d50.0",
             "moments-static.moments-resnet50.0",
         ]
-        if split_name == "miech":
-            custom_paths = {
-                "antoine-rgb": ["antoine/resnet_features.pickle"],
-                "audio": ["antoine/audio_features.pickle"],
-                "flow": ["antoine/flow_features.pickle"],
-                "face": ["antoine/facefeats-clone.pickle"],
-            }
-        else:
-            custom_paths = {
-                "audio": ["aggregated_audio_feats/Audio_MSRVTT_new.pickle"],
-                "face": ["aggregated_face_feats/facefeats-avg.pickle"],
-            }
-        custom_paths.update({
+        custom_paths = {
+            "audio": ["aggregated_audio_feats/Audio_MSRVTT_new.pickle"],
+            "face": ["aggregated_face_feats/facefeats-avg.pickle"],
             "ocr": ["aggregated_ocr_feats/ocr-raw.pickle"],
             "speech": ["aggregated_speech/speech-w2v.pickle"]
+        }
+        custom_miech_paths = custom_paths.copy()
+        custom_miech_paths.update({
+            "antoine-rgb": ["antoine/resnet_features.pickle"],
+            "audio": ["antoine/audio_features.pickle"],
+            "flow": ["antoine/flow_features.pickle"],
+            "face": ["antoine/facefeats-clone.pickle"],
         })
         text_feat_paths = {
             "w2v": "w2v_MSRVTT.pickle",
@@ -87,6 +85,7 @@ class MSRVTT(BaseDataset):
                                      for key in text_feat_paths}
         feature_info = {
             "custom_paths": custom_paths,
+            "custom_miech_paths": custom_miech_paths,
             "feature_names": feature_names,
             "subset_list_paths": subset_paths,
             "text_feat_paths": text_feat_paths,
@@ -100,7 +99,11 @@ class MSRVTT(BaseDataset):
         root_feat = Path(self.root_feat)
         feat_names = {key: self.visual_feat_paths(key) for key in
                       self.paths["feature_names"]}
-        feat_names.update(self.paths["custom_paths"])
+        if self.split_name == "miech":
+            custom_path_key = "custom_miech_paths"
+        else:
+            custom_path_key = "custom_paths"
+        feat_names.update(self.paths[custom_path_key])
         features = {}
         for expert, rel_names in feat_names.items():
             if expert not in self.ordered_experts:

@@ -1,0 +1,27 @@
+{
+    "inherit_from": "configs/data_loader_youcook2.json",
+    "experts": {
+        "face_dim": 512,
+        "modalities": [
+            "imagenet.senet154.0",
+            "imagenet.resnext101_32x48d.0",
+            "i3d.i3d.0"
+        ],
+        "ce_shared_dim": 512
+    },
+    "arch": {
+        "args": {
+            "test_caption_mode": "indep",
+            "use_ce": ""
+        }
+    },
+    "data_loader": {
+        "type": "ExpertDataLoader",
+        "args":{
+            "dataset_name": "YouCook2",
+            "data_dir": "data/YouCook2",
+            "trn_cat": 0,
+            "batch_size": 128
+        }
+    }
+}

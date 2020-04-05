@@ -1,5 +1,5 @@
 {
-    "inherit_from": "configs/cvpr2020-challenge/data_loader_activity-net.json",
+    "inherit_from": "configs/cvpr2020-challenge/data_loader_youcook2.json",
     "experts": {
         "modalities": [
             "imagenet.senet154.0",

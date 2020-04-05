@@ -10,7 +10,8 @@
             "scene.densenet161.0",
             "i3d.i3d.0",
             "face",
-            "ocr"
+            "ocr",
+            "s3dg.s3dg.0"
         ]
     },
     "arch": {

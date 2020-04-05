@@ -2,8 +2,8 @@
     "inherit_from": "configs/cvpr2020-challenge/data_loader_didemo.json",
     "experts": {
         "modalities": [
-            "i3d.i3d.0",
-            "imagenet.senet154.0"
+            "imagenet.senet154.0",
+            "i3d.i3d.0"
         ]
     }
 }

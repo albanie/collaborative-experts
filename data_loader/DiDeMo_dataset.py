@@ -28,6 +28,7 @@ class DiDeMo(BaseDataset):
             "imagenet.senet154.0",
             "scene.densenet161.0",
             "i3d.i3d.0",
+            "s3dg.s3dg.0",
             "imagenet.resnext101_32x48d.0",
             "trn.moments-trn.0",
             "r2p1d.r2p1d-ig65m.0",
@@ -90,7 +91,7 @@ class DiDeMo(BaseDataset):
             self.load_challenge_text_features()
         else:
             self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
-            text_feat_path = root_feat / self.paths["text_feat_path"][self.text_feat]
+            text_feat_path = root_feat / self.paths["text_feat_paths"][self.text_feat]
             self.text_features = memcache(text_feat_path)
 
     def sanity_checks(self):

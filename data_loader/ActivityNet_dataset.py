@@ -28,6 +28,7 @@ class ActivityNet(BaseDataset):
             "imagenet.senet154.0",
             "scene.densenet161.0",
             "i3d.i3d.0",
+            "s3dg.s3dg.0",
             "imagenet.resnext101_32x48d.0",
             "trn.moments-trn.0",
             "r2p1d.r2p1d-ig65m.0",

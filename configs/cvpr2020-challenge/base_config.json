@@ -91,6 +91,21 @@
                         "logits": 1000
                     }
                 },
+                "s3dg.s3dg.0": {
+                    "fps": 10,
+                    "offset": 0,
+                    "stride": 16,
+                    "pixel_dim": 256,
+                    "inner_stride": 1,
+                    "temporal": "avg",
+                    "aggregate": "concat",
+                    "aggregate-axis": 1,
+                    "type": "embed",
+                    "feat_dims": {
+                        "embed": 1024,
+                        "logits": 512
+                    }
+                },
                 "i3d.i3d.0": {
                     "fps": 25,
                     "offset": 0,
@@ -181,7 +196,7 @@
                 },
                 "ocr": {
                     "model": "yang",
-                    "temporal": "vlad",
+                    "temporal": "avg",
                     "type": "embed",
                     "flaky": true,
                     "binarise": false,
@@ -191,9 +206,13 @@
                 },
                 "audio": {
                     "model": "vggish",
-                    "temporal": "vlad",
+                    "temporal": "avg",
+                    "flaky": true,
                     "type": "embed",
-                    "binarise": false
+                    "binarise": false,
+                    "feat_dims": {
+                        "embed": 128
+                    }
                 },
                 "antoine-rgb": {
                     "model": "antoine",
@@ -214,7 +233,7 @@
                 "speech": {
                     "model": "w2v",
                     "flaky": true,
-                    "temporal": "vlad",
+                    "temporal": "avg",
                     "type": "embed",
                     "binarise": false,
                     "feat_dims": {

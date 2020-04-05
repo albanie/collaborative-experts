@@ -80,7 +80,7 @@ class Visualizer:
             save_result (bool) - - if save the current results to an HTML file
         """
         if not Path(self.web_dir).exists():
-            Path(self.web_dir).mkdir(exists_ok=True, parents=True)
+            Path(self.web_dir).mkdir(exist_ok=True, parents=True)
         print(f"updating webpage at {self.web_dir}")
         title = f"Experiment name = {self.name}"
         refresh = True
@@ -99,7 +99,7 @@ class Visualizer:
 
         for ranking in rankings:
             vids, txts, links = [], [], []
-            gt_vid_path = str(Path("videos") / ranking["gt-path"].name)
+            gt_vid_path = ranking["gt-path"]
             gt_captions = [" ".join(x) for x in ranking["gt-captions"]]
             gt_captions = "<br>".join(gt_captions)
             if ranking["hide-gt"]:
@@ -108,19 +108,19 @@ class Visualizer:
                 vids.append("hidden")
             else:
                 txt = (f"{gt_captions}<br><b>Rank: {ranking['gt-rank']}, "
-                       f"Sim: {ranking['gt-sim']:.3f} [{ranking['gt-path'].stem}]")
+                       f"Sim: {ranking['gt-sim']:.3f} [{Path(ranking['gt-path']).stem}]")
                 txts.append(txt)
                 links.append(gt_vid_path)
                 vids.append(gt_vid_path)
 
-            for idx, (path, sim) in enumerate(zip(ranking["top-k-paths"],
+            for idx, (vid_path, sim) in enumerate(zip(ranking["top-k-paths"],
                                                   ranking["top-k-sims"])):
+                vid_path = Path(vid_path)
                 if ranking["hide-gt"]:
                     txt = f"choice: {idx}"
                 else:
-                    txt = f"<b>Rank: {idx}, Sim: {sim:.3f}, [{path.stem}]"
+                    txt = f"<b>Rank: {idx}, Sim: {sim:.3f}, [{Path(vid_path).stem}]"
                 txts.append(txt)
-                vid_path = str(Path("videos") / path.name)
                 vids.append(vid_path)
                 links.append(vid_path)
             webpage.add_videos(vids, txts, links, width=200)

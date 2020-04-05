@@ -30,6 +30,7 @@ class MSVD(BaseDataset):
             "imagenet.senet154.0",
             "scene.densenet161.0",
             "i3d.i3d.0",
+            "s3dg.s3dg.0",
             "imagenet.resnext101_32x48d.0",
             "trn.moments-trn.0",
             "r2p1d.r2p1d-ig65m.0",
@@ -69,6 +70,7 @@ class MSVD(BaseDataset):
         feat_names = {key: self.visual_feat_paths(key) for key in
                       self.paths["feature_names"]}
         feat_names.update(self.paths["custom_paths"])
+
         features = {}
         for expert, rel_names in feat_names.items():
             if expert not in self.ordered_experts:

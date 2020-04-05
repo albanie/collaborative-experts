@@ -1,24 +1,45 @@
 """A small utility for transferring features to/from the webserver.
 
 Example usage:
-To fetch features for LSMDC, run the following in the project root folder:
+To fetch features for MSRVTT, run the following in the project root folder:
 python misc/sync_experts.py --dataset MSRVTT
+
+Note that to fetch the features for LSMDC, you must additionally supply an access
+code after filling out the MPII dataset agreement form:
+python misc/sync_experts.py --dataset LSMDC --access_code <put-code-here>
 """
 import os
 import time
-import subprocess
+import hashlib
 import argparse
+import subprocess
+from typing import Dict
 from pathlib import Path
 
+from typeguard import typechecked
 
-def upload_to_server(web_dir, dataset, webserver, refresh):
-    server_dir = Path(web_dir) / "data" / "features-v2"
+
+@typechecked
+def upload_to_server(
+    web_dir: Path,
+    dataset: str,
+    release: str,
+    webserver: str,
+    refresh: Dict[str, bool],
+):
+    server_dir = web_dir / "data" / release
     subprocess.call(["ssh", webserver, "mkdir -p", str(server_dir)])
-    compressed_file = f"{dataset}-experts.tar.gz"
+    if release.startswith("challenge-release"):
+        dataset_dir = Path("misc/cvpr2020_challenge/datasets") / dataset
+        tar_include = dataset_dir / release / "tar_include.txt"
+        compressed_file = f"{release}-{dataset}-experts.tar.gz"
+    else:
+        dataset_dir = Path("misc/datasets") / dataset.lower()
+        tar_include = dataset_dir / "tar_include.txt"
+        compressed_file = f"{dataset}-experts.tar.gz"
     compressed_path = Path("data") / dataset / "webserver-files" / compressed_file
     if not compressed_path.parent.exists():
         compressed_path.parent.mkdir(exist_ok=True, parents=True)
-    tar_include = Path("misc") / "datasets" / dataset.lower() / "tar_include.txt"
     if not Path(compressed_path).exists() or refresh["compression"]:
         compression_args = (f"tar --dereference --create --verbose"
                             f" --file={str(compressed_path)}"
@@ -42,7 +63,14 @@ def upload_to_server(web_dir, dataset, webserver, refresh):
     print(f"Finished transferring features in {duration}")
 
 
-def fetch_from_server(dataset, root_url, refresh, purge_tar_file):
+@typechecked
+def fetch_from_server(
+        dataset: str,
+        root_url: str,
+        purge_tar_file: bool,
+        refresh: Dict[str, bool],
+        access_code: str = None,
+):
     local_data_dir = Path("data") / dataset
     symlinked_feats_dir = local_data_dir / "symlinked-feats"
     if symlinked_feats_dir.exists() and not refresh["symlinked-feats"]:
@@ -53,6 +81,10 @@ def fetch_from_server(dataset, root_url, refresh, purge_tar_file):
     archive_name = f"{dataset}-experts.tar.gz"
     local_archive = local_data_dir / archive_name
     if not local_archive.exists():
+        if access_code:
+            access_hash = hashlib.sha256(access_code.encode("utf-8")).hexdigest()[:10]
+            archive_name = f"{access_hash}-{archive_name}"
+        import ipdb; ipdb.set_trace()
         src_url = f"{root_url}/features-v2/{archive_name}"
         wget_args = ["wget", f"--output-document={str(local_archive)}", src_url]
         print(f"running command: {' '.join(wget_args)}")
@@ -70,14 +102,22 @@ def fetch_from_server(dataset, root_url, refresh, purge_tar_file):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", default="MSRVTT",
-                        choices=["MSRVTT", "LSMDC", "MSVD", "didemo", "activity-net"])
+                        choices=["MSRVTT", "LSMDC", "MSVD", "DiDeMo", "activity-net",
+                                 "YouCook2"])
     parser.add_argument("--action", default="fetch", choices=["upload", "fetch"])
     parser.add_argument("--webserver", default="login.robots.ox.ac.uk")
     parser.add_argument("--refresh_compression", action="store_true")
     parser.add_argument("--refresh_server", action="store_true")
     parser.add_argument("--refresh_symlinked_feats", action="store_true")
     parser.add_argument("--purge_tar_file", action="store_true")
-    parser.add_argument("--web_dir",
+    parser.add_argument("--release", default="features-v2",
+                        choices=["features-v2", "challenge-release-1",
+                                 "challenge-release-2"],
+                        help=("The features to fetch (features-v2 refers to the features"
+                              " that can be used to reproduce the collaborative experts"
+                              "paper"))
+    parser.add_argument("--access_code", help="Code to access LSMDC")
+    parser.add_argument("--web_dir", type=Path,
                         default="/projects/vgg/vgg/WWW/research/collaborative-experts")
     parser.add_argument(
         "--root_url",
@@ -97,6 +137,7 @@ if __name__ == "__main__":
             dataset=args.dataset,
             refresh=refresh_targets,
             webserver=args.webserver,
+            release=args.release,
         )
     elif args.action == "fetch":
         fetch_from_server(
@@ -104,6 +145,7 @@ if __name__ == "__main__":
             root_url=args.root_url,
             refresh=refresh_targets,
             purge_tar_file=args.purge_tar_file,
+            access_code=args.access_code,
         )
     else:
         raise ValueError(f"unknown action: {args.action}")

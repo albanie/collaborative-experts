@@ -28,11 +28,13 @@ def validate_predictions(
         "LSMDC": 1,
         "MSVD": 81,
         "DiDeMo": 1,
+        "YouCook2": 1,
         "ActivityNet": 1,
     }
     expected_videos = {
         "MSRVTT": {"public_server_val": 497, "public_server_test": 2990},
         "LSMDC": {"public_server_val": 7408, "public_server_test": 1000},
+        "YouCook2": {"public_server_val": 969, "public_server_test": 3310},
         "MSVD": {"public_server_val": 100, "public_server_test": 670},
         "DiDeMo": {"public_server_val": 1065, "public_server_test": 1004},
         "ActivityNet": {"public_server_val": 1001, "public_server_test": 4917}
@@ -40,6 +42,7 @@ def validate_predictions(
     expected_invalid_queries = {
         "MSRVTT": {"public_server_val": 0, "public_server_test": 6},
         "LSMDC": {"public_server_val": 0, "public_server_test": 0},
+        "YouCook2": {"public_server_val": 0, "public_server_test": 0},
         "MSVD": {"public_server_val": 3810, "public_server_test": 26507},
         "DiDeMo": {"public_server_val": 0, "public_server_test": 0},
         "ActivityNet": {"public_server_val": 0, "public_server_test": 0},

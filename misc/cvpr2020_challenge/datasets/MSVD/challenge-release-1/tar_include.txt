@@ -1,0 +1,14 @@
+data/MSVD/challenge-release-1/aggregated_face_feats/face-avg.pickle
+data/MSVD/challenge-release-1/aggregated_i3d_25fps_256px_stride25_offset0_inner_stride1/i3d-avg.pickle
+data/MSVD/challenge-release-1/aggregated_imagenet_25fps_256px_stride1_offset0/resnext101_32x48d-avg.pickle
+data/MSVD/challenge-release-1/aggregated_imagenet_25fps_256px_stride1_offset0/senet154-avg.pickle
+data/MSVD/challenge-release-1/aggregated_ocr_feats/ocr-w2v.pickle
+data/MSVD/challenge-release-1/aggregated_r2p1d_30fps_256px_stride32_offset0_inner_stride1/r2p1d-ig65m-avg.pickle
+data/MSVD/challenge-release-1/aggregated_s3dg_10fps_256px_stride16_offset0_inner_stride1/s3dg-avg.pickle
+data/MSVD/challenge-release-1/aggregated_scene_25fps_256px_stride1_offset0/densenet161-avg.pickle
+data/MSVD/challenge-release-1/aggregated_text_feats/openai.pkl
+data/MSVD/challenge-release-1/aggregated_text_feats/w2v.pkl
+data/MSVD/challenge-release-1/public_server_val.txt
+data/MSVD/challenge-release-1/raw-captions.pkl
+data/MSVD/challenge-release-1/train_list.txt
+data/MSVD/challenge-release-1/val_list.txt

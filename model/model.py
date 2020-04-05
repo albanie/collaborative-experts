@@ -141,8 +141,9 @@ class CENet(BaseModel):
             self.random_feats = set()
 
         # sanity checks on the features that may be vladded
-        pre_vlad_feat_sizes = {"audio": 128, "speech": 300, "ocr": 300,
-                               "detection": 1541, "openpose": 54}
+        pre_vlad_feat_sizes = {"ocr": 300, "audio": 128, "speech": 300}
+        pre_vlad_feat_sizes = {key: val for key, val in pre_vlad_feat_sizes.items()
+                               if feat_aggregation[key]["temporal"] == "vlad"}
 
         # we basically disable safety checks for detection-sem
         if spatial_feats:
