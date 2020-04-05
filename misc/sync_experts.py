@@ -94,7 +94,7 @@ def fetch_from_server(
         if access_code:
             access_hash = hashlib.sha256(access_code.encode("utf-8")).hexdigest()[:10]
             archive_name = f"{access_hash}-{archive_name}"
-        src_url = f"{root_url}/features-v2/{archive_name}"
+        src_url = f"{root_url}/{release}/{archive_name}"
         wget_args = ["wget", f"--output-document={str(local_archive)}", src_url]
         print(f"running command: {' '.join(wget_args)}")
         subprocess.call(wget_args)
@@ -151,6 +151,7 @@ if __name__ == "__main__":
     elif args.action == "fetch":
         fetch_from_server(
             dataset=args.dataset,
+            release=args.release,
             root_url=args.root_url,
             refresh=refresh_targets,
             purge_tar_file=args.purge_tar_file,
