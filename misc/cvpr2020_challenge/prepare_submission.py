@@ -18,7 +18,7 @@ from typeguard import typechecked
 
 
 @typechecked
-def get_dataset_query_stats(dataset: str, challenge_phase: str) -> Dict[str, Dict]:
+def get_dataset_num_queries(dataset: str, challenge_phase: str) -> int:
     stats = {
         "max_descriptions_per_video": {
             "MSRVTT": 20,
@@ -59,7 +59,7 @@ def validate_predictions(
         topk: int = 10,
 ):
     shape = preds.shape
-    num_queries = get_dataset_query_stats(dataset, challenge_phase=challenge_phase)
+    num_queries = get_dataset_num_queries(dataset, challenge_phase=challenge_phase)
     expected = (num_queries, topk)
     msg = f"Expected ranks with shape {expected}, but found {shape} for {dataset}"
     assert shape == expected, msg
