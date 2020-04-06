@@ -1,13 +1,13 @@
-### CVPR 2020 Challenge: The video pentathlon
+## CVPR 2020 Challenge: The video pentathlon
 
 This page contains information relating to the [CVPR penathlon challenge](https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/). Details about the format of the challenge can be found [here](https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/challenge.html).
 
 **Obtaining the features:**
 
-The challenge has two phases: a development phase (for which the validation set is named `public_server_val`) and a test phase (for which the test set is named `public_server_test`).  The features for the development phase can be used to train models and upload predictions the CodaLab server.  To download and extract the features, run:
+The challenge has two phases: a `challenge-release-1` phase (for which the validation set is named `public_server_val`) and a `challenge-release-2` for which the test set is named `public_server_test`).  The features for the development phase can be used to train models and upload predictions the CodaLab server.  To download and extract the features, run:
 
 ```
-python misc/cvpr2020_challenge/fetch_features.py --release public_server_val
+python misc/sync_experts.py --release challenge-release-1
 ```
 
 Thirty days before the close of the challenge, the features for the test set will be released (see the workshop [page](https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/challenge.html) for dates).
@@ -21,6 +21,9 @@ There are two ways to get started with training models: (i) train a model on a s
 Alternatively, if you are looking to get your feet wet with a simple example, you can train a single model for a single dataset as follows:
 
 ```
+# add the project root folder to the pythonpath
+export PYTHONPATH=$(pwd):$PYTHONPATH
+
 # pick a GPU device id
 gpu_id=0
 
@@ -33,6 +36,9 @@ python train.py --config configs/cvpr2020-challenge/$dataset/baseline-public-tra
 *Training a full baseline*: To get started with the challenge, we have provided a [train_baselines.py](misc/cvpr2020_challenge/train_baselines.py) script which will train a basic model for each dataset and store the predictions in the format required for uploading to the server (described below). After fetching the features using the step above, you can launch this script:
 
 ```
+# add the project root folder to the pythonpath
+export PYTHONPATH=$(pwd):$PYTHONPATH
+
 # pick a GPU device id
 gpu_id=0
 
