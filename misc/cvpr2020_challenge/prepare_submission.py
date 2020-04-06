@@ -13,7 +13,42 @@ from datetime import datetime
 
 import numpy as np
 import humanize
+from typing import Dict
 from typeguard import typechecked
+
+
+@typechecked
+def get_dataset_query_stats(dataset: str, challenge_phase: str) -> Dict[str, Dict]:
+    stats = {
+        "max_descriptions_per_video": {
+            "MSRVTT": 20,
+            "LSMDC": 1,
+            "MSVD": 81,
+            "DiDeMo": 1,
+            "YouCook2": 1,
+            "ActivityNet": 1,
+        },
+        "expected_videos": {
+            "MSRVTT": {"public_server_val": 497, "public_server_test": 2990},
+            "LSMDC": {"public_server_val": 7408, "public_server_test": 1000},
+            "YouCook2": {"public_server_val": 969, "public_server_test": 3310},
+            "MSVD": {"public_server_val": 100, "public_server_test": 670},
+            "DiDeMo": {"public_server_val": 1065, "public_server_test": 1004},
+            "ActivityNet": {"public_server_val": 1001, "public_server_test": 4917}
+        },
+        "expected_invalid_queries": {
+            "MSRVTT": {"public_server_val": 0, "public_server_test": 6},
+            "LSMDC": {"public_server_val": 0, "public_server_test": 0},
+            "YouCook2": {"public_server_val": 0, "public_server_test": 0},
+            "MSVD": {"public_server_val": 3810, "public_server_test": 26507},
+            "DiDeMo": {"public_server_val": 0, "public_server_test": 0},
+            "ActivityNet": {"public_server_val": 0, "public_server_test": 0},
+        },
+    }
+    num_videos = stats["expected_videos"][dataset][challenge_phase]
+    num_queries = num_videos * stats["max_descriptions_per_video"][dataset]
+    invalid_queries = stats["expected_invalid_queries"][dataset][challenge_phase]
+    return num_queries - invalid_queries
 
 
 @typechecked
@@ -23,34 +58,9 @@ def validate_predictions(
         challenge_phase: str,
         topk: int = 10,
 ):
-    max_descriptions_per_video = {
-        "MSRVTT": 20,
-        "LSMDC": 1,
-        "MSVD": 81,
-        "DiDeMo": 1,
-        "YouCook2": 1,
-        "ActivityNet": 1,
-    }
-    expected_videos = {
-        "MSRVTT": {"public_server_val": 497, "public_server_test": 2990},
-        "LSMDC": {"public_server_val": 7408, "public_server_test": 1000},
-        "YouCook2": {"public_server_val": 969, "public_server_test": 3310},
-        "MSVD": {"public_server_val": 100, "public_server_test": 670},
-        "DiDeMo": {"public_server_val": 1065, "public_server_test": 1004},
-        "ActivityNet": {"public_server_val": 1001, "public_server_test": 4917}
-    }
-    expected_invalid_queries = {
-        "MSRVTT": {"public_server_val": 0, "public_server_test": 6},
-        "LSMDC": {"public_server_val": 0, "public_server_test": 0},
-        "YouCook2": {"public_server_val": 0, "public_server_test": 0},
-        "MSVD": {"public_server_val": 3810, "public_server_test": 26507},
-        "DiDeMo": {"public_server_val": 0, "public_server_test": 0},
-        "ActivityNet": {"public_server_val": 0, "public_server_test": 0},
-    }
     shape = preds.shape
-    num_videos = expected_videos[dataset][challenge_phase]
-    num_queries = num_videos * max_descriptions_per_video[dataset]
-    expected = (num_queries - expected_invalid_queries[dataset][challenge_phase], topk)
+    num_queries = get_dataset_query_stats(dataset, challenge_phase=challenge_phase)
+    expected = (num_queries, topk)
     msg = f"Expected ranks with shape {expected}, but found {shape} for {dataset}"
     assert shape == expected, msg
     print(f"Found valid rank matrix for {dataset} [shape: {shape}]")
