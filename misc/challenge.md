@@ -4,13 +4,21 @@ This page contains information relating to the [CVPR penathlon challenge](https:
 
 **Obtaining the features:**
 
-The challenge has two phases: a `challenge-release-1` phase (for which the validation set is named `public_server_val`) and a `challenge-release-2` for which the test set is named `public_server_test`).  The features for the development phase can be used to train models and upload predictions the CodaLab server.  To download and extract the features, run:
+The challenge has two phases: a `challenge-release-1` phase (for which the validation set is named `public_server_val`) and a `challenge-release-2` for which the test set is named `public_server_test`).  The features for the development phase can be used to train models and upload predictions the CodaLab server. Downloading the features is done in two stages:
 
+1. This codebase assumes that you have created a symlink with the name `data` in the root of the project (i.e. so after cloning you have a symlink at `collaborative-experts/data` which points to whichever place on your filesystem you would like to keep checkpoints, datasets, logfiles etc.). To create this symlink, run:
+
+```
+ln -s /folder/where/you/are/happy/to/put/data /path/to/collaborative-experts/data
+```
+
+2. Then, to download and extract the features, run:
 ```
 python misc/sync_experts.py --release challenge-release-1
 ```
 
 Thirty days before the close of the challenge, the features for the test set will be released (see the workshop [page](https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/challenge.html) for dates).
+
 
 **Training a baseline:**
 
