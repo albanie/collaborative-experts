@@ -16,20 +16,19 @@ The train/test splits are listed in the files:
 
 **Tar contents**
 
-The compressed tar file (2.1 GiB) can be downloaded from:
+Please note that to obtain the features and descriptions for this dataset, you must obtain permission from MPII to use the data (this is process is described [here](https://www.mpi-inf.mpg.de/departments/computer-vision-and-machine-learning/research/vision-and-language/mpii-movie-description-dataset/request-access-to-mpii-movie-description-dataset/).  Once you have done so, please request that a member of the LSMDC team contacts us to confirm approval (via albanie at robots dot ox dot ac dot uk) - we can then provide you with a link to the features.
+
+
+The compressed tar file (2.1 GiB) can then be downloaded from the provided link.
 
 ```
-http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/features-v2/LSMDC-experts.tar.gz
 sha1sum: 43c9c6090cb34fbbeebebe033e08ae019b11c64f
 ```
 
 A list of the contents of the tar file are given in [tar_include.txt](tar_include.txt).
 
-[**Deprecated**] *The features made available with the previous code release are also available as a compressed tar file (6.0 GiB). These should be considered deprecated, since they are incompatible with the current codebase, but are still available and can be downloaded from:*
+[**Deprecated**] *The features made available with the previous code release are also available as a compressed tar file (6.0 GiB). These should be considered deprecated, since they are incompatible with the current codebase, but are still available and can be downloaded (once permission has been obtained, as described above)*
 
-```
-deprecated features: http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data-deprecated/features/LSMDC-experts.tar.gz
-```
 
 **Features from MoEE [2]**
 

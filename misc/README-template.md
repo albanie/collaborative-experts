@@ -16,7 +16,9 @@ This repo provides code for learning and evaluating joint video-text embeddings 
 
 ### CVPR 2020: Pentathlon challenge
 
-We are hosting a video retrieval challenge as part of the [Video Pentathlon Workshop](https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/index.html).  Find out how to participate [here](misc/challenge.md)!
+<img width="200" alt="logo" src="figs/logo-centre.png">
+
+We are hosting a video retrieval challenge as part of the Video Pentathlon Workshop. Find out how to participate [here](misc/challenge.md)!
 
 
 ### Pretrained video embeddings

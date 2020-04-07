@@ -32,7 +32,7 @@ The compressed tar file (600 MiB) can be downloaded from:
 
 ```
 http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/features-v2/MSRVTT-experts.tar.gz
-sha1sum: 9d6d0f78d76091609e6faa304e6f69697a924449
+sha1sum: 9018a9bf215e174c982b997fd4ee140eb0865040
 ```
 
 A list of the contents of the tar file are given in [tar_include.txt](tar_include.txt).

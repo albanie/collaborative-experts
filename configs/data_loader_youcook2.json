@@ -71,7 +71,7 @@
             "feat_aggregation": {
                 "imagenet.senet154.0": {
                     "fps": 25,
-                    "stride": 5,
+                    "stride": 1,
                     "pixel_dim": 256,
                     "aggregate-axis": 1,
                     "offset": 0,
@@ -85,7 +85,7 @@
                 },
                 "imagenet.resnext101_32x48d.0": {
                     "fps": 25,
-                    "stride": 5,
+                    "stride": 1,
                     "offset": 0,
                     "pixel_dim": 256,
                     "temporal": "avg",
@@ -98,7 +98,7 @@
                     }
                 },
                 "scene.densenet161.0": {
-                    "stride": 5,
+                    "stride": 1,
                     "fps": 25,
                     "offset": 0,
                     "temporal": "avg",
