@@ -51,7 +51,7 @@ NOTES:
 
 **Uploading predictions to the server:**
 
-The challenge is hosted on CodaLab [FIX LINK](Fix-link).  
+The challenge is hosted on CodaLab (Dear friendly tester, please use this temporary challenge link: https://competitions.codalab.org/competitions/24264?secret_key=11b7bbfd-8623-4c82-b2a4-f8586008681b#results).  
 
 **Trying out new ideas!**
 

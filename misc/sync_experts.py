@@ -110,8 +110,9 @@ def fetch_from_server(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", default="MSRVTT",
-                        choices=["MSRVTT", "LSMDC", "MSVD", "DiDeMo", "activity-net",
+    parser.add_argument("--dataset", nargs="+",
+                        default=["MSRVTT", "MSVD", "DiDeMo", "activity-net", "YouCook2"],
+                        choices=["LSMDC", "MSRVTT", "MSVD", "DiDeMo", "activity-net",
                                  "YouCook2"])
     parser.add_argument("--action", default="fetch", choices=["upload", "fetch"])
     parser.add_argument("--webserver", default="login.robots.ox.ac.uk")
@@ -140,22 +141,27 @@ if __name__ == "__main__":
         "symlinked-feats": args.refresh_symlinked_feats,
     }
 
-    if args.action == "upload":
-        upload_to_server(
-            web_dir=args.web_dir,
-            dataset=args.dataset,
-            refresh=refresh_targets,
-            webserver=args.webserver,
-            release=args.release,
-        )
-    elif args.action == "fetch":
-        fetch_from_server(
-            dataset=args.dataset,
-            release=args.release,
-            root_url=args.root_url,
-            refresh=refresh_targets,
-            purge_tar_file=args.purge_tar_file,
-            access_code=args.access_code,
-        )
-    else:
-        raise ValueError(f"unknown action: {args.action}")
+    for dataset in args.dataset:
+        if dataset == "LSMDC":
+            msg = ("To download LSMDC, you must obtain an access code (please see "
+                   "README.md for details")
+            assert args.access_code, msg
+        if args.action == "upload":
+            upload_to_server(
+                web_dir=args.web_dir,
+                dataset=dataset,
+                refresh=refresh_targets,
+                webserver=args.webserver,
+                release=args.release,
+            )
+        elif args.action == "fetch":
+            fetch_from_server(
+                dataset=dataset,
+                release=args.release,
+                root_url=args.root_url,
+                refresh=refresh_targets,
+                purge_tar_file=args.purge_tar_file,
+                access_code=args.access_code,
+            )
+        else:
+            raise ValueError(f"unknown action: {args.action}")

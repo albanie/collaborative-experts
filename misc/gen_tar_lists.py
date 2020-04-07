@@ -125,7 +125,7 @@ def generate_tar_lists_for_challenge(
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--save_dir", default="data/saved")
+    parser.add_argument("--save_dir", default="data/saved", type=Path)
     parser.add_argument("--refresh", action="store_true")
     parser.add_argument("--experiments_path", default="misc/experiments.json")
     parser.add_argument("--target", default="main",
