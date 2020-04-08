@@ -135,7 +135,7 @@ class MSRVTT(BaseDataset):
                 self.restrict_test_captions = memcache(
                     root_feat / self.paths["js_test_cap_idx_path"])
             self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
-            text_feat_path = root_feat / self.paths["text_feat_path"][self.text_feat]
+            text_feat_path = root_feat / self.paths["text_feat_paths"][self.text_feat]
             self.text_features = memcache(text_feat_path)
 
             if self.restrict_train_captions:
