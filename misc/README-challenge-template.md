@@ -1,3 +1,7 @@
+<p align="center">
+<img width="300" alt="logo" src="../figs/logo-centre.png">
+</p>
+
 ## CVPR 2020 Challenge: The video pentathlon
 
 This page contains information relating to the [CVPR penathlon challenge](https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/). Details about the format of the challenge can be found [here](https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/challenge.html).
@@ -41,7 +45,7 @@ dataset=msvd
 python train.py --config configs/cvpr2020-challenge/$dataset/baseline-public-trainval.json --device $gpu_id
 ```
 
-*Training a full baseline*: To get started with the challenge, we have provided a [train_baselines.py](misc/cvpr2020_challenge/train_baselines.py) script which will train a basic model for each dataset and store the predictions in the format required for uploading to the server (described below). After fetching the features using the step above, you can launch this script:
+*Training a full baseline*: To get started with the challenge, we have provided a [train_baselines.py](cvpr2020_challenge/train_baselines.py) script which will train a basic model for each dataset and store the predictions in the format required for uploading to the server (described below). After fetching the features using the step above, you can launch this script:
 
 ```
 # add the project root folder to the pythonpath
