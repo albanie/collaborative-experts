@@ -1,11 +1,14 @@
-import argparse
+import copy
 import json
+import argparse
+from typing import Dict, List, Tuple
+from pathlib import Path
+
 import tqdm
 from typeguard import typechecked
-from typing import Tuple, Dict, List
-from pathlib import Path
-from misc.gen_readme import dataset_paths, model_specs2path
+
 from parse_config import ConfigParser
+from misc.gen_readme import dataset_paths, model_specs2path
 
 
 @typechecked
@@ -70,8 +73,9 @@ def generate_tar_lists_for_challenge(
     challenge_dir = phase_dirs[challenge_phase]
     for dataset in datasets:
         tar_include_list = base / dataset / challenge_dir / "tar_include.txt"
-        if tar_include_list.exists() and not refresh:
-            print(f"Found existing tar_include_list at {tar_include_list}, skipping")
+        video_tar_include_list = base / dataset / challenge_dir / "video_tar_include.txt"
+        if tar_include_list.exists() and video_tar_include_list.exists() and not refresh:
+            print(f"Found lists at {tar_include_list}/{video_tar_include_list}, skipping")
             continue
         tar_include_list.parent.mkdir(exist_ok=True, parents=True)
         src_folder = data_dir / dataset / challenge_dir
@@ -87,7 +91,14 @@ def generate_tar_lists_for_challenge(
         _, all_dataset_paths = dataset_paths(dataset=dataset)
         modern_feat_agg = {key: val for key, val in feat_aggregation.items()
                            if key in all_dataset_paths["feature_names"]}
-        expected_feat_paths = set(model_specs2path(modern_feat_agg, keep))
+        expected_feat_paths = set()
+        for feat_type in ("embed", "logits"):
+            for agg_type in ("avg", "max", "fixed_seg"):
+                modern_feat_agg_ = copy.deepcopy(modern_feat_agg)
+                for feat_key in modern_feat_agg_:
+                    modern_feat_agg_[feat_key]["temporal"] = agg_type
+                    modern_feat_agg_[feat_key]["type"] = feat_type
+                expected_feat_paths.update((model_specs2path(modern_feat_agg_, keep)))
         keep = {
             "custom_paths",
             "challenge_text_feat_paths",
@@ -110,6 +121,7 @@ def generate_tar_lists_for_challenge(
                         raise TypeError(f"Unexpected type: {type(val)}")
             else:
                 raise TypeError(f"Unexpected type: {type(paths)}")
+
         # filter to relevant features
         filtered_rel_paths = []
         for rel_path in rel_paths:
@@ -120,6 +132,16 @@ def generate_tar_lists_for_challenge(
         with open(tar_include_list, "w") as f:
             print(f"Writing paths to {tar_include_list}")
             for path in sorted(filtered_rel_paths):
+                f.write(f"{path}\n")
+
+        # select video paths
+        video_dir = src_folder / "videos"
+        video_paths = [x for x in rel_paths if str(x).startswith(str(video_dir))]
+        print(f"[{dataset}] Found {len(video_paths)} video paths")
+
+        with open(video_tar_include_list, "w") as f:
+            print(f"Writing video paths to {video_tar_include_list}")
+            for path in sorted(video_paths):
                 f.write(f"{path}\n")
 
 
@@ -134,8 +156,7 @@ def main():
     parser.add_argument("--challenge_phase", default="public_server_val",
                         choices=["public_server_val", "public_server_test"])
     parser.add_argument("--datasets", nargs="+",
-                        default=["MSRVTT", "MSVD", "DiDeMo", "LSMDC", "activity-net", 
-                                 "YouCook2"])
+                        default=["MSRVTT", "MSVD", "DiDeMo", "activity-net", "YouCook2"])
     args = parser.parse_args()
 
     with open(args.experiments_path, "r") as f:

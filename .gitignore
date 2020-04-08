@@ -30,3 +30,10 @@ configs/templates
 slurm
 
 .vscode
+
+# exclude long video tar lists to avoid an overly heavy git repo
+misc/cvpr2020_challenge/datasets/activity-net/challenge-release-1/video_tar_include.txt
+misc/cvpr2020_challenge/datasets/MSVD/challenge-release-1/video_tar_include.txt
+misc/cvpr2020_challenge/datasets/DiDeMo/challenge-release-1/video_tar_include.txt
+misc/cvpr2020_challenge/datasets/MSRVTT/challenge-release-1/video_tar_include.txt
+misc/cvpr2020_challenge/datasets/YouCook2/challenge-release-1/video_tar_include.txt

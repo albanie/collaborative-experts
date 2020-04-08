@@ -108,7 +108,7 @@ def fetch_from_server(
         local_archive.unlink()
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", nargs="+",
                         default=["MSRVTT", "MSVD", "DiDeMo", "activity-net", "YouCook2"],
@@ -165,3 +165,6 @@ if __name__ == "__main__":
             )
         else:
             raise ValueError(f"unknown action: {args.action}")
+
+if __name__ == "__main__":
+    main()
