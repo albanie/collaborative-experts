@@ -136,7 +136,8 @@ def generate_tar_lists_for_challenge(
 
         # select video paths
         video_dir = src_folder / "videos"
-        video_paths = [x for x in rel_paths if str(x).startswith(str(video_dir))]
+        video_paths = [x for x in rel_paths if str(x).startswith(str(video_dir))
+                       and x.is_file()]
         print(f"[{dataset}] Found {len(video_paths)} video paths")
 
         with open(video_tar_include_list, "w") as f:

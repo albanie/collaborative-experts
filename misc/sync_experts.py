@@ -20,11 +20,17 @@ from typeguard import typechecked
 
 
 @typechecked
-def get_archive_name(dataset: str, release: str) -> str:
+def get_archive_name(dataset: str, release: str, archive_type: str) -> str:
     if release.startswith("challenge-release"):
         archive_name = f"{release}-{dataset}-experts.tar.gz"
     else:
         archive_name = f"{dataset}-experts.tar.gz"
+    if archive_type == "features":
+        pass
+    elif archive_type == "videos":
+        archive_name = f"{archive_type}-{archive_name}"
+    else:
+        raise NotImplementedError(f"Unsupported archive type: {archive_type}")
     return archive_name
 
 
@@ -40,36 +46,54 @@ def upload_to_server(
     subprocess.call(["ssh", webserver, "mkdir -p", str(server_dir)])
     if release.startswith("challenge-release"):
         dataset_dir = Path("misc/cvpr2020_challenge/datasets") / dataset
-        tar_include = dataset_dir / release / "tar_include.txt"
-        compressed_file = f"{release}-{dataset}-experts.tar.gz"
+        # tar_include = dataset_dir / release / "tar_include.txt"
+        tar_lists = {
+            "features": "tar_include.txt",
+            "videos": "video_tar_include.txt",
+        }
+        tar_includes, compressed_paths = [], []
+        for key, tar_list in tar_lists.items():
+            tar_includes.append(dataset_dir / release / tar_list)
+            compressed_file = get_archive_name(
+                dataset=dataset,
+                release=release,
+                archive_type=key,
+            )
+            compressed_path = Path(f"data/{dataset}/webserver-files") / compressed_file
+            compressed_paths.append(compressed_path)
     else:
-        dataset_dir = Path("misc/datasets") / dataset.lower()
-        tar_include = dataset_dir / "tar_include.txt"
-    compressed_file = get_archive_name(dataset=dataset, release=release)
-    compressed_path = Path("data") / dataset / "webserver-files" / compressed_file
-    if not compressed_path.parent.exists():
-        compressed_path.parent.mkdir(exist_ok=True, parents=True)
-    if not Path(compressed_path).exists() or refresh["compression"]:
-        compression_args = (f"tar --dereference --create --verbose"
-                            f" --file={str(compressed_path)}"
-                            f" --use-compress-program=pigz"
-                            f" --files-from={tar_include}")
-        print(f"running command {compression_args}")
-        tic = time.time()
-        os.system(compression_args)
-        duration = time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - tic))
-        print(f"Finished compressing features in {duration}")
-    else:
-        print(f"Found existing compressed file at {compressed_path}, skipping....")
+        tar_includes = [Path("misc/datasets") / dataset.lower() / "tar_include.txt"]
+        compressed_file = get_archive_name(
+            dataset=dataset,
+            release=release,
+            archive_type="features",
+        )
+        compressed_paths = [Path("data") / dataset / "webserver-files" / compressed_file]
 
-    dest = f"{webserver}:{str(server_dir / compressed_file)}"
-    rsync_args = ["rsync", "-av", "--progress", str(compressed_path), dest]
-    if not refresh["server"]:
-        rsync_args.insert(1, "--ignore-existing")
-    tic = time.time()
-    subprocess.call(rsync_args)
-    duration = time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - tic))
-    print(f"Finished transferring features in {duration}")
+    for tar_include, compressed_path in zip(tar_includes, compressed_paths):
+        if not compressed_path.parent.exists():
+            compressed_path.parent.mkdir(exist_ok=True, parents=True)
+        if not Path(compressed_path).exists() or refresh["compression"]:
+            compression_args = (f"tar --dereference --create --verbose"
+                                f" --file={str(compressed_path)}"
+                                f" --use-compress-program=pigz"
+                                f" --files-from={tar_include}")
+            print(f"running command {compression_args}")
+            tic = time.time()
+            os.system(compression_args)
+            duration = time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - tic))
+            print(f"Finished tar contents features in {duration}")
+        else:
+            print(f"Found existing compressed file at {compressed_path}, skipping....")
+
+        dest = f"{webserver}:{str(server_dir / compressed_path.name)}"
+        rsync_args = ["rsync", "-av", "--progress", str(compressed_path), dest]
+        if not refresh["server"]:
+            rsync_args.insert(1, "--ignore-existing")
+        tic = time.time()
+        subprocess.call(rsync_args)
+        duration = time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - tic))
+        print(f"Finished transferring tar file in {duration}")
 
 
 @typechecked
@@ -88,7 +112,7 @@ def fetch_from_server(
         return
 
     local_data_dir.mkdir(exist_ok=True, parents=True)
-    archive_name = get_archive_name(dataset=dataset, release=release)
+    archive_name = get_archive_name(dataset, release=release, archive_type="features")
     local_archive = local_data_dir / archive_name
     if not local_archive.exists():
         if access_code:

@@ -24,8 +24,11 @@ data/MSVD/challenge-release-1/aggregated_r2p1d_30fps_256px_stride32_offset0_inne
 data/MSVD/challenge-release-1/aggregated_r2p1d_30fps_256px_stride32_offset0_inner_stride1/r2p1d-ig65m-fixed_seg.pickle
 data/MSVD/challenge-release-1/aggregated_r2p1d_30fps_256px_stride32_offset0_inner_stride1/r2p1d-ig65m-max-logits.pickle
 data/MSVD/challenge-release-1/aggregated_r2p1d_30fps_256px_stride32_offset0_inner_stride1/r2p1d-ig65m-max.pickle
+data/MSVD/challenge-release-1/aggregated_s3dg_10fps_256px_stride16_offset0_inner_stride1/s3dg-avg-logits.pickle
 data/MSVD/challenge-release-1/aggregated_s3dg_10fps_256px_stride16_offset0_inner_stride1/s3dg-avg.pickle
+data/MSVD/challenge-release-1/aggregated_s3dg_10fps_256px_stride16_offset0_inner_stride1/s3dg-fixed_seg-logits.pickle
 data/MSVD/challenge-release-1/aggregated_s3dg_10fps_256px_stride16_offset0_inner_stride1/s3dg-fixed_seg.pickle
+data/MSVD/challenge-release-1/aggregated_s3dg_10fps_256px_stride16_offset0_inner_stride1/s3dg-max-logits.pickle
 data/MSVD/challenge-release-1/aggregated_s3dg_10fps_256px_stride16_offset0_inner_stride1/s3dg-max.pickle
 data/MSVD/challenge-release-1/aggregated_scene_25fps_256px_stride1_offset0/densenet161-avg-logits.pickle
 data/MSVD/challenge-release-1/aggregated_scene_25fps_256px_stride1_offset0/densenet161-avg.pickle
