@@ -103,7 +103,6 @@ class ExpertDataLoader:
             dataset_name: str,
             root_feat_folder: str,
             text_dropout: float,
-            cls_partitions: List[str],
             max_tokens: Dict[str, int],
             raw_input_dims: Dict[str, int],
             feat_aggregation: Dict[str, Dict],
@@ -112,6 +111,7 @@ class ExpertDataLoader:
             restrict_train_captions: int = 0,
             drop_last: bool = False,
             refresh_lru_cache: bool = False,
+            cls_partitions: List[str] = ["train", "val", "tiny", "challenge"],
             challenge_test_root_feat_folder: str = "challenge",
     ):
 

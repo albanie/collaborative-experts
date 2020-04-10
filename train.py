@@ -57,10 +57,6 @@ def run_exp(config):
         set_seeds(seed)
         config["seed"] = seed
 
-        # We use cls defaults for backwards compatibility with the MMIT configs.  In the
-        # long run this should be handled by the json configs themselves
-        cls_defaults = ["train", "val", "tiny", "challenge"]
-
         model = config.init(
             name='arch',
             module=module_arch,
@@ -87,7 +83,6 @@ def run_exp(config):
             text_agg=config["experts"]["text_agg"],
             use_zeros_for_missing=config["experts"].get("use_zeros_for_missing", False),
             task=config.get("task", "retrieval"),
-            cls_partitions=config.get("cls_partitions", cls_defaults),
             eval_only=False,
         )
 

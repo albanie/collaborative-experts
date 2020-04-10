@@ -76,10 +76,6 @@ def evaluation(config, logger=None, trainer=None):
         web_dir=config._web_log_dir,
     )
 
-    # We use cls defaults for backwards compatibility with the MMIT configs.  In the
-    # long run this should be handled by the json configs themselves
-    cls_defaults = ["train", "val", "tiny", "challenge"]
-
     data_loaders = config.init(
         name='data_loader',
         module=module_data,
@@ -91,7 +87,6 @@ def evaluation(config, logger=None, trainer=None):
         text_agg=config["experts"]["text_agg"],
         use_zeros_for_missing=config["experts"].get("use_zeros_for_missing", False),
         task=config.get("task", "retrieval"),
-        cls_partitions=config.get("cls_partitions", cls_defaults),
         eval_only=True,
     )
 
@@ -127,7 +122,6 @@ def evaluation(config, logger=None, trainer=None):
         "https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/"
         "\n"
     )
-
 
     # prepare model for testing.  Note that some datasets fail to fit the retrieval
     # set on the GPU, so we run them on the CPU
