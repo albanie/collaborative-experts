@@ -15,22 +15,8 @@ from yaspi.yaspi import Yaspi
 
 from typeguard import typechecked
 
+from utils.util import filter_cmd_args
 from misc.cvpr2020_challenge.prepare_submission import generate_predictions
-
-
-@typechecked
-def filter_cmd_args(cmd_args: List[str], remove: List[str]) -> List[str]:
-    drop = []
-    for key in remove:
-        if key not in cmd_args:
-            continue
-        pos = cmd_args.index(key)
-        drop.append(pos)
-        if len(cmd_args) > (pos + 1) and not cmd_args[pos + 1].startswith("--"):
-            drop.append(pos + 1)
-    for pos in reversed(drop):
-        cmd_args.pop(pos)
-    return cmd_args
 
 
 @typechecked
@@ -49,7 +35,6 @@ def dataset_name2json_key(dataset: str) -> str:
     # storing in jsons
     json_key = {"activity-net": "ActivityNet"}.get(dataset, dataset)
     return json_key
-
 
 
 @typechecked

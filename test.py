@@ -1,11 +1,13 @@
 import copy
 import random
-import json
 import pickle
 import argparse
+import logging
+from pathlib import Path
 
 import numpy as np
 import torch
+from typing import Tuple
 from mergedeep import Strategy, merge
 
 import model.model as module_arch
@@ -45,36 +47,14 @@ def compress_predictions(query_masks: np.ndarray, sims: np.ndarray, topk: int = 
     return ranks[:, :topk]
 
 
-def evaluation(config, logger=None, trainer=None):
-
-    if logger is None:
-        logger = config.get_logger('test')
-
-    if getattr(config._args, "eval_from_training_config", False):
-        eval_conf = copy.deepcopy(config)
-        merge(eval_conf._config, config["eval_settings"], strategy=Strategy.REPLACE)
-        config = eval_conf
-
-    logger.info("Running evaluation with configuration:")
-    logger.info(config)
-
+@typechecked
+def get_model_and_data_loaders(
+        config: ConfigParser,
+        logger: logging.Logger,
+        ckpt_path: Path,
+) -> Tuple[torch.nn.Module, module_data.ExpertDataLoader]:
     expert_dims, raw_input_dims = compute_dims(config)
     trn_config = compute_trn_config(config)
-
-    # Set the random initial seeds
-    seed = config["seed"]
-    logger.info(f"Setting experiment random seed to {seed}")
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-
-    update_src_web_video_dir(config)
-    visualizer = config.init(
-        name='visualizer',
-        module=module_vis,
-        exp_name=config._exper_name,
-        web_dir=config._web_log_dir,
-    )
 
     data_loaders = config.init(
         name='data_loader',
@@ -102,9 +82,6 @@ def evaluation(config, logger=None, trainer=None):
         feat_aggregation=config["data_loader"]["args"]["feat_aggregation"],
         trn_cat=config["data_loader"]["args"].get("trn_cat", 0),
     )
-    logger.info(model)
-
-    metrics = [getattr(module_metric, met) for met in config['metrics']]
     ckpt_path = config._args.resume
     logger.info(f"Loading checkpoint: {ckpt_path} ...")
     checkpoint = torch.load(ckpt_path)
@@ -112,6 +89,46 @@ def evaluation(config, logger=None, trainer=None):
     if config['n_gpu'] > 1:
         model = torch.nn.DataParallel(model)
     model.load_state_dict(state_dict)
+
+    return model, data_loaders
+
+
+def evaluation(config, logger=None, trainer=None):
+
+    if logger is None:
+        logger = config.get_logger('test')
+
+    if getattr(config._args, "eval_from_training_config", False):
+        eval_conf = copy.deepcopy(config)
+        merge(eval_conf._config, config["eval_settings"], strategy=Strategy.REPLACE)
+        config = eval_conf
+
+    logger.info("Running evaluation with configuration:")
+    logger.info(config)
+
+    # Set the random initial seeds
+    seed = config["seed"]
+    logger.info(f"Setting experiment random seed to {seed}")
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
+    model, data_loaders = get_model_and_data_loaders(
+        config=config,
+        logger=logger,
+        ckpt_path=config._args.resume,
+    )
+    logger.info(model)
+
+    update_src_web_video_dir(config)
+    visualizer = config.init(
+        name='visualizer',
+        module=module_vis,
+        exp_name=config._exper_name,
+        web_dir=config._web_log_dir,
+    )
+
+    metrics = [getattr(module_metric, met) for met in config['metrics']]
     challenge_mode = config.get("challenge_mode", False)
     challenge_msg = (
         "\n"

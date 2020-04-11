@@ -884,6 +884,8 @@ class CEModule(nn.Module):
                 text_embd_padded[:, :text_embd_.shape[1]] = text_embd_
                 text_embd_ = text_embd_padded
             cross_view_conf_matrix = th.matmul(text_embd_, vid_embd_.t())
+        elif self.task == "compute_video_embeddings":
+            return {"modalities": self.modalities, "embeddings": experts}
         else:
             cross_view_conf_matrix = sharded_cross_view_inner_product(
                 ind=ind,

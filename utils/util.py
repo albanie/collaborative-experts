@@ -7,6 +7,7 @@ import json
 import random
 from pathlib import Path
 from datetime import datetime
+from typing import List
 from itertools import repeat
 from collections import OrderedDict
 
@@ -16,6 +17,21 @@ import psutil
 import humanize
 from PIL import Image
 from typeguard import typechecked
+
+
+@typechecked
+def filter_cmd_args(cmd_args: List[str], remove: List[str]) -> List[str]:
+    drop = []
+    for key in remove:
+        if key not in cmd_args:
+            continue
+        pos = cmd_args.index(key)
+        drop.append(pos)
+        if len(cmd_args) > (pos + 1) and not cmd_args[pos + 1].startswith("--"):
+            drop.append(pos + 1)
+    for pos in reversed(drop):
+        cmd_args.pop(pos)
+    return cmd_args
 
 
 @typechecked
