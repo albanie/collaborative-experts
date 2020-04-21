@@ -116,7 +116,7 @@ def evaluation(config, logger=None, trainer=None):
     model, data_loaders = get_model_and_data_loaders(
         config=config,
         logger=logger,
-        ckpt_path=config._args.resume,
+        ckpt_path=Path(config._args.resume),
     )
     logger.info(model)
 
