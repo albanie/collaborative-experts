@@ -92,10 +92,10 @@ class ActivityNet(BaseDataset):
         if self.challenge_mode:
             self.load_challenge_text_features()
         else:
-            self.text_features = memcache(root_feat /
-                                          self.paths["text_feat_paths"]["train"])
-            self.text_features.update(
-                memcache(root_feat / self.paths["text_feat_paths"][self.split_name]))
+            fname = self.paths["text_feat_paths"]["openai"]["train"]
+            self.text_features = memcache(root_feat / fname)
+            fname = self.paths["text_feat_paths"]["openai"][self.split_name]
+            self.text_features.update(memcache(root_feat / fname))
             self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
 
     def sanity_checks(self):

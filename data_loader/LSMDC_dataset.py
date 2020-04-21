@@ -95,7 +95,7 @@ class LSMDC(BaseDataset):
             self.load_challenge_text_features()
         else:
             self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
-            text_feat_path = root_feat / self.paths["text_feat_path"][self.text_feat]
+            text_feat_path = root_feat / self.paths["text_feat_paths"][self.text_feat]
             self.text_features = memcache(text_feat_path)
 
     def sanity_checks(self):
