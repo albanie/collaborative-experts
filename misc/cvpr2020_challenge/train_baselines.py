@@ -91,6 +91,7 @@ def train_baselines(
     challenge_phase = "public_server_val"
     fname = f"baselines-{timestamp}-{challenge_phase}-{'-'.join(datasets)}.json"
     outputs = {key: {} for key in ("predictions", "ckpts")}
+    dest_dir.mkdir(exist_ok=True, parents=True)
     dest_paths = {key: dest_dir / f"{key}-{fname}" for key in outputs}
 
     if aggregate:
@@ -115,7 +116,6 @@ def train_baselines(
 
     for key, dest_path in dest_paths.items():
         print(f"Writing baseline {key} list to {dest_path}")
-        dest_path.parent.mkdir(exist_ok=True, parents=True)
         with open(dest_path, "w") as f:
             json.dump(outputs[key], f, indent=4, sort_keys=True)
 
