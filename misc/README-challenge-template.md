@@ -21,7 +21,10 @@ ln -s /folder/where/you/are/happy/to/put/data /path/to/collaborative-experts/dat
 python misc/sync_experts.py --release challenge-release-1
 ```
 
-Thirty days before the close of the challenge, the features for the test set will be released (see the workshop [page](https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/challenge.html) for dates).
+3. To download data for the test-phase, run:
+```
+python misc/sync_experts.py --release challenge-release-2
+```
 
 
 ### Training a baseline
