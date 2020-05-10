@@ -65,13 +65,13 @@ NOTES:
 
 *Before submitting, please note that you are limited to a total of three test submissions over the course of the challenge*.
 
-The test phase of the competition is now open.  To test the baseline models described above, you can pass the json file of checkpoints produced by the `train_baselines.py` script to the [test_baselines.py](cvpr2020_challenge/test_baselines.py) :
+The test phase of the competition is now open (10th May 2020).  To test the baseline models described above, you can pass the json file of checkpoints produced by the `train_baselines.py` script to the [test_baselines.py](cvpr2020_challenge/test_baselines.py) :
 
 ```
 # add the project root folder to the pythonpath
 export PYTHONPATH=$(pwd):$PYTHONPATH
 
-# provide path to checkpoints (produced by train_baselines.py)
+# provide path to checkpoints (you should replace this with the output produced by train_baselines.py)
 CKPT_LIST=data/cvpr2020-challenge-submissions/ckpts-baselines-2020-04-05_09-53-14-public_server_val-MSRVTT-MSVD-DiDeMo-YouCook2-activity-net.json
 
 python misc/cvpr2020_challenge/test_baselines.py  --ckpt_list_path ${CKPT_LIST}
