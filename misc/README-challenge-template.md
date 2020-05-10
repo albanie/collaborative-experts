@@ -6,7 +6,7 @@
 
 This page contains information relating to the [CVPR penathlon challenge](https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/). Details about the format of the challenge can be found [here](https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/challenge.html).
 
-**Obtaining the features:**
+### Obtaining the features
 
 The challenge has two phases: a `challenge-release-1` phase (for which the validation set is named `public_server_val`) and a `challenge-release-2` for which the test set is named `public_server_test`).  The features for the development phase can be used to train models and upload predictions the CodaLab server. Downloading the features is done in two stages:
 
@@ -24,7 +24,7 @@ python misc/sync_experts.py --release challenge-release-1
 Thirty days before the close of the challenge, the features for the test set will be released (see the workshop [page](https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/challenge.html) for dates).
 
 
-**Training a baseline:**
+### Training a baseline
 
 There are two ways to get started with training models: (i) train a model on a single dataset to get your feet wet; (ii) train a model for each dataset and combine the results into a zip file that can be uploaded directly to CodaLab for evaluation.  
 
@@ -61,7 +61,7 @@ NOTES:
 * It is possible to train models without a GPU, but it's quite slow.
 * If you have access to a SLURM scheduler, adding the `--yaspify` flag will train each of the baselines in parallel (this may be helpful to save some time, but will require `pip install yaspi`).
 
-**Test phase**
+### Test phase
 
 *Before submitting, please note that you are limited to a total of three test submissions over the course of the challenge*.
 
@@ -80,15 +80,15 @@ python misc/cvpr2020_challenge/test_baselines.py  --ckpt_list_path ${CKPT_LIST}
 This will produce a file in the test format required by the CodaLab server.
 
 
-**Uploading predictions to the server:**
+### Uploading predictions to the server
 
 The challenge is hosted on CodaLab: https://competitions.codalab.org/competitions/24292
 
-**Using multiple captions per video:**
+### Using multiple captions per video
 
 Two of the datasets: `MSRVTT` and `MSVD` provide multiple captions per video (this can be seen by examining the raw captions for each dataset, or the collection of text features which are grouped by video).  This information is not exploited by the baseline code, but it is valid to use this information under the rules of the challenge (e.g. by ensembling predictions for each of the captions assigned to a signle video) and is expected to lead to a boost in performance on these two datasets.
 
-**Trying out new ideas!**
+### Trying out new ideas!
 
 There are undoubtedly many ways to improve upon the baseline. Here are just a few suggestions/ideas for possible directions:
 * Using more modalities: there are many more preprocessed features available than the ones used in the baseline so experimenting with different combinations may produce good results.
