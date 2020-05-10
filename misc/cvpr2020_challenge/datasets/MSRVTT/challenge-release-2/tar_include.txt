@@ -1,0 +1,5 @@
+data/MSRVTT/challenge-release-2/aggregated_text_feats/bertxl.pickle
+data/MSRVTT/challenge-release-2/aggregated_text_feats/openai.pickle
+data/MSRVTT/challenge-release-2/aggregated_text_feats/w2v.pickle
+data/MSRVTT/challenge-release-2/public_server_test.txt
+data/MSRVTT/challenge-release-2/raw-captions.pkl

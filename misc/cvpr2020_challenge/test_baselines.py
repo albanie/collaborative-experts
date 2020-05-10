@@ -1,12 +1,14 @@
 """Evaluating simple baselines for the CVPR2020 video pentathlon challenge
 
-%run -i misc/cvpr2020_challenge/test_baselines.py \
-    --ckpt_list_path data/cvpr2020-challenge-submissions/ckpts-baselines-2020-04-05_09-53-14-public_server_val-MSRVTT-MSVD-DiDeMo-YouCook2-activity-net.json
+Example usage (evaluates checkpoints produced by the train_baselines.py script):
 
-    ckpts-baselines-2020-03-31_12-24-52-public_server_val-MSRVTT-MSVD-DiDeMo-LSMDC-activity-net.json
-  --ckpt_list_path data/cvpr2020-challenge-submissions/debug.json
+# add the project root folder to the pythonpath
+export PYTHONPATH=$(pwd):$PYTHONPATH
 
---ckpt_list_path data/cvpr2020-challenge-submissions/ckpts-baselines-2020-03-30_09-12-18-public_server_val-MSRVTT-MSVD-DiDeMo-LSMDC-activity-net.json
+# provide path to checkpoints (produced by train_baselines.py)
+CKPT_LIST=data/cvpr2020-challenge-submissions/ckpts-baselines-2020-04-05_09-53-14-public_server_val-MSRVTT-MSVD-DiDeMo-YouCook2-activity-net.json
+
+python misc/cvpr2020_challenge/test_baselines.py  --ckpt_list_path ${CKPT_LIST}
 """
 import json
 import argparse

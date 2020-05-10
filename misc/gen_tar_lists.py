@@ -135,15 +135,16 @@ def generate_tar_lists_for_challenge(
                 f.write(f"{path}\n")
 
         # select video paths
-        video_dir = src_folder / "videos"
-        video_paths = [x for x in rel_paths if str(x).startswith(str(video_dir))
-                       and x.is_file()]
-        print(f"[{dataset}] Found {len(video_paths)} video paths")
+        if challenge_phase == "public_server_val":
+            video_dir = src_folder / "videos"
+            video_paths = [x for x in rel_paths if str(x).startswith(str(video_dir))
+                        and x.is_file()]
+            print(f"[{dataset}] Found {len(video_paths)} video paths")
 
-        with open(video_tar_include_list, "w") as f:
-            print(f"Writing video paths to {video_tar_include_list}")
-            for path in sorted(video_paths):
-                f.write(f"{path}\n")
+            with open(video_tar_include_list, "w") as f:
+                print(f"Writing video paths to {video_tar_include_list}")
+                for path in sorted(video_paths):
+                    f.write(f"{path}\n")
 
 
 def main():

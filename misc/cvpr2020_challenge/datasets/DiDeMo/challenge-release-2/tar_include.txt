@@ -1,0 +1,3 @@
+data/DiDeMo/challenge-release-2/aggregated_text_feats/openai.pkl
+data/DiDeMo/challenge-release-2/public_server_test.txt
+data/DiDeMo/challenge-release-2/raw-captions.pkl

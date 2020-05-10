@@ -1,0 +1,4 @@
+data/MSVD/challenge-release-2/aggregated_text_feats/openai.pkl
+data/MSVD/challenge-release-2/aggregated_text_feats/w2v.pkl
+data/MSVD/challenge-release-2/public_server_test.txt
+data/MSVD/challenge-release-2/raw-captions.pkl

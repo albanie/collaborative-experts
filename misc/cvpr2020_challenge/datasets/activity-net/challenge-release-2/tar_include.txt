@@ -1,0 +1,3 @@
+data/activity-net/challenge-release-2/aggregated_text_feats/openai.pkl
+data/activity-net/challenge-release-2/public_server_test.txt
+data/activity-net/challenge-release-2/raw-captions-train-val_1.pkl

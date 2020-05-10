@@ -47,10 +47,9 @@ def upload_to_server(
     if release.startswith("challenge-release"):
         dataset_dir = Path("misc/cvpr2020_challenge/datasets") / dataset
         # tar_include = dataset_dir / release / "tar_include.txt"
-        tar_lists = {
-            "features": "tar_include.txt",
-            "videos": "video_tar_include.txt",
-        }
+        tar_lists = {"features": "tar_include.txt"}
+        if release == "challenge-release-1":
+            tar_lists["videos"] = "video_tar_include.txt"
         tar_includes, compressed_paths = [], []
         for key, tar_list in tar_lists.items():
             tar_includes.append(dataset_dir / release / tar_list)

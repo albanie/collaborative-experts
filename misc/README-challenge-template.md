@@ -30,7 +30,7 @@ There are two ways to get started with training models: (i) train a model on a s
 
 *Training on a single dataset:*
 
-Alternatively, if you are looking to get your feet wet with a simple example, you can train a single model for a single dataset as follows:
+If you are looking to get started with a simple example, you can train a single model for a single dataset as follows:
 
 ```
 # add the project root folder to the pythonpath
@@ -61,9 +61,32 @@ NOTES:
 * It is possible to train models without a GPU, but it's quite slow.
 * If you have access to a SLURM scheduler, adding the `--yaspify` flag will train each of the baselines in parallel (this may be helpful to save some time, but will require `pip install yaspi`).
 
+**Test phase**
+
+*Before submitting, please note that you are limited to a total of three test submissions over the course of the challenge*.
+
+The test phase of the competition is now open.  To test the baseline models described above, you can pass the json file of checkpoints produced by the `train_baselines.py` script to the [test_baselines.py](cvpr2020_challenge/test_baselines.py) :
+
+```
+# add the project root folder to the pythonpath
+export PYTHONPATH=$(pwd):$PYTHONPATH
+
+# provide path to checkpoints (produced by train_baselines.py)
+CKPT_LIST=data/cvpr2020-challenge-submissions/ckpts-baselines-2020-04-05_09-53-14-public_server_val-MSRVTT-MSVD-DiDeMo-YouCook2-activity-net.json
+
+python misc/cvpr2020_challenge/test_baselines.py  --ckpt_list_path ${CKPT_LIST}
+```
+
+This will produce a file in the test format required by the CodaLab server.
+
+
 **Uploading predictions to the server:**
 
-The challenge is hosted on CodaLab (Dear friendly tester, please use this temporary challenge link: https://competitions.codalab.org/competitions/24264?secret_key=11b7bbfd-8623-4c82-b2a4-f8586008681b#results).  
+The challenge is hosted on CodaLab: https://competitions.codalab.org/competitions/24292
+
+**Using multiple captions per video:**
+
+Two of the datasets: `MSRVTT` and `MSVD` provide multiple captions per video (this can be seen by examining the raw captions for each dataset, or the collection of text features which are grouped by video).  This information is not exploited by the baseline code, but it is valid to use this information under the rules of the challenge (e.g. by ensembling predictions for each of the captions assigned to a signle video) and is expected to lead to a boost in performance on these two datasets.
 
 **Trying out new ideas!**
 
