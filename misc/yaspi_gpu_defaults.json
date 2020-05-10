@@ -13,6 +13,6 @@
     "refresh_logs": false,
     "exclude": "",
     "constraint_str": "",
-    "prep": "pushd ${HOME}/coding/libs/pt/collaborative-experts",
+    "prep": "",
     "env_setup": "export PYTHONPATH=\"${BASE}\":$PYTHONPATH; export PATH=\"${HOME}\"/local/anaconda3/condabin/:$PATH; source ~/local/anaconda3/etc/profile.d/conda.sh; conda activate pt37"
 }
