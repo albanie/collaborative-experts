@@ -115,6 +115,7 @@ def train_baselines(
 
     for key, dest_path in dest_paths.items():
         print(f"Writing baseline {key} list to {dest_path}")
+        dest_path.parent.mkdir(exist_ok=True, parents=True)
         with open(dest_path, "w") as f:
             json.dump(outputs[key], f, indent=4, sort_keys=True)
 
