@@ -20,7 +20,9 @@ This repo provides code for learning and evaluating joint video-text embeddings 
 <img width="300" alt="logo" src="figs/logo-centre.png">
 </p>
 
-We are hosting a video retrieval challenge as part of the Video Pentathlon Workshop. Find out how to participate [here](misc/challenge.md)!
+We hosted a video retrieval challenge as part of the <a href="https://www.robots.ox.ac.uk/~vgg/challenges/video-pentathlon/">Video Pentathlon Workshop</a>.  The challenge is described in a technical report <a href="https://arxiv.org/abs/2008.00744">here</a>.
+
+For details on code related to the challenge, see [here](misc/challenge.md)!
 
 
 ### Pretrained video embeddings
@@ -287,7 +289,19 @@ Dependencies can be installed via `pip install -r requirements/pip-requirements.
 }
 ```
 
-[2] If you make use of the MSRVTT or LSMDC features provided by Miech et al. (details are given in their respective READMEs [here](misc/datasets/msrvtt/README.md) and [here](misc/datasets/lsmdc/README.md)), please cite:
+[2] A report of the CVPR pentathlon challenge is described [here](), for which the reference is:
+
+```
+@article{albanie2020end,
+  title={The End-of-End-to-End: A Video Understanding Pentathlon Challenge (2020)},
+  author={Albanie, Samuel and Liu, Yang and Nagrani, Arsha and Miech, Antoine and Coto, Ernesto and Laptev, Ivan and Sukthankar, Rahul and Ghanem, Bernard and Zisserman, Andrew and Gabeur, Valentin and others},
+  journal={arXiv preprint arXiv:2008.00744},
+  year={2020}
+}
+```
+
+
+[3] If you make use of the MSRVTT or LSMDC features provided by Miech et al. (details are given in their respective READMEs [here](misc/datasets/msrvtt/README.md) and [here](misc/datasets/lsmdc/README.md)), please cite:
 
 ```
 @article{miech2018learning,
