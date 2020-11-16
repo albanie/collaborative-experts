@@ -1,5 +1,4 @@
 {
-
     "msrvtt-train-full-moee": ["5738fb92", "2020-01-07_15-27-15"],
     "msrvtt-train-full-ce-only-scene": ["812545a9", "2020-01-07_14-51-54"],
     "msrvtt-train-full-ce-only-scene-face": ["5e28c6f2", "2020-01-07_14-52-47"],
@@ -149,5 +148,20 @@
     "activity-net-train-full-ce-only-scene-speech-audio-flow-rgb-inst-r2p1d-ocr-face": ["b2e01b87", "2020-01-25_07-46-17"],
     "activity-net-train-full-concat-ablation": ["bc82bfba", "2020-01-25_15-03-45"],
     "activity-net-train-full-moee": ["4c6616be", "2020-01-25_17-21-28"],
-    "activity-net-train-full-moee-minus-moee-weights": ["235dbfcf", "2020-01-25_15-18-18"]
+    "activity-net-train-full-moee-minus-moee-weights": ["235dbfcf", "2020-01-25_15-18-18"],
+
+    "queryd-train-full-ce": ["bf393a74", "2020-10-21_16-29-49"],
+    "queryd-train-full-ce-only-scene": ["7a747dc4", "2020-10-21_16-41-01"],
+    "queryd-train-full-ce-only-scene-audio": ["c87311b1", "2020-10-21_16-32-58"],
+    "queryd-train-full-ce-only-scene-audio-inst": ["f302d191", "2020-10-21_16-29-36"],
+    "queryd-train-full-ce-only-scene-audio-inst-r2p1d": ["70feaf3c", "2020-10-21_16-25-50"],
+    "queryd-train-full-ce-only-scene-inst": ["bb0be767", "2020-10-21_16-36-00"],
+    "queryd-train-full-ce-only-scene-r2p1d": ["86e43b8b", "2020-10-21_16-38-35"],
+    "queryd-train-full-mnnet": ["4f82d8b3", "2020-10-21_16-32-55"],
+    "queryd-train-full-moee": ["d75cfe35", "2020-10-21_16-33-40"],
+
+    "querydsegments-train-full-ce": ["d7737672", "2020-10-21_18-19-39"],
+    "querydsegments-train-full-mnnet": ["84b0801c", "2020-10-21_18-28-28"],
+    "querydsegments-train-full-moee": ["87a1436a", "2020-10-21_18-29-07"]
+
 }

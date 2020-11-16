@@ -1,0 +1,9 @@
+{
+    "inherit_from": "configs/data_loader_querydsegments.json",
+    "arch": {
+        "type": "CENet",
+        "args": {
+            "use_ce": ""
+        }
+    }
+}

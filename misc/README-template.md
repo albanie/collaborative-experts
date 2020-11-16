@@ -106,6 +106,18 @@ For each dataset, the Collaborative Experts model makes use of a collection of p
 | DiDeMo | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/didemo/README.md)| 2.3 GiB | <sup><sub><sup><sub>6fd4bcc68c1611052de2499fd8ab3f488c7c195b</sub></sup></sub></sup> | 
 | ActivityNet | audio, face, flow, ocr, rgb, scene, speech | [README](misc/datasets/activity-net/README.md)| 3.8 GiB | <sup><sub><sup><sub>b16685576c97cdec2783fb89ea30ca7d17abb021</sub></sup></sub></sup> | 
 
+### QuerYD
+
+<<misc/README-model-study.md:msrvtt:queryd>>
+
+The influence of different pretrained experts for the performance of the CE model trained on QuerYD is studied. The value and cumulative effect of different experts for scene clas-sification (SCENE), ambient sound classification (AUDIO),image classification (OBJECT), and action recognition (ACTION) are presented. PREV. denotes the experts used in the previous row.
+
+<<misc/README-queryd-ablations-template.md:queryd:queryd>>
+
+### QuerYDSegments
+
+<<misc/README-model-study.md:msrvtt:querydsegments>>
+
 ### Evaluating a pretrained model
 
 Evaluting a pretrained model for a given dataset requires:
