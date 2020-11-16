@@ -1,5 +1,5 @@
 {
-    "inherit_from": "configs/base_config.json",
+    "inherit_from": "configs/base_config_queryd.json",
     "eval_mode": "test_run",
     "experts": {
         "text_feat": "w2v",

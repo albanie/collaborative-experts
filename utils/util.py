@@ -62,6 +62,8 @@ def update_src_web_video_dir(config):
             "DiDeMo": "DiDeMo/videos",
             "LSMDC": "LSMDC/videos",
             "YouCook2": "YouCook2/videos",
+            "QuerYD": "QuerYD/videos",
+            "QuerYDSegments": "QuerYDSegments/videos",
         }
         src_video_dir = Path(src_video_dir.parts[0]) / lookup[dataset]
     config["visualizer"]["args"]["src_video_dir"] = Path(src_video_dir)
@@ -210,7 +212,8 @@ def compute_dims(config, logger=None):
 
         # For the CE architecture, we need to project all features to a common
         # dimensionality
-        if arch_args["use_ce"] or arch_args.get("mimic_ce_dims", False):
+        is_ce = config["arch"]["type"] == "CENet"
+        if is_ce and (arch_args["use_ce"] or arch_args.get("mimic_ce_dims", False)):
             out_dim = experts["ce_shared_dim"]
 
         dims.append((expert, (in_dim, out_dim)))
@@ -221,8 +224,9 @@ def compute_dims(config, logger=None):
         assert config["data_loader"]["args"]["max_tokens"]["text"] == 1, msg
 
     if config["experts"]["text_agg"] == "avg":
-        msg = "averaging can only be performed with text using single tokens"
-        assert config["arch"]["args"]["vlad_clusters"]["text"] == 0
+        if hasattr(config["arch"]["args"], "vlad_clusters"):
+            msg = "averaging can only be performed with text using single tokens"
+            assert config["arch"]["args"]["vlad_clusters"]["text"] == 0
         assert config["data_loader"]["args"]["max_tokens"]["text"] == 1
 
     # To remove the dependency of dataloader on the model architecture, we create a

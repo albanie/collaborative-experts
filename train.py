@@ -1,32 +1,34 @@
 """
 %run -i train.py --config configs/data_loader_lsmdc.json --device 0
 """
-import os
-import time
-import random
-import copy
-import socket
 import argparse
+import copy
+import json
+import os
+import random
+import socket
+import time
 import warnings
-from test import evaluation
 from pathlib import Path
-from mergedeep import merge, Strategy
+from test import evaluation
 
 import numpy as np
+import swats
 import torch
 import torch.nn as nn
+from mergedeep import Strategy, merge
 
-import swats
-import model.loss as module_loss
-import model.model as module_arch
-import model.metric as module_metric
 import data_loader.data_loaders as module_data
-from utils import radam, ranger, cos_restart, set_seeds
-from trainer import Trainer
-from utils.util import compute_dims, compute_trn_config, update_src_web_video_dir
-from parse_config import ConfigParser
-from logger.log_parser import log_summary
+import model.loss as module_loss
+import model.metric as module_metric
+import model.model as module_arch
 import utils.visualizer as module_vis
+from logger.log_parser import log_summary
+from parse_config import ConfigParser
+from trainer import Trainer
+from utils import cos_restart, radam, ranger, set_seeds
+from utils.util import (compute_dims, compute_trn_config,
+                        update_src_web_video_dir)
 
 
 def run_exp(config):
@@ -57,11 +59,18 @@ def run_exp(config):
         set_seeds(seed)
         config["seed"] = seed
 
+        try:
+            with open(config["text_embedding_model_configs"], "r") as f:
+                text_embedding_model_configs = json.load(f)
+            experts = config["experts"]
+            text_dim = text_embedding_model_configs[experts["text_feat"]]["dim"]
+        except KeyError:
+            text_dim = config["experts"]["text_dim"]
         model = config.init(
             name='arch',
             module=module_arch,
             expert_dims=expert_dims,
-            text_dim=config["experts"]["text_dim"],
+            text_dim=text_dim,
             disable_nan_checks=config["disable_nan_checks"],
             spatial_feats=config["data_loader"]["args"].get("spatial_feats", False),
             task=config.get("task", "retrieval"),
@@ -79,7 +88,7 @@ def run_exp(config):
             raw_input_dims=raw_input_dims,
             challenge_mode=config.get("challenge_mode", False),
             text_feat=config["experts"]["text_feat"],
-            text_dim=config["experts"]["text_dim"],
+            text_dim=text_dim,
             text_agg=config["experts"]["text_agg"],
             use_zeros_for_missing=config["experts"].get("use_zeros_for_missing", False),
             task=config.get("task", "retrieval"),

@@ -6,7 +6,7 @@ from zsvision.zs_utils import memcache, concat_features
 from typeguard import typechecked
 
 from utils import memory_summary
-from base.base_dataset import BaseDataset
+from base.base_dataset_queryd import BaseDataset
 
 
 class QuerYDSegments(BaseDataset):

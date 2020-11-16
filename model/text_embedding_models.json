@@ -1,0 +1,114 @@
+{
+    "w2v": {
+        "weights_path": "data/text_models/GoogleNews-vectors-negative300.bin.gz",
+        "dim": 300,
+        "force_cpu": true,
+        "remove_stopwords": false,
+        "mirror": "https://s3.amazonaws.com/dl4j-distribution/GoogleNews-vectors-negative300.bin.gz"
+    },
+    "grovle": {
+        "dim": 300,
+        "weights_path": "data/text_models/grovle.zip",
+        "force_cpu": true,
+        "remove_stopwords": false,
+        "mirror": "http://www.robots.ox.ac.uk/~albanie/data/mirrors/GrOVLE"
+    },
+    "mt_grovle": {
+        "dim": 300,
+        "weights_path": "data/text_models/mt_grovle.zip",
+        "force_cpu": true,
+        "remove_stopwords": false,
+        "mirror": "http://www.robots.ox.ac.uk/~albanie/data/mirrors/GrOVLE"
+    },
+    "hglmm_300d": {
+        "dim": 300,
+        "weights_path": "data/text_models/hglmm_300d.zip",
+        "force_cpu": true,
+        "remove_stopwords": false,
+        "mirror": "http://www.robots.ox.ac.uk/~albanie/data/mirrors/GrOVLE"
+    },
+    "hglmm_6kd": {
+        "dim": 6000,
+        "weights_path": "data/text_models/hglmm_6kd.zip",
+        "force_cpu": true,
+        "remove_stopwords": false,
+        "mirror": "http://www.robots.ox.ac.uk/~albanie/data/mirrors/GrOVLE"
+    },
+    "howto100m_mil_nce": {
+        "word_dict_path": "data/text_models/howto100m/s3d_dict.npy",
+        "weights_path": "data/text_models/howto100m/s3d_howto100m.pth",
+        "dim": 512,
+        "mirror": "https://www.rocq.inria.fr/cluster-willow/amiech/howto100m"
+    },
+    "openai": {
+        "dim": 768,
+        "custom_pipeline": true
+    },
+    "electra": {
+        "dim": 256
+    },
+    "openai-gpt": {
+        "dim": 768
+    },
+    "gpt2": {
+        "dim": 768
+    },
+    "gpt2-medium": {
+        "dim": 1024
+    },
+    "gpt2-large": {
+        "dim": 1280
+    },
+    "gpt2-xl": {
+        "dim": 1600
+    },
+    "gpt2-xl-finetune": {
+        "dim": 1600
+    },
+    "bert-base-uncased": {
+        "dim": 768
+    },
+    "t5-small": {
+         "dim": 512
+    },
+    "t5-base": {
+         "dim": 768
+    },
+    "t5-large": {
+         "dim": 1024
+    },
+    "t5-3b": {
+         "dim": 1024
+    },
+    "t5-11b": {
+         "force_cpu": true,
+         "dim": 1024
+    },
+    "albert-base-v2": {
+         "dim": 768
+    },
+    "albert-large-v2": {
+         "dim": 1024
+    },
+    "albert-xlarge-v2": {
+         "dim": 2048
+    },
+    "ctrl": {
+         "dim": 1280
+    },
+    "roberta-base": {
+         "dim": 768
+    },
+    "roberta-large": {
+         "dim": 1024
+    },
+    "xlnet-base-cased": {
+         "dim": 768
+    },
+    "xlnet-large-cased": {
+         "dim": 1024
+    },
+    "transfo-xl-wt103": {
+         "dim": 1024
+    }
+}
