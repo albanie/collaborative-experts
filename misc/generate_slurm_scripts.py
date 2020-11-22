@@ -11,6 +11,8 @@ EXP_LIST="activity-net-ablations.txt"
 EXP_LIST="didemo-ablations.txt"
 
 EXP_LIST="msvd-ablations.txt"
+
+EXP_LIST="msrvtt-text-study.txt"
 python misc/generate_slurm_scripts.py --job_queue "slurm/${EXP_LIST}" \
                                && source data/slurm/scripts/slurm-dependencies.sh
 """
@@ -20,50 +22,10 @@ import copy
 import argparse
 import itertools
 from pathlib import Path
+from utils.util import parse_grid
 from itertools import zip_longest
 from collections import OrderedDict
 
-
-def get_short_uuid():
-    """Return a 7 alpha-numeric character random string.  We could use the full uuid()
-    for better uniqueness properties, but it makes the filenames long and its not
-    needed for our purpose (simply grouping experiments that were run with the same
-    configuration).
-    """
-    return str(uuid.uuid4()).split("-")[0]
-
-
-def parse_grid(x):
-    """Parse compact command line strings of the form:
-        --key1 val_a|val_b --key2 val_c|val_d
-
-    (here a vertical bar represents multiple values)
-
-    into a grid of separate strings e.g:
-        --key1 val_a --key2 val_c
-        --key1 val_a --key2 val_d
-        --key1 val_b --key2 val_c
-        --key1 val_b --key2 val_d
-
-    """
-    args = x.split(" ")
-    group_id = get_short_uuid()
-    grid_opts, parsed = {}, []
-    for ii, token in enumerate(args):
-        if "|" in token:
-            grid_opts[ii] = token.split("|")
-    grid_idx, grid_vals = [], []
-    for ii, val in grid_opts.items():
-        grid_idx.append(ii)
-        grid_vals.append(val)
-    grid_vals = list(itertools.product(*grid_vals))
-    for cfg in grid_vals:
-        base = copy.deepcopy(args)
-        for ii, val in zip(grid_idx, cfg):
-            base[ii] = val
-        base.append(f"--group_id {group_id}")
-        parsed.append(" ".join(base))
-    return parsed
 
 
 def fill_template(template_path, rules):
@@ -216,7 +178,6 @@ def generate_script(template_path, slurm_script_dir, job_queue, exp_dir,
 
             }
             script = fill_template(template_path, rules)
-            # script = generated
         elif script_name in aggregation_scripts:
             script = generate_aggregation_script(
                 exp_dir=exp_dir,
@@ -246,7 +207,9 @@ def main():
                         default="misc/slurm/aggregate-logs-and-stats.sh")
     parser.add_argument("--constraints", default="")
     parser.add_argument("--exp_dir",
-                        default="/users/albanie/coding/libs/pt/speedy-experts")
+                        #default="/users/albanie/coding/libs/pt/collaborative-experts")
+                        # default="/users/ioana/collaborative-experts-internal/collaborative-experts-internal")
+                        default="/scratch/shared/beegfs/oncescu/shared-datasets/QuerYD/collaborative")
     args = parser.parse_args()
 
     monitor_script = f"slurm/monitor-jobs.sh"

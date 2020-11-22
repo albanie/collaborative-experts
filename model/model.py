@@ -901,6 +901,8 @@ class CEModule(nn.Module):
         return {
             "modalities": self.modalities,
             "cross_view_conf_matrix": cross_view_conf_matrix,
+            "text_embds": text_embd,
+            "vid_embds": experts,
         }
 
 
@@ -1079,7 +1081,7 @@ def sharded_cross_view_inner_product(vid_embds, text_embds, text_weights,
         assert set(th.unique(available).cpu().numpy()).issubset(set([0, 1])), msg
         # set the text weights along the first axis and combine with availabilities to
         # produce a <T x B x num_experts> tensor
-        text_weight_tensor = text_weights.view(T*num_caps ,1, len(subspaces)) * available
+        text_weight_tensor = text_weights.view(T*num_caps, 1, len(subspaces)) * available
         # normalise to account for missing experts
         normalising_weights = text_weight_tensor.sum(2).view(T*num_caps, B, 1)
         text_weight_tensor = th.div(text_weight_tensor, normalising_weights)

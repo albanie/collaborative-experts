@@ -8,13 +8,14 @@ Note that to fetch the features for LSMDC, you must additionally supply an acces
 code after filling out the MPII dataset agreement form:
 python misc/sync_experts.py --dataset LSMDC --access_code <put-code-here>
 """
-import os
-import time
-import hashlib
 import argparse
+import hashlib
+import json
+import os
 import subprocess
-from typing import Dict
+import time
 from pathlib import Path
+from typing import Dict
 
 from typeguard import typechecked
 
@@ -41,15 +42,17 @@ def upload_to_server(
     release: str,
     webserver: str,
     refresh: Dict[str, bool],
+    experiments: Path,
 ):
     server_dir = web_dir / "data" / release
     subprocess.call(["ssh", webserver, "mkdir -p", str(server_dir)])
     if release.startswith("challenge-release"):
         dataset_dir = Path("misc/cvpr2020_challenge/datasets") / dataset
         # tar_include = dataset_dir / release / "tar_include.txt"
-        tar_lists = {"features": "tar_include.txt"}
-        if release == "challenge-release-1":
-            tar_lists["videos"] = "video_tar_include.txt"
+        tar_lists = {
+            "features": "tar_include.txt",
+            "videos": "video_tar_include.txt",
+        }
         tar_includes, compressed_paths = [], []
         for key, tar_list in tar_lists.items():
             tar_includes.append(dataset_dir / release / tar_list)
@@ -93,6 +96,57 @@ def upload_to_server(
         subprocess.call(rsync_args)
         duration = time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - tic))
         print(f"Finished transferring tar file in {duration}")
+    
+# @typechecked
+# def multiprocessing_upload():
+    
+
+@typechecked
+def upload_models_to_robots(web_dir: Path, experiments: Path,
+                            save_dir: Path, webserver: str):
+    with open(experiments, "r") as f:
+        experiments = json.load(f)
+    experiments_items = experiments.items()
+    server_dir = web_dir / "data"
+    for exp_name, meta in experiments_items:
+        if "queryd" in exp_name:
+            group_id, timestamp = meta
+            seed_folder = sorted(os.listdir(Path(save_dir) / "log" / Path(exp_name) / group_id))[0]
+            files_in_seed_folder = os.listdir(Path(save_dir) / "log" / Path(exp_name) / group_id / seed_folder /  Path(timestamp))
+            for file in files_in_seed_folder:
+                if ".json" in file and ".bak" not in file:
+                    fname = file
+                    break
+            rel_path = Path(exp_name) / group_id / seed_folder / Path(timestamp)
+            log_path = Path(save_dir) / "log" / rel_path / fname
+            server_log_path = server_dir / "log" / rel_path
+            model_config_path = server_dir / "models" / rel_path
+
+            subprocess.call(["ssh", webserver, "mkdir -p", str(server_log_path)])
+            subprocess.call(["ssh", webserver, "mkdir -p", str(model_config_path)])
+            dest_log = f"{webserver}:{str(server_log_path)}"
+            rsync_args_log = ["rsync", "-av", "--progress", "--ignore-existing", str(log_path), dest_log]
+
+            tic = time.time()
+            subprocess.call(rsync_args_log)
+            duration = time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - tic))
+            print(f"Finished transferring log file for experiment {exp_name} in {duration}")
+
+            model_path = Path(save_dir) / "models" / rel_path / "trained_model.pth"
+            config_path = Path(save_dir) / "models" / rel_path / "config.json"
+
+            dest_model_config = f"{webserver}:{str(model_config_path)}"
+            rsync_args_model = ["rsync", "-av", "--progress", "--ignore-existing", str(model_path), dest_model_config]
+            tic = time.time()
+            subprocess.call(rsync_args_model)
+            duration = time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - tic))
+            print(f"Finished transferring model for experiment {exp_name} in {duration}")
+            rsync_args_config = ["rsync", "-av", "--progress", "--ignore-existing", str(config_path), dest_model_config]
+            tic = time.time()
+            subprocess.call(rsync_args_config)
+            duration = time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - tic))
+            print(f"Finished transferring config file for experiment {exp_name} in {duration}")
+        
 
 
 @typechecked
@@ -136,13 +190,15 @@ def main():
     parser.add_argument("--dataset", nargs="+",
                         default=["MSRVTT", "MSVD", "DiDeMo", "activity-net", "YouCook2"],
                         choices=["LSMDC", "MSRVTT", "MSVD", "DiDeMo", "activity-net",
-                                 "YouCook2"])
-    parser.add_argument("--action", default="fetch", choices=["upload", "fetch"])
+                                 "YouCook2", "QuerYD", "QuerYDSegments"])
+    parser.add_argument("--action", default="fetch", choices=["upload", "fetch", "model"])
     parser.add_argument("--webserver", default="login.robots.ox.ac.uk")
     parser.add_argument("--refresh_compression", action="store_true")
     parser.add_argument("--refresh_server", action="store_true")
     parser.add_argument("--refresh_symlinked_feats", action="store_true")
     parser.add_argument("--purge_tar_file", action="store_true")
+    parser.add_argument("--experiments_path", type=Path, default="misc/experiments.json")
+    parser.add_argument("--save_dir", default="data/saved", type=Path)
     parser.add_argument("--release", default="features-v2",
                         choices=["features-v2", "challenge-release-1",
                                  "challenge-release-2"],
@@ -185,6 +241,13 @@ def main():
                 refresh=refresh_targets,
                 purge_tar_file=args.purge_tar_file,
                 access_code=args.access_code,
+            )
+        elif args.action == "model":
+            upload_models_to_robots(
+                web_dir=args.web_dir,
+                experiments=args.experiments_path,
+                save_dir=args.save_dir,
+                webserver=args.webserver,
             )
         else:
             raise ValueError(f"unknown action: {args.action}")

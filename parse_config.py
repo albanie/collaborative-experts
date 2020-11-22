@@ -2,17 +2,17 @@ import os
 import time
 import pprint
 import logging
-from typing import Dict
+from typing import Dict, List
 from pathlib import Path
 from datetime import datetime
 from operator import getitem
 from functools import reduce
 
-from mergedeep import Strategy, merge
-from zsvision.zs_utils import set_nested_key_val
+import mock
 from typeguard import typechecked
+from zsvision.zs_utils import load_json_config, set_nested_key_val
 
-from utils import read_json, write_json
+from utils import write_json
 from logger import setup_logging
 
 
@@ -27,6 +27,8 @@ class ConfigParser:
 
         if slave_mode:
             args = args.parse_args(args=[])
+        elif isinstance(args, mock.Mock):
+            pass
         else:
             args = args.parse_args()
 
@@ -42,7 +44,7 @@ class ConfigParser:
             self.resume = None
         self.cfg_fname = Path(args.config)
 
-        config = self.load_config(self.cfg_fname)
+        config = load_json_config(self.cfg_fname)
         self._config = _update_config(config, options, args)
 
         if self._config.get("eval_config", False):
@@ -130,21 +132,6 @@ class ConfigParser:
             config["trainer"]["skip_first_n_saves"] = 0
             exper_name = f"{exper_name}-train-single-epoch"
         return exper_name
-
-    @staticmethod
-    @typechecked
-    def load_config(cfg_fname: Path) -> Dict:
-        config = read_json(cfg_fname)
-        # apply inheritance through config hierarchy
-        descendant, ancestors = config, []
-        while "inherit_from" in descendant:
-            parent_config = read_json(Path(descendant["inherit_from"]))
-            ancestors.append(parent_config)
-            descendant = parent_config
-        for ancestor in ancestors:
-            merge(ancestor, config, strategy=Strategy.REPLACE)
-            config = ancestor
-        return config
 
     def init(self, name, module, *args, **kwargs):
         """Finds a function handle with the name given as 'type' in config, and returns

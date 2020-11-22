@@ -1,0 +1,14 @@
+{
+    "inherit_from": "configs/data_loader_queryd.json,configs/base_mnnet.json",
+    "optimizer": {
+        "type": "Ranger",
+        "args": {
+            "lr": 1e-08,
+            "weight_decay": 0.0
+        }
+    },
+    "data_loader": {
+        "type": "ExpertDataLoader",
+        "batch_size": 2048
+    }
+}

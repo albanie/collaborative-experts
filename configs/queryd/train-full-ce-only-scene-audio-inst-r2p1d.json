@@ -1,0 +1,11 @@
+{
+    "inherit_from": "configs/data_loader_queryd.json",
+    "experts": {
+        "modalities": [
+            "scene.densenet161.0",
+            "audio",
+            "r2p1d.r2p1d-ig65m.0",
+            "imagenet.resnext101_32x48d.0"
+        ]
+    }
+}

@@ -6,32 +6,97 @@ replaced with the urls for each resource.
 Note: print a summary of the most recent results for a given dataset via:
 python find_latest_checkpoints.py --dataset lsmdc
 """
-import re
-import json
 import argparse
+import glob
 import importlib
+import json
+import multiprocessing
+import os
+import pickle
+import re
 import subprocess
-from pathlib import Path
+import time
+from collections import OrderedDict, defaultdict
 from itertools import zip_longest
-from collections import OrderedDict
-from typing import Dict, Tuple, Union, List
+from pathlib import Path
+from typing import Dict, List, Tuple, Union
 
-import tqdm
 import numpy as np
+import pylatex
+import scipy.stats
+import tqdm
 from millify import millify
 from typeguard import typechecked
 
+from aggregate_logs_and_stats import summarise
+
 
 @typechecked
-def generate_url(root_url: str, target: str, exp_name: str, experiments: Dict) -> str:
+def gen_latex_version_of_table(
+        latex_table_dir: Path,
+        content: List[str],
+        table_name: str,
+        branch_name: str = "dev",
+) -> Path:
+    msg = "Expected latexify tag to be placed directly following a table"
+    assert content[-1].startswith("|"), msg
+    num_table_rows = [x.startswith("|") for x in reversed(content)].index(False)
+    assert num_table_rows > 2, "expected at least three table rows (including header)"
+    markdown_table = list(reversed(content[-1:-(num_table_rows + 1):-1]))
+    col_names = [x.strip() for x in markdown_table[0].split("|")[1:-1]]
+
+    # remove last column of links
+    remove_links = col_names[-1].lower() == "links"
+    if remove_links:
+        col_names.pop()
+    cols = "|".join(["c" for _ in range(len(col_names))])
+    table = pylatex.Tabular(cols)
+    table.add_hline()
+    table.add_hline()
+    table.add_row(tuple(col_names))
+    table.add_hline()
+    for row in markdown_table[2:]:
+        tokens = [x.strip() for x in row.split("|")[1:-1]]
+        if remove_links:
+            tokens.pop()
+        row_contents = []
+        for token in tokens:
+            mean_regexp = r"<sub><sup>([0-9]+[.][0-9]+)<sub>"
+            # std_regexp = r"<sub>\(([0-9]+[.][0-9]+|[a-z]+)\)<\/sub>"
+            std_regexp = r"<sub>\(([0-9]+[.][0-9]+e*-*[0-9]*|[a-z]+|)\)<\/sub>"
+            mean_strs = re.findall(mean_regexp, token)
+            if mean_strs:
+                assert len(mean_strs) == 1, "expected a unique mean specifier"
+                std_strs = re.findall(std_regexp, token)
+                assert len(std_strs) == 1, "expected a unique std specifier"
+                mean_str, std_str = mean_strs[0], std_strs[0]
+                raw_str = "$" + mean_str + r"_{\pm" + std_str + r"}$"
+                token = pylatex.NoEscape(raw_str)
+            row_contents.append(token)
+        table.add_row(tuple(row_contents))
+        table.add_hline()
+    latex_str = table.dumps()
+    latex_table_dir.mkdir(exist_ok=True, parents=True)
+    dest_path = latex_table_dir / f"{table_name}.txt"
+    with open(dest_path, "w") as f:
+        f.write(latex_str)
+    github_project_root = f"/../../tree/{branch_name}/"
+    markdown_link = Path(f"{github_project_root}{dest_path}")
+    return markdown_link
+
+
+@typechecked
+def generate_url(root_url: str, target: str,
+                 exp_name: str, experiments: Dict,
+                 fnames: dict, seed_folders: dict) -> str:
     path_store = {
-        "log": {"parent": "log", "fname": "summary-seed-0_seed-1_seed-2.json"},
+        "log": {"parent": "log", "fname": fnames[exp_name]},
         "config": {"parent": "models", "fname": "config.json"},
         "model": {"parent": "models", "fname": "trained_model.pth"}
     }
     paths = path_store[target]
     group_id, timestamp = experiments[exp_name]
-    rel_path = Path(group_id) / "seed-0" / timestamp / paths["fname"]
+    rel_path = Path(group_id) / seed_folders[exp_name] / timestamp / paths["fname"]
     return str(Path(root_url) / paths["parent"] / exp_name / rel_path)
 
 
@@ -42,7 +107,7 @@ def small_font_str(tokens):
 
 def sync_files(experiments, save_dir, webserver, web_dir):
     filetypes = {
-        "log": ["summary-seed-0_seed-1_seed-2.json"],
+        "log": ["summary-seed-1_seed-2_seed-3.json"],
         "models": ["trained_model.pth", "config.json"]
     }
     for key, (group_id, timestamp) in experiments.items():
@@ -51,7 +116,7 @@ def sync_files(experiments, save_dir, webserver, web_dir):
             for fname in fnames:
                 if timestamp.startswith("TODO"):
                     continue
-                rel_path = Path(group_id) / "seed-0" / timestamp / fname
+                rel_path = Path(group_id) / "seed-1" / timestamp / fname
                 local_path = Path(save_dir) / filetype / key / rel_path
                 server_path = Path(web_dir).expanduser() / filetype / key / rel_path
                 if not local_path.exists() and "/log/" in str(local_path):
@@ -84,7 +149,7 @@ def model_specs2path(feat_aggregation: Dict, keep: set, tag: str = None) -> List
         elif feat_type not in {"ocr", "speech", "audio"}:
             base = f"{base}_{fps}fps_{pixel_dim}px_stride{stride}"
 
-        for option in "offset", "inner_stride":
+        for option in "offset", "inner_stride", "num_segments":
             if aggs.get(option, None) is not None:
                 base += f"_{option}{aggs[option]}"
 
@@ -109,6 +174,8 @@ def dataset_paths(
         "didemo": "DiDeMo",
         "activity-net": "ActivityNet",
         "youcook2": "YouCook2",
+        "queryd": "QuerYD",
+        "querydsegments": "QuerYDSegments"
     }
     if dataset in set(name_map.values()):
         class_name = dataset
@@ -128,7 +195,7 @@ def dataset_paths(
 def generate_tar_lists(save_dir, experiments):
     all_feat_paths = {}
     for exp_name, (group_id, timestamp) in tqdm.tqdm(experiments.items()):
-        rel_path = Path(group_id) / "seed-0" / timestamp / "config.json"
+        rel_path = Path(group_id) / "seed-1" / timestamp / "config.json"
         config_path = Path(save_dir) / "models" / exp_name / rel_path
         with open(config_path, "r") as f:
             config = json.load(f)
@@ -170,6 +237,49 @@ def generate_tar_lists(save_dir, experiments):
                 print(f"Writing {path} to {tar_include_list}")
                 f.write(f"{path}\n")
 
+@typechecked
+def parse_geom_means_from_val_runs(log: List[str], group: str) -> List[float]:
+    """TODO: Samuel - this is redundant due to log_summary() func in log_parser
+    should refactor after deadline.
+    """
+    subset = "val"
+    # sanity check, should not be used for experiments with test sets
+    assert sum(["test_t2v" in x for x in log]) == 0, "should not parse test runs"
+    scores = {
+        "R1": defaultdict(list),
+        "R5": defaultdict(list),
+        "R10": defaultdict(list),
+    }
+    # Regex tag for finding the seed
+    seed_tag = "Setting experiment random seed to"
+
+    for row in log:
+        if seed_tag in row:
+            # Search for the log file entry describing the current random seed
+            match = re.search(seed_tag + " (\d+)$", row)  # NOQA
+            assert len(match.groups()) == 1, "expected a single regex match"
+            current_seed = match.groups()[0]
+
+        if f"{subset}_{group}_metrics" in row:
+            tokens = row.split(" ")
+            for key in scores:
+                tag = f"{subset}_{group}_metrics_{key}:"
+                if tag in tokens:
+                    pos = tokens.index(tag) + 1
+                    val = tokens[pos]
+                    val = float(val)
+                    assert current_seed is not None, "failed to determine the seed"
+                    scores[key][current_seed].append(val)
+    # keep last score
+    agg_scores = {key: [] for key in scores}
+    for metric, subdict in scores.items():
+        for seed, values in subdict.items():
+            agg_scores[metric].append(values[-1])
+    geometric_means = []
+    for r1, r5, r10 in zip(agg_scores["R1"], agg_scores["R5"], agg_scores["R10"]):
+        geometric_means.append(scipy.stats.mstats.gmean([r1, r5, r10]))
+    return geometric_means
+
 
 def parse_log(log_path):
     with open(log_path, "r") as f:
@@ -179,7 +289,8 @@ def parse_log(log_path):
         tag = f"[{group}] loaded log file"
         results[group] = OrderedDict()
         presence = [tag in row for row in log]
-        assert sum(presence) == 1, "expected single occurence of log tag"
+        msg = f"expected single occurence of log tag, found {sum(presence)} in {log_path}"
+        assert sum(presence) == 1, msg
         metrics = ["R1", "R5", "R10", "R50", "MedR", "MeanR"]
         pos = np.where(presence)[0].item()
         if "fixed training length" in log[pos + 2]:
@@ -195,31 +306,93 @@ def parse_log(log_path):
             assert tokens[-3] == f"{metric}:", f"unexpected row format {row}"
             mean, std = float(tokens[-2].split(",")[0]), float(tokens[-1])
             results[group][metric] = (mean, std)
+        # geometric means are recomputed from summaries
+        tag = f"test_{group}_metrics_geometric_mean"
+        nan_tag = "INFO:summary:R1: nan"
+        matches = [x for x in log if tag in x]
+        if len(matches) in {1, 2, 3}:
+            geoms = [float(x.split()[-1].replace("INFO:summary:", "")) for x in matches]
+            if len(matches) < 3:
+                print(f"WARNING: Getting stds from {len(matches)} runs for {log_path}!")
+        elif sum([nan_tag in x for x in log]) > 0:
+            geoms = [np.nan, np.nan, np.nan]
+        else:
+            valid_exceptions = ["miechfeats-moee", "miech-ce", "jsfusion"]
+            msg = f"Did not expect fixed length training for {log_path}"
+            assert any([x in str(log_path) for x in valid_exceptions]), msg
+            geoms = parse_geom_means_from_val_runs(log, group=group)
+        if len(geoms) == 1:
+            std = np.nan
+        else:
+            std = np.std(geoms)
+        results[group]["geom"] = (np.mean(geoms), std)
     for row in log:
         if "Trainable parameters" in row:
-            results["params"] = int(row.split(" ")[-1])
+            param_token = row.split(" ")[-1].replace("INFO:summary:", "")
+            results["params"] = int(param_token)
     return results
 
-
-def parse_results(experiments, save_dir):
-    log_results = {}
-    for exp_name, meta in experiments.items():
+@typechecked
+def multiprocessing_parsing(exp_name: str, meta: list,
+                            save_dir: Path, refresh_summaries: bool):
+    if os.path.exists(Path(save_dir) / 'pickle_files' / f'log_results_{exp_name}.pkl') is False:
         group_id, timestamp = meta
         if timestamp.startswith("TODO"):
             log_results[exp_name] = {"timestamp": "TODO", "results": {}}
-            continue
-        rel_fname = Path(timestamp) / "summary-seed-0_seed-1_seed-2.json"
-        found = False
-        for log_dir in ["log", "log-includes-some-final-exps"]:
-            rel_path = Path(exp_name) / group_id / "seed-0" / rel_fname
-            log_path = Path(save_dir) / log_dir / rel_path
-            if log_path.exists():
-                found = True
-                break
-        assert found, f"Could not find {log_path}"
-        results = parse_log(log_path)
-        log_results[exp_name] = {"timestamp": timestamp, "results": results}
-    return log_results
+        else:
+            seed_folder = sorted(os.listdir(Path(save_dir) / "log" / Path(exp_name) / group_id))[0]
+            files_in_seed_folder = os.listdir(Path(save_dir) / "log" / Path(exp_name) / group_id / seed_folder /  Path(timestamp))
+            for file in files_in_seed_folder:
+                if ".json" in file and ".bak" not in file:
+                    fname = file
+                    break
+            rel_fname = Path(timestamp) / fname
+            rel_path = Path(exp_name) / group_id / seed_folder / rel_fname
+            log_path = Path(save_dir) / "log" / rel_path
+            if refresh_summaries:
+                summarise(group_id=group_id, log_dir=Path(save_dir) / "log")
+            results = parse_log(log_path)
+            log_results = {"timestamp": timestamp, "results": results}
+        with open(Path(save_dir) / 'pickle_files' / f'log_results_{exp_name}.pkl', 'wb') as f:
+            pickle.dump([log_results, fname, seed_folder], f)
+            print(f"Saved experiment {exp_name}")
+    else:
+        print(f"Experiment log_results_{exp_name}.pkl already saved")
+
+@typechecked
+def parse_results(
+        experiments: Dict[str, List[str]],
+        save_dir: Path,
+        refresh_summaries: bool,
+) -> (Dict[str, Dict[str, Union[str, Dict]]],
+      dict, dict):
+    starttime = time.time()
+    processes = []
+    experiments_items = experiments.items()
+    if os.path.exists(Path(save_dir) / 'pickle_files') is False:
+        os.mkdir(Path(save_dir) / 'pickle_files')
+    for exp_name, meta in experiments_items:
+        p = multiprocessing.Process(target=multiprocessing_parsing,
+                                    args=(exp_name, meta,
+                                          save_dir, refresh_summaries))
+        processes.append(p)
+        p.start()
+    for process in processes:
+        process.join()
+    print('That took {} seconds'.format(time.time() - starttime))
+    log_results = {}
+    fnames = {}
+    seed_folders = {}
+    for exp_name, _ in experiments_items:
+        with open(Path(save_dir) / 'pickle_files' / f'log_results_{exp_name}.pkl',
+                  'rb') as f:
+            log_results[exp_name],\
+                fnames[exp_name],\
+                    seed_folders[exp_name] = pickle.load(f)
+        with open(Path(save_dir) / 'log_results2.pkl', 'wb') as f:
+            pickle.dump([log_results, fnames, seed_folders], f)
+    
+    return log_results, fnames, seed_folders
 
 
 def generate_results_string(target, exp_name, results, latexify, drop=None):
@@ -242,10 +415,23 @@ def generate_results_string(target, exp_name, results, latexify, drop=None):
     return small_font_str(tokens)
 
 
-def generate_readme(experiments, readme_templates, root_url, readme_dests, results_path,
-                    save_dir, latexify, keep_mnr):
+def generate_readme(
+    experiments: Dict[str, List[str]],
+    root_url: str,
+    readme_templates: List[Path],
+    readme_dests: List[Path],
+    results_path: Path,
+    latex_table_dir: Path,
+    save_dir: Path,
+    latexify: bool,
+    keep_mnr: bool,
+    refresh_summaries: bool
+):
 
-    results = parse_results(experiments, save_dir)
+    results, fnames, seed_folders = parse_results(experiments=experiments,
+                                                  save_dir=save_dir,
+                                                  refresh_summaries=refresh_summaries,
+                                                 )
     with open(results_path, "w") as f:
         json.dump(results, f, indent=4, sort_keys=False)
 
@@ -296,12 +482,20 @@ def generate_readme(experiments, readme_templates, root_url, readme_dests, resul
                 groups = match.groups()
                 assert len(groups) == 1, "expected single group"
                 exp_name, target = groups[0].split(".")
-                if results[exp_name]["timestamp"] == "TODO":
+                if target.startswith("latexify"):
+                    latex_link = gen_latex_version_of_table(
+                        content=generated[:],
+                        table_name=exp_name,
+                        latex_table_dir=latex_table_dir,
+                    )
+                    token = f"[latex]({latex_link}) | | | | | | | |"
+                elif results[exp_name]["timestamp"] == "TODO":
                     token = "TODO"
                 elif target in {"config", "model", "log"}:
                     token = generate_url(root_url, target, exp_name,
-                                         experiments=experiments)
-                    # token = small_font_str([token])
+                                         experiments=experiments,
+                                         fnames=fnames,
+                                         seed_folders=seed_folders)
                 elif target in {"t2v", "v2t"}:
                     token = generate_results_string(target, exp_name, results,
                                                     latexify=latexify)
@@ -309,12 +503,13 @@ def generate_readme(experiments, readme_templates, root_url, readme_dests, resul
                     if keep_mnr:
                         drop = {"R50"}
                     else:
-                        drop = {"R50", "MeanR"}
+                        drop = {"R50", "MeanR", "geom"}
                     target_ = target.split("-")[1]
                     token = generate_results_string(target_, exp_name, results,
                                                     drop=drop, latexify=latexify)
                 elif target in {"params"}:
                     token = millify(results[exp_name]["results"]["params"], precision=2)
+
                 edits.append((match.span(), token))
             if edits:
                 # invert the spans
@@ -335,14 +530,16 @@ def generate_readme(experiments, readme_templates, root_url, readme_dests, resul
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--save_dir", default="data/saved")
+    parser.add_argument("--save_dir", default="data/saved", type=Path)
     parser.add_argument("--webserver", default="login.robots.ox.ac.uk")
-    parser.add_argument("--results_path", default="misc/results.json")
+    parser.add_argument("--results_path", default="misc/results.json", type=Path)
     parser.add_argument("--experiments_path", default="misc/experiments.json")
     parser.add_argument("--readme_template", default="misc/README-template.md")
     parser.add_argument("--latexify", action="store_true")
     parser.add_argument("--keep_mnr", action="store_true")
+    parser.add_argument("--refresh_summaries", action="store_true")
     parser.add_argument("--readme_dest", default="README.md")
+    parser.add_argument("--latex_table_dir", default="latex-tables", type=Path)
     parser.add_argument("--ablation_readme_dest", default="misc/ablations.md")
     parser.add_argument("--challenge_readme_dest", default="misc/challenge.md")
     parser.add_argument("--ablation_readme_template",
@@ -387,10 +584,12 @@ def main():
             save_dir=args.save_dir,
             latexify=args.latexify,
             experiments=experiments,
+            latex_table_dir=args.latex_table_dir,
             keep_mnr=args.keep_mnr,
             readme_dests=readme_dests,
             results_path=args.results_path,
             readme_templates=readme_templates,
+            refresh_summaries=args.refresh_summaries,
         )
 
 

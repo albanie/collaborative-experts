@@ -15,6 +15,8 @@ from data_loader.DiDeMo_dataset import DiDeMo
 from data_loader.MSRVTT_dataset import MSRVTT
 from data_loader.ActivityNet_dataset import ActivityNet
 from data_loader.YouCook2_dataset import YouCook2
+from data_loader.QuerYD_dataset import QuerYD
+from data_loader.QuerYDSegments_dataset import QuerYDSegments
 
 
 @functools.lru_cache(maxsize=64, typed=False)
@@ -41,6 +43,7 @@ def dataset_loader(
         max_tokens: Dict[str, int],
         raw_input_dims: HashableOrderedDict,
         feat_aggregation: HashableDict,
+        **args,
 ):
     print(f"refreshing cache for {dataset_name} data loader [{split_name}]")
     kwargs = dict(
@@ -65,6 +68,7 @@ def dataset_loader(
         use_zeros_for_missing=use_zeros_for_missing,
         restrict_train_captions=restrict_train_captions,
         challenge_test_root_feat_folder=challenge_test_root_feat_folder,
+        **args,
     )
     if dataset_name == "MSRVTT":
         dataset = MSRVTT(**kwargs)
@@ -78,6 +82,10 @@ def dataset_loader(
         dataset = ActivityNet(**kwargs)
     elif dataset_name == "YouCook2":
         dataset = YouCook2(**kwargs)
+    elif dataset_name == "QuerYD":
+        dataset = QuerYD(**kwargs)
+    elif dataset_name == "QuerYDSegments":
+        dataset = QuerYDSegments(**kwargs)
     return dataset
 
 
@@ -112,6 +120,7 @@ class ExpertDataLoader:
             drop_last: bool = False,
             refresh_lru_cache: bool = False,
             cls_partitions: List[str] = ["train", "val", "tiny", "challenge"],
+            subsample_training_data_fraction: float = 1.0,
             challenge_test_root_feat_folder: str = "challenge",
     ):
 
@@ -151,6 +160,7 @@ class ExpertDataLoader:
             raw_input_dims=raw_input_dims,
             feat_aggregation=feat_aggregation,
             restrict_train_captions=restrict_train_captions,
+            subsample_training_data_fraction=subsample_training_data_fraction,
         )
 
         if "retrieval" in task:

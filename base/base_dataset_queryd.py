@@ -1,9 +1,10 @@
 import time
 import inspect
 import logging
+import json
 import functools
 from abc import abstractmethod
-from typing import Dict, Union
+from typing import Dict, Union, List
 from pathlib import Path
 from collections import OrderedDict
 
@@ -60,6 +61,7 @@ class BaseDataset(Dataset):
             cls_partition: str,
             root_feat_folder: str,
             challenge_test_root_feat_folder: str,
+            subsample_training_data_fraction: float,
             text_dim: int,
             num_test_captions: int,
             restrict_train_captions: int,
@@ -68,7 +70,6 @@ class BaseDataset(Dataset):
             logger: logging.Logger,
             raw_input_dims: Dict[str, int],
             feat_aggregation: Dict[str, Dict],
-            **kwargs,
     ):
         self.task = task
         self.eval_only = eval_only
@@ -80,6 +81,7 @@ class BaseDataset(Dataset):
         self.spatial_feats = spatial_feats
         self.text_dropout = text_dropout
         self.restrict_train_captions = restrict_train_captions
+        self.subsample_training_data_fraction = subsample_training_data_fraction
         self.max_tokens = max_tokens
         self.cls_partition = cls_partition
         self.fuse_captions = fuse_captions
@@ -114,6 +116,13 @@ class BaseDataset(Dataset):
         # training and one for validation.
         self.logger.info("The current task is {}".format(self.task))
         self.sample_list = self.partition_lists["train"]
+        if self.subsample_training_data_fraction < 1:
+            num_train = len(self.sample_list)
+            num_keep = int(self.subsample_training_data_fraction * num_train)
+            sampled_train = np.random.choice(self.sample_list, num_keep, replace=False)
+            self.logger.info(f"Sampling training samples [{num_train} -> {num_keep}]")
+            self.sample_list = sampled_train.tolist()
+
         self.num_samples = len(self.sample_list)
         num_val = len(self.partition_lists["val"])
 
@@ -206,6 +215,7 @@ class BaseDataset(Dataset):
             for expert in self.tensor_storage["fixed"].intersection(self.experts):
                 feats = self.features[expert][video_name]
                 drop = self.has_missing_values(feats)
+                
                 self.test_ind[expert][ii] = not drop
                 self.retrieval[expert][ii] = feats
                 if drop:
@@ -269,6 +279,7 @@ class BaseDataset(Dataset):
 
     def configure_train_test_splits(self, split_name):
         """Partition the datset into train/val/test splits.
+
         Args:
             split_name (str): the name of the split
         """
@@ -276,6 +287,7 @@ class BaseDataset(Dataset):
         print("loading training/val splits....")
         tic = time.time()
         for subset, path in self.paths["subset_list_paths"][split_name].items():
+            # import pdb; pdb.set_trace()
             if self.challenge_mode and split_name == "public_server_test" \
                     and subset == "val":
                 root_feat = Path(self.challenge_test_root_feat_folder)
@@ -496,7 +508,7 @@ class BaseDataset(Dataset):
         elif feat_type not in {"ocr", "speech", "audio"}:
             base = f"{base}_{fps}fps_{pixel_dim}px_stride{stride}"
 
-        for option in "offset", "inner_stride":
+        for option in "offset", "inner_stride", "num_segments":
             if aggs.get(option, None) is not None:
                 base += f"_{option}{aggs[option]}"
 
@@ -558,6 +570,39 @@ class BaseDataset(Dataset):
                                 f"max: {np.max(sizes):4}, "
                                 f"mean: {np.mean(sizes):.1f}")
                     print(f"{subset}: missing: {missing:4}, {stat_str} {expert}")
+
+    @staticmethod
+    @typechecked
+    def common_text_feat_paths() -> Dict[str, str]:
+        """Load the text features and raw captions to be used in the challenge.
+        """
+        with open("model/text_embedding_models.json") as f:
+            supported_text_embeddings = json.load(f)
+        return {name: f"{name}.pkl" for name in supported_text_embeddings}
+
+    @staticmethod
+    @typechecked
+    def common_feat_names() -> List[str]:
+        """Produce a common collection of feature names shared amongst datasets.
+        """
+        feature_names = [
+            "imagenet.senet154.0",
+            "scene.densenet161.0",
+            "imagenet.resnext101_32x48d.0",
+            "trn.moments-trn.0",
+            "moments_2d.resnet50.0",
+            "i3d.i3d.0",
+            "i3d.i3d.1",
+            "s3dg.s3dg.0",
+            "s3dg.s3dg.1",
+            "r2p1d.r2p1d-ig65m.0",
+            "r2p1d.r2p1d-ig65m.1",
+            "r2p1d.r2p1d-ig65m-kinetics.0",
+            "r2p1d.r2p1d-ig65m-kinetics.1",
+            "moments_3d.moments-resnet3d50.0",
+            "moments_3d.moments-resnet3d50.1"
+        ]
+        return feature_names
 
     def load_challenge_text_features(self):
         """Load the text features and raw captions to be used in the challenge.

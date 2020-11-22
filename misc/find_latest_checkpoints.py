@@ -1,5 +1,6 @@
 """Simple aggregation script for experiments
-python misc/find_latest_checkpoints.py --dataset lsmdc
+
+ipy misc/find_latest_checkpoints.py -- --dataset youcook2long
 """
 import argparse
 from pathlib import Path
@@ -7,8 +8,13 @@ from datetime import datetime
 
 
 def formatted_summary(dataset, exp_root, fname):
-    summaries = list(Path(exp_root).glob(f"**/*{fname}"))
-    summaries = [x for x in summaries if dataset in str(x)]
+    try:
+        summaries = list(Path(exp_root).glob(f"**/*{fname}"))
+        summaries = [x for x in summaries if dataset in str(x)]
+    except FileNotFoundError:
+        fname = "summary-seed-1_seed-2_seed-3.json"
+        summaries = list(Path(exp_root).glob(f"**/*{fname}"))
+        summaries = [x for x in summaries if dataset in str(x)]
     print(f"Found {len(summaries)}")
     latest = {}
     time_format = "%Y-%m-%d_%H-%M-%S"
