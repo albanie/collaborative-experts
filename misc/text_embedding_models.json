@@ -1,0 +1,7 @@
+{
+    "w2v": {
+        "weights_path": "data/text_models/GoogleNews-vectors-negative300.bin.gz",
+        "dim": 300,
+        "mirror": "https://s3.amazonaws.com/dl4j-distribution/GoogleNews-vectors-negative300.bin.gz"
+    }
+}
