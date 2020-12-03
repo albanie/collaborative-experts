@@ -1,5 +1,5 @@
 import copy
-from typing import Dict, Union, List
+from typing import Dict, List, Union
 from pathlib import Path
 
 from typeguard import typechecked
@@ -13,7 +13,7 @@ class MSRVTT(BaseDataset):
 
     @staticmethod
     @typechecked
-    def dataset_paths() -> Dict[str, Union[str, List[str], Path, Dict]]:
+    def dataset_paths(training_file=None) -> Dict[str, Union[str, List[str], Path, Dict]]:
         subset_paths = {}
         js_test_cap_idx_path = None
         challenge_splits = {"val", "public_server_val", "public_server_test"}
@@ -34,7 +34,10 @@ class MSRVTT(BaseDataset):
                 # of the test captions, and restrict to this subset during eval.
                 js_test_cap_idx_path = "jsfusion_val_caption_idx.pkl"
             elif split_name in {"full-val", "full-test"}:
-                train_list_path = "train_list_full.txt"
+                if training_file is None:
+                    train_list_path = "train_list_full.txt"
+                else:
+                    train_list_path = training_file
                 if split_name == "full-val":
                     test_list_path = "val_list_full.txt"
                 else:
@@ -49,23 +52,13 @@ class MSRVTT(BaseDataset):
                 msg = "unrecognised MSRVTT split: {}"
                 raise ValueError(msg.format(split_name))
             subset_paths[split_name] = {"train": train_list_path, "val": test_list_path}
-        feature_names = [
-            "imagenet.senet154.0",
-            "scene.densenet161.0",
-            "i3d.i3d.0",
-            "s3dg.s3dg.0",
-            "imagenet.resnext101_32x48d.0",
-            "trn.moments-trn.0",
-            "r2p1d.r2p1d-ig65m.0",
-            "r2p1d.r2p1d-ig65m-kinetics.0",
-            "moments_3d.moments-resnet3d50.0",
-            "moments-static.moments-resnet50.0",
-        ]
+        feature_names = BaseDataset.common_feat_names()
         custom_paths = {
             "audio": ["aggregated_audio_feats/Audio_MSRVTT_new.pickle"],
             "face": ["aggregated_face_feats/facefeats-avg.pickle"],
             "ocr": ["aggregated_ocr_feats/ocr-raw.pickle"],
-            "speech": ["aggregated_speech/speech-w2v.pickle"]
+            "speech": ["aggregated_speech/speech-w2v.pickle"],
+
         }
         custom_miech_paths = custom_paths.copy()
         custom_miech_paths.update({
@@ -74,15 +67,18 @@ class MSRVTT(BaseDataset):
             "flow": ["antoine/flow_features.pickle"],
             "face": ["antoine/facefeats-clone.pickle"],
         })
-        text_feat_paths = {
-            "w2v": "w2v_MSRVTT.pickle",
-            "openai": "w2v_MSRVTT_openAIGPT.pickle",
-            "bertxl": "w2v_MSRVTT_transformer.pickle",
-        }
-        text_feat_paths = {key: Path("aggregated_text_feats") / fname
+
+        text_feat_paths = BaseDataset.common_text_feat_paths()
+        # include non-standard text features
+        text_feat_paths["openai"] = "w2v_MSRVTT_openAIGPT.pickle"
+        text_feat_dir = Path("aggregated_text_feats")
+
+        text_feat_paths = {key: text_feat_dir / fname
                            for key, fname in text_feat_paths.items()}
+
         challenge_text_feat_paths = {key: f"aggregated_text_feats/{key}.pickle"
                                      for key in text_feat_paths}
+
         feature_info = {
             "custom_paths": custom_paths,
             "custom_miech_paths": custom_miech_paths,
@@ -97,8 +93,18 @@ class MSRVTT(BaseDataset):
 
     def load_features(self):
         root_feat = Path(self.root_feat)
+        if self.distil_params is not None:
+            self.distil_features = {}
+            d_base_path = self.distil_params['base_path']
+
+            teachers = list(map(lambda x: root_feat / Path(d_base_path + x), self.distil_params['teachers']))
+
+            for i, f_name in enumerate(teachers):
+                self.distil_features[i] = memcache(f_name)
+
         feat_names = {key: self.visual_feat_paths(key) for key in
                       self.paths["feature_names"]}
+
         if self.split_name == "miech":
             custom_path_key = "custom_miech_paths"
         else:
@@ -108,6 +114,7 @@ class MSRVTT(BaseDataset):
         for expert, rel_names in feat_names.items():
             if expert not in self.ordered_experts:
                 continue
+
             feat_paths = tuple([root_feat / rel_name for rel_name in rel_names])
             if len(feat_paths) == 1:
                 features[expert] = memcache(feat_paths[0])
@@ -126,7 +133,6 @@ class MSRVTT(BaseDataset):
 
                 # Make separate feature copies for each split to allow in-place filtering
                 features[expert] = copy.deepcopy(features_)
-
         self.features = features
         if self.challenge_mode:
             self.load_challenge_text_features()
@@ -160,6 +166,7 @@ class MSRVTT(BaseDataset):
         self.summary_stats()
 
     def sanity_checks(self):
+
         if self.num_test_captions == 20:
             if len(self.partition_lists["val"]) == 2990:
                 missing = 6
@@ -169,6 +176,7 @@ class MSRVTT(BaseDataset):
                 missing = 0
             else:
                 raise ValueError("unrecognised test set")
-            msg = "Expected to find two missing queries in MSRVTT for full eval"
-            correct_missing = self.query_masks.sum() == self.query_masks.size - missing
+            found_missing = self.query_masks.size - self.query_masks.sum()
+            msg = f"Expected {missing} missing queries in MSRVTT, found {found_missing}"
+            correct_missing = found_missing == missing
             self.log_assert(correct_missing, msg=msg)

@@ -3,12 +3,15 @@ Exclude from autoreload
 %aimport -util.utils
 """
 import os
+import copy
 import json
+import uuid
 import random
+import logging
+import itertools
+from typing import Dict, List, Tuple
 from pathlib import Path
 from datetime import datetime
-from typing import List
-from itertools import repeat
 from collections import OrderedDict
 
 import numpy as np
@@ -29,9 +32,53 @@ def filter_cmd_args(cmd_args: List[str], remove: List[str]) -> List[str]:
         drop.append(pos)
         if len(cmd_args) > (pos + 1) and not cmd_args[pos + 1].startswith("--"):
             drop.append(pos + 1)
-    for pos in reversed(drop):
+    for pos in sorted(drop, reverse=True):
         cmd_args.pop(pos)
     return cmd_args
+
+
+@typechecked
+def get_short_uuid() -> str:
+    """Return a 7 alpha-numeric character random string.  We could use the full uuid()
+    for better uniqueness properties, but it makes the filenames long and its not
+    needed for our purpose (simply grouping experiments that were run with the same
+    configuration).
+    """
+    return str(uuid.uuid4()).split("-")[0]
+
+
+@typechecked
+def parse_grid(x: str) -> Dict[str, List[str]]:
+    """Parse compact command line strings of the form:
+        --key1 val_a|val_b --key2 val_c|val_d
+
+    (here a vertical bar represents multiple values)
+
+    into a grid of separate strings e.g:
+        --key1 val_a --key2 val_c
+        --key1 val_a --key2 val_d
+        --key1 val_b --key2 val_c
+        --key1 val_b --key2 val_d
+
+    """
+    args = x.split(" ")
+    group_id = get_short_uuid()
+    grid_opts, parsed = {}, []
+    for ii, token in enumerate(args):
+        if "|" in token:
+            grid_opts[ii] = token.split("|")
+    grid_idx, grid_vals = [], []
+    for ii, val in grid_opts.items():
+        grid_idx.append(ii)
+        grid_vals.append(val)
+    grid_vals = list(itertools.product(*grid_vals))
+    for cfg in grid_vals:
+        base = copy.deepcopy(args)
+        for ii, val in zip(grid_idx, cfg):
+            base[ii] = val
+        base.append(f"--group_id {group_id}")
+        parsed.append(" ".join(base))
+    return {group_id: parsed}
 
 
 @typechecked
@@ -96,8 +143,7 @@ def expert_tensor_storage(experts, feat_aggregation):
     for expert, config in feat_aggregation.items():
         if config["temporal"] in {"vlad"}:
             expert_storage["variable"].add(expert)
-        elif config["temporal"] in {"avg", "max", "avg-max", "max-avg", "avg-max-ent",
-                                    "max-avg-ent"}:
+        elif all([x in {"avg", "max", "ent", "std"} for x in config["temporal"].split("-")]):
             expert_storage["fixed"].add(expert)
         else:
             raise ValueError(f"unknown temporal strategy: {config['temporal']}")
@@ -136,18 +182,8 @@ def write_json(content, fname, paths2strs=False):
 
 def inf_loop(data_loader):
     ''' wrapper function for endless data loader. '''
-    for loader in repeat(data_loader):
+    for loader in itertools.repeat(data_loader):
         yield from loader
-
-
-class HashableDict(dict):
-    def __hash__(self):
-        return hash(frozenset(self))
-
-
-class HashableOrderedDict(dict):
-    def __hash__(self):
-        return hash(frozenset(self))
 
 
 def compute_trn_config(config, logger=None):
@@ -160,7 +196,11 @@ def compute_trn_config(config, logger=None):
     return trn_config
 
 
-def compute_dims(config, logger=None):
+@typechecked
+def compute_dims(
+        config,
+        logger: logging.Logger = None,
+) -> Tuple[Dict[str, Tuple[int, int]], Dict[str, int], int]:
     if logger is None:
         logger = config.get_logger('utils')
 
@@ -183,7 +223,7 @@ def compute_dims(config, logger=None):
         temporal = feat_agg[expert]["temporal"]
         if expert == "face":
             in_dim, out_dim = experts["face_dim"], experts["face_dim"]
-        elif expert == "audio" and temporal == "vlad":
+        elif expert in {"audio", "audio.vggish.0"} and temporal == "vlad":
             in_dim, out_dim = 128 * vlad_clusters["audio"], 128
         elif expert == "speech" and temporal == "vlad":
             in_dim, out_dim = 300 * vlad_clusters["speech"], 300
@@ -226,7 +266,7 @@ def compute_dims(config, logger=None):
     if config["experts"]["text_agg"] == "avg":
         if hasattr(config["arch"]["args"], "vlad_clusters"):
             msg = "averaging can only be performed with text using single tokens"
-            assert config["arch"]["args"]["vlad_clusters"]["text"] == 0
+            assert config["arch"]["args"]["vlad_clusters"]["text"] == 0, msg
         assert config["data_loader"]["args"]["max_tokens"]["text"] == 1
 
     # To remove the dependency of dataloader on the model architecture, we create a
@@ -241,7 +281,11 @@ def compute_dims(config, logger=None):
                 raw_dim = raw_dim // vlad_clusters.get(expert, 1)
         raw_input_dims[expert] = raw_dim
 
-    return expert_dims, raw_input_dims
+    with open(config["text_embedding_model_configs"], "r") as f:
+        text_embedding_model_configs = json.load(f)
+    text_dim = text_embedding_model_configs[experts["text_feat"]]["dim"]
+
+    return expert_dims, raw_input_dims, text_dim
 
 
 def ensure_tensor(x):

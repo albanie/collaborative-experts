@@ -1,0 +1,11 @@
+{
+
+    "msrvtt-train-gpt2-xl-finetuned-mte-denoising-adam-less80": ["c58ecf3b", "2020-11-21_14-00-26"],
+    "msrvtt-train-gpt2-xl-finetuned-denoising-adam": ["a61447a9", "2020-11-11_05-31-29"],
+    "msrvtt-train-gpt2-xl-finetuned-mte-denoising-adam": ["2cc98676", "2020-11-11_06-21-03"],
+    "msrvtt-train-full-ce": ["6becbb74", "2020-06-28_18-31-21"],
+    "msrvtt-train-ce-intra-mte": ["4d4508a2", "2020-11-06_17-27-00"],
+    "msrvtt-train-gpt2-xl-finetuned-adam": ["244af891", "2020-10-01_12-22-00"],
+    "msrvtt-train-gpt2-xl-finetuned-mte-adam": ["6427fd41", "2020-09-30_20-34-12"]
+
+}

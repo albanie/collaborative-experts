@@ -1,9 +1,10 @@
 import time
 import inspect
 import logging
+import json
 import functools
 from abc import abstractmethod
-from typing import Dict, Union
+from typing import Dict, Union, List
 from pathlib import Path
 from collections import OrderedDict
 
@@ -16,6 +17,7 @@ from typeguard import typechecked
 import data_loader
 from utils.util import ensure_tensor, expert_tensor_storage
 from zsvision.zs_utils import memcache
+import pickle
 
 # For SLURM usage, buffering makes it difficult to see events as they happen, so we set
 # the global print statement to enforce flushing
@@ -27,7 +29,7 @@ class BaseDataset(Dataset):
     @staticmethod
     @abstractmethod
     @typechecked
-    def dataset_paths() -> Dict[str, Union[Path, str]]:
+    def dataset_paths(training_file=None) -> Dict[str, Union[Path, str]]:
         """Generates a datastructure containing all the paths required to load features
         """
         raise NotImplementedError
@@ -68,6 +70,10 @@ class BaseDataset(Dataset):
             logger: logging.Logger,
             raw_input_dims: Dict[str, int],
             feat_aggregation: Dict[str, Dict],
+            distil_params: Union[None, Dict],
+            training_file: Union[None, str],
+            caption_masks: Union[None, str],
+            ce_shared_dim: Union[None, int],
             **kwargs,
     ):
         self.task = task
@@ -88,6 +94,8 @@ class BaseDataset(Dataset):
         self.root_feat = data_dir / root_feat_folder
         self.challenge_test_root_feat_folder = data_dir / challenge_test_root_feat_folder
         self.experts = set(raw_input_dims.keys())
+        self.distil_params = distil_params
+        self.training_file = training_file
 
         # This attributes can be overloaded by different datasets, so it must be set
         # before the `load_features() method call`
@@ -95,6 +103,7 @@ class BaseDataset(Dataset):
         self.text_features = None
         self.label_features = None
         self.video_labels = None
+        self.distil_features = None
         self.raw_captions = None
         self.features = None
 
@@ -114,8 +123,15 @@ class BaseDataset(Dataset):
         # training and one for validation.
         self.logger.info("The current task is {}".format(self.task))
         self.sample_list = self.partition_lists["train"]
+
         self.num_samples = len(self.sample_list)
         num_val = len(self.partition_lists["val"])
+
+        self.ce_shared_dim = ce_shared_dim
+        if caption_masks is not None:
+            self.caption_masks = pickle.load(open(self.root_feat / Path(caption_masks), "rb"))
+        else:
+            self.caption_masks = None
 
         if self.task == "classification":
             self.sample_list = self.partition_lists[self.cls_partition]
@@ -206,6 +222,7 @@ class BaseDataset(Dataset):
             for expert in self.tensor_storage["fixed"].intersection(self.experts):
                 feats = self.features[expert][video_name]
                 drop = self.has_missing_values(feats)
+
                 self.test_ind[expert][ii] = not drop
                 self.retrieval[expert][ii] = feats
                 if drop:
@@ -231,6 +248,7 @@ class BaseDataset(Dataset):
 
             if self.task == "retrieval":
                 candidates_sentences = self.text_features[video_name]
+
                 if self.restrict_test_captions is not None:
                     keep_sent_idx = self.restrict_test_captions[video_name]
                     candidates_sentences = [candidates_sentences[keep_sent_idx]]
@@ -269,10 +287,11 @@ class BaseDataset(Dataset):
 
     def configure_train_test_splits(self, split_name):
         """Partition the datset into train/val/test splits.
+
         Args:
             split_name (str): the name of the split
         """
-        self.paths = type(self).dataset_paths()
+        self.paths = type(self).dataset_paths(self.training_file)
         print("loading training/val splits....")
         tic = time.time()
         for subset, path in self.paths["subset_list_paths"][split_name].items():
@@ -303,6 +322,28 @@ class BaseDataset(Dataset):
                                             self.raw_input_dims[expert]))
             else:
                 tensors[expert] = np.zeros((batch_size, self.raw_input_dims[expert]))
+        if self.distil_features is not None:
+            distil = {}
+            distil_text = {}
+
+            for t in self.distil_features:
+                distil[t] = {}
+                distil_text[t] = {}
+
+                check_moee = False
+                if self.distil_params is not None and 'moee' in self.distil_params:
+                    if isinstance(self.distil_params['moee'], list) and self.distil_params['moee'][t] == 1:
+                        check_moee = True
+                    elif not isinstance(self.distil_params['moee'], list) and self.distil_params['moee'] == True:
+                        check_moee = True
+                for mod in self.distil_features[t][list(self.distil_features[t].keys())[0]]['vid_embds'].keys():
+                    if check_moee:
+                        size = self.raw_input_dims[mod]
+                        distil[t][mod] = np.zeros((batch_size, size))
+                        distil_text[t][mod] = np.zeros((batch_size, 1, size))
+                    else:
+                        distil[t][mod] = np.zeros((batch_size, self.ce_shared_dim))
+                        distil_text[t][mod] = np.zeros((batch_size, 1, self.ce_shared_dim))
 
         # Track which indices of each modality are available in the present batch
         ind = {expert: np.zeros(batch_size) for expert in self.experts}
@@ -335,6 +376,14 @@ class BaseDataset(Dataset):
                 else:
                     tensors[expert][ii, :, :] = self.MISSING_VAL
 
+            if self.distil_features is not None:
+                for t in datum['distil_mods']:
+                    for mod in datum['distil_mods'][t]:
+                        distil[t][mod][ii] = datum['distil_mods'][t][mod]
+                for t in datum['distil_mods']:
+                    for mod in datum['distil_texts'][t]:
+                        distil_text[t][mod][ii] = datum['distil_texts'][t][mod]
+
             if "retrieval" in self.task:
                 text = datum["text"]
                 for jj in range(self.captions_per_video):
@@ -350,6 +399,14 @@ class BaseDataset(Dataset):
         experts = OrderedDict(
             (expert, th.from_numpy(tensors[expert]).float())
             for expert in self.ordered_experts)
+        if self.distil_features is not None:
+            for t in distil:
+                distil[t] = OrderedDict(
+                    (expert, th.from_numpy(distil[t][expert]).float())
+                    for expert in distil[t])
+                distil_text[t] = OrderedDict(
+                    (expert, th.from_numpy(distil_text[t][expert]).float())
+                    for expert in distil_text[t])
 
         for expert in self.experts:
             if self.feat_aggregation[expert].get("binarise", False):
@@ -357,9 +414,13 @@ class BaseDataset(Dataset):
                 experts[expert][replace] = th.ones_like(experts[expert][replace])
 
         minibatch = {"experts": experts, "ind": ind}
+        if self.distil_features is not None:
+            minibatch["distil_video"] = distil
+            minibatch["distil_text"] = distil_text
         if "retrieval" in self.task:
             minibatch["text"] = th.from_numpy(text_tensor).float()
             minibatch["text_token_mask"] = th.from_numpy(text_token_mask)
+
         elif self.task == "classification":
             if self.cls_partition != 'test':
                 minibatch["labels"] = th.from_numpy(label_tensor).float()
@@ -375,14 +436,35 @@ class BaseDataset(Dataset):
     def __getitem__(self, idx):
         if idx < self.num_samples:
             vid = self.sample_list[idx]
+            if self.caption_masks is not None:
+                caption_masks = self.caption_masks[vid]
+            else:
+                caption_masks = None
+            if self.distil_features is not None:
+                distil_mod_feats = {}
+                distil_text_feats = {}
+
+                for t in self.distil_features:
+                    distil_mod_feats[t] = {}
+                    distil_text_feats[t] = {}
+                    for k in self.distil_features[t][vid]:
+                        for mod in self.distil_features[t][vid][k]:
+                            if k == 'vid_embds':
+                                distil_mod_feats[t][mod] = self.distil_features[t][vid][k][mod]
+                            elif k == 'text_embds':
+                                distil_text_feats[t][mod] = self.distil_features[t][vid][k][mod]
+
             # try:
             features = {}
             for expert in self.experts:
                 if expert not in self.trn_config.keys():
-                    if expert in self.raw_config.keys():
-                        features[expert] = np.mean(self.features[expert][vid], axis=0)
-                    else:
-                        features[expert] = self.features[expert][vid]
+                    try:
+                        if expert in self.raw_config.keys():
+                            features[expert] = np.mean(self.features[expert][vid], axis=0)
+                        else:
+                            features[expert] = self.features[expert][vid]
+                    except:
+                        import ipdb; ipdb.set_trace()
                 else:
                     # ------------------------------------
                     # Yang's implementation for TRN inputs
@@ -422,8 +504,19 @@ class BaseDataset(Dataset):
                     text = [np.vstack(text)]
                     pick = None
                 elif isinstance(text, list):
-                    pick = np.random.choice(len(text), size=self.captions_per_video)
+                    if caption_masks is not None:
+                        probability = caption_masks / np.sum(caption_masks)
+                        pick = np.random.choice(len(text), size=self.captions_per_video, p=probability)
+                        assert caption_masks[pick] == 1
+                    else:
+                        pick = np.random.choice(len(text), size=self.captions_per_video)
+ 
                     text = np.array(text)[pick]
+                    if self.distil_features is not None:
+                        # Select appropriate text embd for teacher data
+                        for t in distil_text_feats:
+                            for mod in distil_text_feats[t]:
+                                distil_text_feats[t][mod] = np.array(distil_text_feats[t][mod])[pick]
                 else:
                     pick = None
                     text = np.random.choice(text, size=self.captions_per_video)
@@ -437,7 +530,10 @@ class BaseDataset(Dataset):
 
         # Return both the missing indices as well as the tensors
         if self.task in {"retrieval", "retrieval-as-classification"}:
-            sample = {"text": text}
+            if self.distil_features is not None:
+                sample = {"text": text, "distil_mods": distil_mod_feats, "distil_texts": distil_text_feats}
+            else:
+                sample = {"text": text}
         elif self.task == "classification":
             if self.class_type == "single_label":
                 labels = self.video_labels[vid]
@@ -496,7 +592,7 @@ class BaseDataset(Dataset):
         elif feat_type not in {"ocr", "speech", "audio"}:
             base = f"{base}_{fps}fps_{pixel_dim}px_stride{stride}"
 
-        for option in "offset", "inner_stride":
+        for option in "offset", "inner_stride", "num_segments":
             if aggs.get(option, None) is not None:
                 base += f"_{option}{aggs[option]}"
 
@@ -558,6 +654,39 @@ class BaseDataset(Dataset):
                                 f"max: {np.max(sizes):4}, "
                                 f"mean: {np.mean(sizes):.1f}")
                     print(f"{subset}: missing: {missing:4}, {stat_str} {expert}")
+
+    @staticmethod
+    @typechecked
+    def common_text_feat_paths() -> Dict[str, str]:
+        """Load the text features and raw captions to be used in the challenge.
+        """
+        with open("model/text_embedding_models.json") as f:
+            supported_text_embeddings = json.load(f)
+        return {name: f"{name}.pkl" for name in supported_text_embeddings}
+
+    @staticmethod
+    @typechecked
+    def common_feat_names() -> List[str]:
+        """Produce a common collection of feature names shared amongst datasets.
+        """
+        feature_names = [
+            "imagenet.senet154.0",
+            "scene.densenet161.0",
+            "imagenet.resnext101_32x48d.0",
+            "trn.moments-trn.0",
+            "moments_2d.resnet50.0",
+            "i3d.i3d.0",
+            "i3d.i3d.1",
+            "s3dg.s3dg.0",
+            "s3dg.s3dg.1",
+            "r2p1d.r2p1d-ig65m.0",
+            "r2p1d.r2p1d-ig65m.1",
+            "r2p1d.r2p1d-ig65m-kinetics.0",
+            "r2p1d.r2p1d-ig65m-kinetics.1",
+            "moments_3d.moments-resnet3d50.0",
+            "moments_3d.moments-resnet3d50.1"
+        ]
+        return feature_names
 
     def load_challenge_text_features(self):
         """Load the text features and raw captions to be used in the challenge.

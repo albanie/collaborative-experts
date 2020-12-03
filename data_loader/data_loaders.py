@@ -1,14 +1,14 @@
 import logging
 import functools
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import torch
 from typeguard import typechecked
 from torch.utils.data import DataLoader
 from zsvision.zs_utils import memcache
 
-from utils.util import HashableDict, HashableOrderedDict
+from zsvision.zs_data_structures import HashableDict, HashableOrderedDict
 from data_loader.MSVD_dataset import MSVD
 from data_loader.LSMDC_dataset import LSMDC
 from data_loader.DiDeMo_dataset import DiDeMo
@@ -17,7 +17,7 @@ from data_loader.ActivityNet_dataset import ActivityNet
 from data_loader.YouCook2_dataset import YouCook2
 from data_loader.QuerYD_dataset import QuerYD
 from data_loader.QuerYDSegments_dataset import QuerYDSegments
-
+from data_loader.VaTeX_dataset import VaTeX
 
 @functools.lru_cache(maxsize=64, typed=False)
 def dataset_loader(
@@ -43,6 +43,10 @@ def dataset_loader(
         max_tokens: Dict[str, int],
         raw_input_dims: HashableOrderedDict,
         feat_aggregation: HashableDict,
+        distil_params: Union[None, Dict],
+        training_file: Union[None, str],
+        caption_masks: Union[None, str],
+        ce_shared_dim: Union[None, int],
         **args,
 ):
     print(f"refreshing cache for {dataset_name} data loader [{split_name}]")
@@ -68,6 +72,10 @@ def dataset_loader(
         use_zeros_for_missing=use_zeros_for_missing,
         restrict_train_captions=restrict_train_captions,
         challenge_test_root_feat_folder=challenge_test_root_feat_folder,
+        distil_params=distil_params,
+        training_file=training_file,
+        caption_masks=caption_masks,
+        ce_shared_dim=ce_shared_dim,
         **args,
     )
     if dataset_name == "MSRVTT":
@@ -86,6 +94,8 @@ def dataset_loader(
         dataset = QuerYD(**kwargs)
     elif dataset_name == "QuerYDSegments":
         dataset = QuerYDSegments(**kwargs)
+    elif dataset_name == "VaTeX":
+        dataset = VaTeX(**kwargs)
     return dataset
 
 
@@ -120,13 +130,18 @@ class ExpertDataLoader:
             drop_last: bool = False,
             refresh_lru_cache: bool = False,
             cls_partitions: List[str] = ["train", "val", "tiny", "challenge"],
-            subsample_training_data_fraction: float = 1.0,
             challenge_test_root_feat_folder: str = "challenge",
+            distil_params: Union[None, Dict] = None,
+            training_file: Union[None, str] = None,
+            caption_masks: Union[None, str] = None,
+            ce_shared_dim: Union[None, int] = None,
     ):
 
         # Ensure that the dictionaries are hashable to allow use of caching
         raw_input_dims = HashableOrderedDict(raw_input_dims)
         feat_aggregation = HashableDict(feat_aggregation)
+        if distil_params is not None:
+            distil_params = HashableDict(distil_params)
         max_tokens = HashableDict(max_tokens)
 
         if refresh_lru_cache:
@@ -160,7 +175,10 @@ class ExpertDataLoader:
             raw_input_dims=raw_input_dims,
             feat_aggregation=feat_aggregation,
             restrict_train_captions=restrict_train_captions,
-            subsample_training_data_fraction=subsample_training_data_fraction,
+            distil_params=distil_params,
+            training_file=training_file,
+            caption_masks=caption_masks,
+            ce_shared_dim=ce_shared_dim,
         )
 
         if "retrieval" in task:

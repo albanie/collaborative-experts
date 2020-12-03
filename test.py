@@ -1,31 +1,30 @@
-import argparse
 import copy
-import json
-import logging
 import pickle
 import random
+import logging
+import argparse
+from typing import Tuple, Dict
 from pathlib import Path
-from typing import Tuple
 
 import numpy as np
 import torch
 from mergedeep import Strategy, merge
 from typeguard import typechecked
 
-import data_loader.data_loaders as module_data
-import model.metric as module_metric
 import model as module_arch
+import model.metric as module_metric
 import utils.visualizer as module_vis
+import data_loader.data_loaders as module_data
+from trainer import verbose, ctxt_mgr
+from utils.util import compute_dims, compute_trn_config, update_src_web_video_dir
 from parse_config import ConfigParser
-from trainer import ctxt_mgr, verbose
-from utils.util import (compute_dims, compute_trn_config,
-                        update_src_web_video_dir)
 
 
 @typechecked
 def compress_predictions(query_masks: np.ndarray, sims: np.ndarray, topk: int = 10):
     """We store the indices of the top-k predictions, rather than the full similarity
     matrix, to reduce storage requirements.
+
     NOTE: The similarity matrix contains `num_queries x num_videos` elements, where
     `num_queries = num_videos x max_num_queries_per_video`.  We first mask out
     locations in the similarity matrix that correspond to invalid queries (these are
@@ -54,29 +53,27 @@ def get_model_and_data_loaders(
         logger: logging.Logger,
         ckpt_path: Path,
 ) -> Tuple[torch.nn.Module, module_data.ExpertDataLoader]:
-    expert_dims, raw_input_dims = compute_dims(config)
-    trn_config = compute_trn_config(config)
-    try:
-        with open(config["text_embedding_model_configs"], "r") as f:
-            text_embedding_model_configs = json.load(f)
-        experts = config["experts"]
-        text_dim = text_embedding_model_configs[experts["text_feat"]]["dim"]
-    except KeyError:
-        text_dim = config["experts"]["text_dim"]
+    expert_dims, raw_input_dims, text_dim = compute_dims(config)
+
     data_loaders = config.init(
         name='data_loader',
         module=module_data,
         logger=logger,
         raw_input_dims=raw_input_dims,
         challenge_mode=config.get("challenge_mode", False),
-        text_feat=config["experts"]["text_feat"],
         text_dim=text_dim,
+        text_feat=config["experts"]["text_feat"],
         text_agg=config["experts"]["text_agg"],
         use_zeros_for_missing=config["experts"].get("use_zeros_for_missing", False),
         task=config.get("task", "retrieval"),
         eval_only=True,
+        distil_params=config.get("distil_params", None),
+        training_file=config.get("training_file", None),
+        caption_masks=config.get("caption_masks", None),
+        ce_shared_dim=config["experts"].get("ce_shared_dim", None),
     )
 
+    trn_config = compute_trn_config(config)
     model = config.init(
         name='arch',
         module=module_arch,
@@ -95,8 +92,6 @@ def get_model_and_data_loaders(
     state_dict = checkpoint['state_dict']
     if config['n_gpu'] > 1:
         model = torch.nn.DataParallel(model)
-    
-
     # support backwards compatibility
     deprecated = ["ce.moe_fc_bottleneck1", "ce.moe_cg", "ce.moe_fc_proj"]
     for mod in deprecated:
@@ -106,8 +101,8 @@ def get_model_and_data_loaders(
                 print(f"WARNING: Removing deprecated key {key} from model")
                 state_dict.pop(key)
     model.load_state_dict(state_dict)
-    return model, data_loaders
 
+    return model, data_loaders
 
 def evaluation(config, logger=None, trainer=None):
 
@@ -220,7 +215,7 @@ def evaluation(config, logger=None, trainer=None):
 if __name__ == '__main__':
     args = argparse.ArgumentParser(description='PyTorch Template')
     args.add_argument('--config', default=None, type=str, help="config file path")
-    args.add_argument('--resume', default=None, help='path to checkpoint for evaluation')
+    args.add_argument('--resume', type=Path, help='path to checkpoint for evaluation')
     args.add_argument('--device', help='indices of GPUs to enable')
     args.add_argument('--eval_from_training_config', action="store_true",
                       help="if true, evaluate directly from a training config file.")

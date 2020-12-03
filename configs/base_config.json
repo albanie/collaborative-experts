@@ -3,11 +3,11 @@
     "seed": 0,
     "disable_nan_checks": false,
     "log_name": "info.json",
+    "text_embedding_model_configs": "model/text_embedding_models.json",
     "experts": {
         "drop_feats": "",
         "text_feat": "openai",
         "text_agg": "vlad",
-        "text_dim": 768,
         "modalities": [],
         "ce_shared_dim": 768
     },
@@ -43,7 +43,7 @@
             "trn_cat": false,
             "batch_size": 32,
             "num_workers": 4,
-            "root_feat_folder": "structured-symlinks",
+            "root_feat_folder": "high-quality/structured-symlinks",
             "text_dropout": 0.0,
             "feat_aggregation": {
                 "imagenet.senet154.0": {
@@ -104,9 +104,24 @@
                         "logits": 400
                     }
                 },
+                "i3d.i3d.1": {
+                    "fps": 25,
+                    "offset": 0,
+                    "stride": 4,
+                    "inner_stride": 1,
+                    "pixel_dim": 256,
+                    "temporal": "avg",
+                    "aggregate": "concat",
+                    "aggregate-axis": 1,
+                    "type": "embed",
+                    "feat_dims": {
+                        "embed": 1024,
+                        "logits": 400
+                    }
+                },
                 "moments_3d.moments-resnet3d50.0": {
                     "fps": 25,
-                    "offset": 1,
+                    "offset": 0,
                     "stride": 8,
                     "pixel_dim": 256,
                     "inner_stride": 5,
@@ -119,10 +134,27 @@
                         "logits": 3339
                     }
                 },
+                "s3dg.s3dg.1": {
+                    "fps": 10,
+                    "offset": 0,
+                    "stride": 8,
+                    "num_segments": null,
+                    "pixel_dim": 224,
+                    "inner_stride": 1,
+                    "temporal": "avg",
+                    "aggregate": "concat",
+                    "aggregate-axis": 1,
+                    "type": "embed",
+                    "feat_dims": {
+                        "embed": 1024,
+                        "logits": 512
+                    }
+                },
                 "s3dg.s3dg.0": {
                     "fps": 10,
                     "offset": 0,
                     "stride": 16,
+                    "num_segments": null,
                     "pixel_dim": 256,
                     "inner_stride": 1,
                     "temporal": "avg",
@@ -135,6 +167,21 @@
                     }
                 },
                 "r2p1d.r2p1d-ig65m.0": {
+                    "fps": 30,
+                    "offset": 0,
+                    "stride": 32,
+                    "inner_stride": 1,
+                    "pixel_dim": 256,
+                    "temporal": "avg",
+                    "aggregate": "concat",
+                    "aggregate-axis": 1,
+                    "type": "embed",
+                    "feat_dims": {
+                        "embed": 512,
+                        "logits": 359
+                    }
+                },
+                "r2p1d.r2p1d-ig65m.1": {
                     "fps": 30,
                     "offset": 0,
                     "stride": 32,
@@ -164,10 +211,25 @@
                         "logits": 400
                     }
                 },
-                "moments-static.moments-resnet50.0": {
+                "r2p1d.r2p1d-ig65m-kinetics.1": {
+                    "fps": 30,
+                    "offset": 0,
+                    "stride": 8,
+                    "inner_stride": 1,
+                    "pixel_dim": 256,
+                    "temporal": "avg",
+                    "aggregate": "concat",
+                    "aggregate-axis": 1,
+                    "type": "embed",
+                    "feat_dims": {
+                        "embed": 512,
+                        "logits": 400
+                    }
+                },
+                "moments_2d.resnet50.0": {
                     "fps": 25,
                     "stride": 1,
-                    "offset": 3,
+                    "offset": 0,
                     "pixel_dim": 256,
                     "temporal": "avg",
                     "aggregate": "concat",
@@ -192,6 +254,20 @@
                         "logits": 1000
                     }
                 },
+                "imagenet.resnext101_32x48d.1": {
+                    "fps": 25,
+                    "stride": 1,
+                    "offset": 0,
+                    "pixel_dim": 256,
+                    "temporal": "avg",
+                    "aggregate": "concat",
+                    "aggregate-axis": 1,
+                    "type": "embed",
+                    "feat_dims": {
+                        "embed": 2048,
+                        "logits": 1000
+                    }
+                },
                 "ocr": {
                     "model": "yang",
                     "temporal": "vlad",
@@ -202,8 +278,16 @@
                         "embed": 300
                     }
                 },
+                "audio.vggish.0": {
+                    "model": "vggish",
+                    "flaky": true,
+                    "temporal": "vlad",
+                    "type": "embed",
+                    "binarise": false
+                },
                 "audio": {
                     "model": "vggish",
+                    "flaky": true,
                     "temporal": "vlad",
                     "type": "embed",
                     "binarise": false
