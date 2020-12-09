@@ -15,7 +15,7 @@ class LSMDC(BaseDataset):
 
     @staticmethod
     @typechecked
-    def dataset_paths() -> Dict[str, Union[Path, str, Dict, List[str]]]:
+    def dataset_paths(training_file=None) -> Dict[str, Union[Path, str, Dict, List[str]]]:
         subset_paths = {}
         test_splits = {
             "full-val": "val_list.txt",
@@ -25,29 +25,27 @@ class LSMDC(BaseDataset):
         }
         for split_name, fname in test_splits.items():
             subset_paths[split_name] = {"train": "train_list.txt", "val": fname}
+        for split_name, fname in test_splits.items():
+            if training_file is None:
+                subset_paths[split_name] = {"train": "train_list.txt", "val": fname}
+            else:
+                subset_paths[split_name] = {"train": training_file, "val": fname}
 
-        feature_names = [
-            "imagenet.senet154.0",
-            "scene.densenet161.0",
-            "i3d.i3d.0",
-            "s3dg.s3dg.0",
-            "imagenet.resnext101_32x48d.0",
-            "trn.moments-trn.0",
-            "r2p1d.r2p1d-ig65m.0",
-            "r2p1d.r2p1d-ig65m-kinetics.0",
-            "moments_3d.moments-resnet3d50.0",
-            "moments-static.moments-resnet50.0",
-            "detection",
-            "detection-sem",
-        ]
+
+        feature_names = BaseDataset.common_feat_names()
         custom_paths = {
             "audio": ["aggregated_audio/vggish-raw.pickle"],
             "ocr": ["aggregated_ocr_feats/ocr-w2v.pkl"],
             "face": ["antoine/face-max-with-blank-val.pickle"],
             "speech": ["aggregated_speech/speech-w2v.pickle"],
         }
-        text_feat_paths = {"openai": "openai-text.pickle", "w2v": "w2v-text.pickle"}
-        text_feat_paths = {key: Path("aggregated_text_feats") / fname
+        # old w2v
+        # text_feat_paths = {"openai": "openai-text.pickle", "w2v": "w2v-text.pickle"}
+        text_feat_paths = BaseDataset.common_text_feat_paths()
+        text_feat_paths["openai"] = "openai-text.pickle"
+        text_feat_dir = Path("aggregated_text_feats")
+
+        text_feat_paths = {key: text_feat_dir / fname
                            for key, fname in text_feat_paths.items()}
         challenge_text_feat_paths = {
             key: Path("aggregated_text_feats") / f"{key}{fname.suffix}"
@@ -65,6 +63,15 @@ class LSMDC(BaseDataset):
 
     def load_features(self):
         root_feat = Path(self.root_feat)
+        if self.distil_params is not None:
+            self.distil_features = {}
+            d_base_path = self.distil_params['base_path']
+
+            teachers = list(map(lambda x: root_feat / Path(d_base_path + x), self.distil_params['teachers']))
+
+            for i, f_name in enumerate(teachers):
+                self.distil_features[i] = memcache(f_name)
+
         feat_names = {key: self.visual_feat_paths(key) for key in
                       self.paths["feature_names"]}
         feat_names.update(self.paths["custom_paths"])

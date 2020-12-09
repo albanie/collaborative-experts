@@ -1,0 +1,15 @@
+{
+    "inherit_from": "configs/msrvtt/train-full-ce-refined.json",
+    "experts": {
+        "text_feat": "gpt2-xl-finetune",
+        "text_agg": "vlad"
+    },
+    "distil_loss": false,
+    "optimizer": {
+        "type": "RAdam",
+        "args": {
+            "lr": 0.001,
+            "weight_decay": 1e-5
+        }
+    }
+}

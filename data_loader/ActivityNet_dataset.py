@@ -13,7 +13,7 @@ class ActivityNet(BaseDataset):
 
     @staticmethod
     @typechecked
-    def dataset_paths() -> Dict[str, Union[str, List[str], Path, Dict]]:
+    def dataset_paths(training_file=None) -> Dict[str, Union[str, List[str], Path, Dict]]:
         subset_paths = {}
         test_splits = {
             "val1": "val_1_list.txt",
@@ -22,28 +22,26 @@ class ActivityNet(BaseDataset):
             "public_server_test": "public_server_test.txt",
         }
         for split_name, fname in test_splits.items():
-            subset_paths[split_name] = {"train": "train_list.txt", "val": fname}
+            if training_file is None:
+                subset_paths[split_name] = {"train": "train_list.txt", "val": fname}
+            else:
+                subset_paths[split_name] = {"train": training_file, "val": fname}
 
-        feature_names = [
-            "imagenet.senet154.0",
-            "scene.densenet161.0",
-            "i3d.i3d.0",
-            "s3dg.s3dg.0",
-            "imagenet.resnext101_32x48d.0",
-            "trn.moments-trn.0",
-            "r2p1d.r2p1d-ig65m.0",
-            "r2p1d.r2p1d-ig65m-kinetics.0",
-            "moments_3d.moments-resnet3d50.0",
-            "moments-static.moments-resnet50.0",
-        ]
+
+        feature_names = BaseDataset.common_feat_names()
         custom_paths = {
             "audio": ["aggregated_audio/vggish-audio-raw.pickle"],
             "speech": ["aggregated_speech/goog_w2v-speech-raw.pickle"],
             "ocr": ["aggregated_ocr_feats/ocr-w2v.pkl"],
             "face": ["aggregated_facefeats_25fps_256px_stride1/face-avg.pickle"],
         }
-        text_feat_paths = {}
+        text_feat_paths = BaseDataset.common_text_feat_paths()
+        text_feat_dir = Path("aggregated_text_feats")
+
+        text_feat_paths = {key: text_feat_dir / fname
+                           for key, fname in text_feat_paths.items()}
         challenge_text_feat_paths = {}
+        # include non-standard text features
         for text_feat in ("openai", ):
             text_feat_names = {key: f"{text_feat}-{key}"
                                for key in {"train", "val1"}}
@@ -63,6 +61,15 @@ class ActivityNet(BaseDataset):
 
     def load_features(self):
         root_feat = self.root_feat
+        if self.distil_params is not None:
+            self.distil_features = {}
+            d_base_path = self.distil_params['base_path']
+
+            teachers = list(map(lambda x: root_feat / Path(d_base_path + x), self.distil_params['teachers']))
+
+            for i, f_name in enumerate(teachers):
+                self.distil_features[i] = memcache(f_name)
+
         feat_names = {key: self.visual_feat_paths(key) for key in
                       self.paths["feature_names"]}
         feat_names.update(self.paths["custom_paths"])
@@ -92,10 +99,16 @@ class ActivityNet(BaseDataset):
         if self.challenge_mode:
             self.load_challenge_text_features()
         else:
-            fname = self.paths["text_feat_paths"]["openai"]["train"]
-            self.text_features = memcache(root_feat / fname)
-            fname = self.paths["text_feat_paths"]["openai"][self.split_name]
-            self.text_features.update(memcache(root_feat / fname))
+            text_feat_paths = self.paths["text_feat_paths"][self.text_feat]
+            if isinstance(text_feat_paths, dict):
+                text_features = memcache(root_feat / text_feat_paths["train"])
+                text_features.update(memcache(
+                    root_feat / text_feat_paths[self.split_name]))
+            elif isinstance(text_feat_paths, (Path, str)):
+                text_features = memcache(root_feat / text_feat_paths)
+            else:
+                raise TypeError(f"Unexpected type {type(text_feat_paths)}")
+            self.text_features = text_features
             self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
 
     def sanity_checks(self):

@@ -1,0 +1,23 @@
+{
+    "inherit_from": "configs/activity-net/train-full-ce-refined.json",
+    "experts": {
+        "text_feat": "gpt2-xl-finetune",
+        "text_agg": "vlad"
+    },
+    "distil_loss": true,
+    "distil_params": {
+        "base_path": "teachers/",
+        "teachers": [
+            "train-full-ce-refined-text-w2v.pkl",
+            "train-full-ce-refined-text-gpt2-xl.pkl",
+            "train-full-ce-refined-text-gpt2-xl-finetuned.pkl"
+        ]
+    },
+    "optimizer": {
+        "type": "RAdam",
+        "args": {
+            "lr": 0.001,
+            "weight_decay": 1e-5
+        }
+    }
+}
