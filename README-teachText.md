@@ -1,6 +1,13 @@
-This repo provides code for TeachText.
+This repo provides code:
+- TeachText which leverages complementary cues from multiple text encoders to provide an enhanced supervisory signal to the retrieval model using a generalize distillation setup.
+- Learning and evaluating joint video-text embeddings for the task of video retrieval. The approach is described in the paper "Use What You Have: Video retrieval using representations from collaborative experts" ([paper](https://arxiv.org/abs/1907.13487), [project page](https://www.robots.ox.ac.uk/~vgg/research/collaborative-experts/))
+- CVPR 2020 Pentathlon challenge
 
 **Requirements:** The code assumes PyTorch 1.4 and Python 3.7 (other versions may work, but have not been tested).  See the section on dependencies towards the end of this file for specific package requirements.
+
+### TeachText
+
+![TeachText diagram](figs/TeachText_method.jpg)
 
 **TeachText results on MSRVTT Benchmark**
 

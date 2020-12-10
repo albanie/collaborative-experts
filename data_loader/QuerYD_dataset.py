@@ -13,7 +13,7 @@ class QuerYD(BaseDataset):
 
     @staticmethod
     @typechecked
-    def dataset_paths() -> Dict[str, Union[str, List[str], Path, Dict]]:
+    def dataset_paths(training_file=None) -> Dict[str, Union[str, List[str], Path, Dict]]:
         subset_paths = {}
         test_splits = {
             "val": "val_list.txt",
