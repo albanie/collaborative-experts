@@ -1,0 +1,25 @@
+{
+    "inherit_from": "configs/msrvtt/train-full-ce-refined.json",
+    "experts": {
+        "text_feat": "gpt2-xl-finetune",
+        "text_agg": "vlad"
+    },
+    "optimizer": {
+        "type": "RAdam",
+        "args": {
+            "lr": 0.001,
+            "weight_decay": 1e-5
+        }
+    },
+    "caption_masks": "denoising_masks/denoise-less80.pkl",
+    "training_file": "denoising_masks/denoise-less80.txt",
+    "distil_loss": true,
+    "distil_params": {
+        "base_path": "teachers/",
+        "teachers": [
+            "train-full-ce-refined-text-w2v.pkl",
+            "train-full-ce-refined-text-gpt2-xl.pkl",
+            "train-full-ce-refined-text-gpt2-xl-finetuned.pkl"
+        ]
+    }
+}

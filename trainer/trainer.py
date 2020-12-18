@@ -8,7 +8,6 @@ from base import BaseTrainer
 from utils import memory_summary
 from model.metric import APMeter, APMeterChallenge
 
-
 def verbose(epoch, metrics, mode, name="TEST"):
     r1, r5, r10, r50 = metrics["R1"], metrics["R5"], metrics["R10"], metrics["R50"]
     msg = f"[{mode}]{name:s} epoch {epoch}, R@1: {r1:.1f}"
@@ -55,7 +54,7 @@ class Trainer(BaseTrainer):
     """
     def __init__(self, model, loss, metrics, optimizer, config, data_loaders,
                  lr_scheduler, visualizer, disable_nan_checks, skip_first_n_saves,
-                 include_optim_in_ckpts, force_cpu_val, cache_targets=set(),
+                 include_optim_in_ckpts, force_cpu_val, distil_loss, distil_params, cache_targets=set(),
                  num_keep_ckpts=3, mini_train=False, val_freq=1, skip_tboard=False):
         super().__init__(model, loss, metrics, optimizer, config, mini_train=mini_train,
                          skip_tboard=skip_tboard, num_keep_ckpts=num_keep_ckpts)
@@ -73,6 +72,9 @@ class Trainer(BaseTrainer):
         self.skip_first_n_saves = skip_first_n_saves
         self.include_optim_in_ckpts = include_optim_in_ckpts
         self.seen = {"train": 0, "val": 0}
+        self.distil_loss = distil_loss
+        self.distil_params = distil_params
+        self.tt_loss = torch.nn.SmoothL1Loss(reduction="elementwise_mean")
 
     def _train_epoch(self, epoch):
         """
@@ -105,14 +107,41 @@ class Trainer(BaseTrainer):
             if "labels" in minibatch:
                 labels = minibatch.pop("labels").to(self.device)
 
+            if "distil_video" in minibatch:
+                distil = minibatch.pop("distil_video")
+                distil_text = minibatch.pop("distil_text")
+
+                with torch.no_grad():
+                    new_sims = None
+                    for t in distil:
+                        t_sim = None
+
+                        for new_mod in distil[t]:
+                            distil_text[t][new_mod] = distil_text[t][new_mod].to(self.device)
+                            distil[t][new_mod] = distil[t][new_mod].to(self.device)
+                            tmp_sim = torch.matmul(distil_text[t][new_mod].view(-1, distil_text[t][new_mod].shape[-1]), distil[t][new_mod].t())
+
+                            if t_sim is None:
+                                t_sim = tmp_sim
+                            else:
+                                t_sim = t_sim + tmp_sim
+
+                        if new_sims is None:
+                            new_sims = t_sim
+                        else:
+                            new_sims = new_sims + t_sim
+
+                    new_sims = new_sims / len(distil.keys())
+
             self.optimizer.zero_grad()
             output = self.model(**minibatch)
-
             if "retrieval" in self.data_loaders.dataloaders:
                 loss = self.loss(output["cross_view_conf_matrix"])
             else:
                 loss = self.loss(x=output["class_preds"], target=labels)
 
+            if self.distil_loss:
+                loss += self.tt_loss(output["cross_view_conf_matrix"], new_sims)
             loss.backward()
             self.optimizer.step()
 
@@ -180,7 +209,7 @@ class Trainer(BaseTrainer):
                 self.seen["val"] += batch_size
                 
                 num_queries = samples["text"].shape[0] * samples["text"].shape[1]
-                safe_queries = 4000
+                safe_queries = 256
                 if num_queries > safe_queries:
                     partitions = int(np.ceil(num_queries / safe_queries))
                     chunk_size = int(np.ceil(samples["text"].shape[0] / partitions))
@@ -190,6 +219,8 @@ class Trainer(BaseTrainer):
                         chunk_start = chunk_idx * chunk_size
                         chunk_stop = (chunk_idx + 1) * chunk_size
                         samples["text"] = texts[chunk_start:chunk_stop]
+                        if samples['text'].shape[0] == 0:
+                            continue
                         with ctxt_mgr(samples, self.device,
                                       self.disable_nan_checks) as xx:
                             output = self.model(**xx)

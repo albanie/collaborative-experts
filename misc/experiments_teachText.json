@@ -1,0 +1,34 @@
+{
+
+    "msrvtt-train-gpt2-xl-finetuned-mte-denoising-adam-less80": ["c58ecf3b", "2020-11-21_14-00-26"],
+    "msrvtt-train-gpt2-xl-finetuned-denoising-adam": ["a61447a9", "2020-11-11_05-31-29"],
+    "msrvtt-train-gpt2-xl-finetuned-mte-denoising-adam": ["2cc98676", "2020-11-11_06-21-03"],
+    "msrvtt-train-full-ce": ["6becbb74", "2020-06-28_18-31-21"],
+    "msrvtt-train-ce-intra-mte": ["4d4508a2", "2020-11-06_17-27-00"],
+    "msrvtt-train-gpt2-xl-finetuned-adam": ["244af891", "2020-10-01_12-22-00"],
+    "msrvtt-train-gpt2-xl-finetuned-mte-adam": ["6427fd41", "2020-09-30_20-34-12"],
+
+    "msvd-train-full-ce": ["2ae80bea", "2020-11-11_13-16-14"],
+    "msvd-train-gpt2-xl-finetuned-adam": ["db396303", "2020-10-01_13-17-33"],
+    "msvd-train-gpt2-xl-finetuned-mte-adam": ["0af2a1ed", "2020-09-30_21-30-15"],
+    "msvd-train-ce-intra-mte": ["a3026a07", "2020-11-13_00-19-59"],
+    "msvd-train-gpt2-xl-finetuned-denoising-adam": ["71686a77", "2020-11-11_12-19-27"],
+    "msvd-train-gpt2-xl-finetuned-mte-denoising-adam": ["66dc5dff", "2020-11-11_12-57-29"],
+
+    "didemo-train-full-ce": ["4ea49b50", "2020-06-28_20-04-46"],
+    "didemo-train-gpt2-xl-finetuned-adam": ["616cf11b", "2020-10-01_13-31-57"],
+    "didemo-train-gpt2-xl-finetuned-mte-adam": ["f004e587", "2020-09-30_20-19-13"],
+    "didemo-train-ce-intra-mte": ["1a5a249f", "2020-11-06_19-12-39"],
+
+
+    "lsmdc-train-full-ce": ["7af368b1", "2020-06-28_20-40-54"],
+    "lsmdc-train-gpt2-xl-finetuned-mte-adam": ["38e65732", "2020-09-30_20-52-52"],
+    "lsmdc-train-gpt2-xl-finetuned-adam": ["9e2c8afd", "2020-10-01_13-48-49"],
+    "lsmdc-train-ce-intra-mte": ["1a5555af", "2020-11-06_19-32-23"],
+
+
+    "activity-net-train-full-ce": ["9601c704", "2020-07-31_00-23-01"],
+    "activity-net-train-gpt2-xl-finetuned-adam": ["a791f27d", "2020-10-01_13-42-29"],
+    "activity-net-train-gpt2-xl-finetuned-mte-adam": ["87d04a50", "2020-10-01_08-48-36"],
+    "activity-net-train-ce-intra-mte": ["620ad6b4", "2020-11-06_19-12-39"]
+}

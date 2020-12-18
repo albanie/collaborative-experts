@@ -6,14 +6,14 @@ from zsvision.zs_utils import memcache, concat_features
 from typeguard import typechecked
 
 from utils import memory_summary
-from base.base_dataset_queryd import BaseDataset
+from base.base_dataset import BaseDataset
 
 
 class QuerYDSegments(BaseDataset):
 
     @staticmethod
     @typechecked
-    def dataset_paths() -> Dict[str, Union[str, List[str], Path, Dict]]:
+    def dataset_paths(training_file=None) -> Dict[str, Union[str, List[str], Path, Dict]]:
         subset_paths = {}
         test_splits = {
             "val": "val_list.txt",

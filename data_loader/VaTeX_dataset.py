@@ -1,36 +1,42 @@
+""" VaTeX dataset module.
+"""
 import copy
-import itertools
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, Union, List
 
-from base.base_dataset_queryd import BaseDataset
 from typeguard import typechecked
+from zsvision.zs_utils import memcache, concat_features
+
 from utils import memory_summary
-from zsvision.zs_utils import concat_features, memcache
+from base.base_dataset import BaseDataset
 
 
-class QuerYD(BaseDataset):
+class VaTeX(BaseDataset):
 
     @staticmethod
     @typechecked
-    def dataset_paths(training_file=None) -> Dict[str, Union[str, List[str], Path, Dict]]:
+    def dataset_paths(training_file=-1) -> Dict[str, Union[Path, str, Dict, List[str]]]:
         subset_paths = {}
         test_splits = {
-            "val": "val_list.txt",
-            "test": "test_list.txt",
+            "full-val": "val_list_split1.txt",
+            "full-test": "val_list_split2.txt",
         }
         for split_name, fname in test_splits.items():
             subset_paths[split_name] = {"train": "train_list.txt", "val": fname}
 
         feature_names = BaseDataset.common_feat_names()
-        feature_names.append("audio.vggish.0")
-        text_feat_paths = BaseDataset.common_text_feat_paths()
-        text_feat_paths = {key: Path("text_embeddings") / fname
-                           for key, fname in text_feat_paths.items()}
-        challenge_text_feat_paths = {key: f"text_embeddings/{key}.pkl"
-                                     for key in text_feat_paths}
         custom_paths = {
             "audio": ["aggregated_audio/vggish-raw.hickle"],
+        }
+        text_feat_paths = BaseDataset.common_text_feat_paths()
+
+        text_feat_dir = Path("text-embeddings")
+
+        text_feat_paths = {key: text_feat_dir / fname
+                           for key, fname in text_feat_paths.items()}
+        challenge_text_feat_paths = {
+            key: Path("aggregated_text_feats") / f"{key}{fname.suffix}"
+            for key, fname in text_feat_paths.items()
         }
         feature_info = {
             "custom_paths": custom_paths,
@@ -38,12 +44,21 @@ class QuerYD(BaseDataset):
             "subset_list_paths": subset_paths,
             "text_feat_paths": text_feat_paths,
             "challenge_text_feat_paths": challenge_text_feat_paths,
-            "raw_captions_path": "structured-symlinks/raw_captions_combined_filtered.pkl",
+            "raw_captions_path": "raw-captions.pkl",
         }
         return feature_info
 
     def load_features(self):
-        root_feat = self.root_feat
+        if self.distil_params is not None:
+            self.distil_features = {}
+            d_base_path = self.distil_params['base_path']
+
+            teachers = list(map(lambda x: d_base_path + x, self.distil_params['teachers']))
+
+            for i, f_name in enumerate(teachers):
+                self.distil_features[i] = memcache(f_name)
+
+        root_feat = Path(self.root_feat)
         feat_names = {key: self.visual_feat_paths(key) for key in
                       self.paths["feature_names"]}
         feat_names.update(self.paths["custom_paths"])
@@ -51,7 +66,7 @@ class QuerYD(BaseDataset):
         for expert, rel_names in feat_names.items():
             if expert not in self.ordered_experts:
                 continue
-            feat_paths = tuple([Path(root_feat) / rel_name for rel_name in rel_names])
+            feat_paths = tuple([root_feat / rel_name for rel_name in rel_names])
             if len(feat_paths) == 1:
                 features[expert] = memcache(feat_paths[0])
             else:
@@ -74,19 +89,10 @@ class QuerYD(BaseDataset):
             self.load_challenge_text_features()
         else:
             self.raw_captions = memcache(root_feat / self.paths["raw_captions_path"])
-            # keys = list(raw_captions.keys())
-            # raw_captions_fused = {}
-            # for key in keys:
-            #     raw_captions_fused[key] = list(itertools.chain.from_iterable(raw_captions[key]))
-            # self.raw_captions = raw_captions_fused
             text_feat_path = root_feat / self.paths["text_feat_paths"][self.text_feat]
             self.text_features = memcache(text_feat_path)
 
-        # overload video paths, which are structured differently for YouCook2
-        self.video_path_retrieval = [f"videos/{x}.mp4"
-                                     for x in self.partition_lists["val"]]
-
     def sanity_checks(self):
-        msg = (f"Expected to have single test caption for QuerYD, since we assume"
+        msg = (f"Expected to have single test caption for VaTeX, since we assume "
                f"that the captions are fused (but using {self.num_test_captions})")
-        assert self.num_test_captions == 1, msg
+        assert self.num_test_captions == 10, msg

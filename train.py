@@ -1,16 +1,15 @@
 """
 %run -i train.py --config configs/data_loader_lsmdc.json --device 0
 """
-import argparse
-import copy
-import json
 import os
+import copy
+import time
 import random
 import socket
-import time
+import argparse
 import warnings
-from pathlib import Path
 from test import evaluation
+from pathlib import Path
 
 import numpy as np
 import swats
@@ -18,18 +17,17 @@ import torch
 import torch.nn as nn
 from mergedeep import Strategy, merge
 
-import data_loader.data_loaders as module_data
 import model.loss as module_loss
+import model as module_arch
 import model.metric as module_metric
-import model.model as module_arch
 import utils.visualizer as module_vis
-from logger.log_parser import log_summary
-from parse_config import ConfigParser
+import data_loader.data_loaders as module_data
+from utils import radam, ranger, set_seeds, cos_restart
 from trainer import Trainer
-from utils import cos_restart, radam, ranger, set_seeds
-from utils.util import (compute_dims, compute_trn_config,
-                        update_src_web_video_dir)
-
+from utils.util import compute_dims, compute_trn_config, update_src_web_video_dir
+from parse_config import ConfigParser
+from logger.log_parser import log_summary
+import math
 
 def run_exp(config):
     warnings.filterwarnings('ignore')
@@ -41,7 +39,7 @@ def run_exp(config):
         txt_path = f"{config._log_dir}/preds.txt"
         print(txt_path, file=f, flush=True)
 
-    expert_dims, raw_input_dims = compute_dims(config, logger)
+    expert_dims, raw_input_dims, text_dim = compute_dims(config, logger)
     trn_config = compute_trn_config(config)
 
     if config._args.group_seed:
@@ -59,13 +57,6 @@ def run_exp(config):
         set_seeds(seed)
         config["seed"] = seed
 
-        try:
-            with open(config["text_embedding_model_configs"], "r") as f:
-                text_embedding_model_configs = json.load(f)
-            experts = config["experts"]
-            text_dim = text_embedding_model_configs[experts["text_feat"]]["dim"]
-        except KeyError:
-            text_dim = config["experts"]["text_dim"]
         model = config.init(
             name='arch',
             module=module_arch,
@@ -87,12 +78,16 @@ def run_exp(config):
             logger=logger,
             raw_input_dims=raw_input_dims,
             challenge_mode=config.get("challenge_mode", False),
-            text_feat=config["experts"]["text_feat"],
             text_dim=text_dim,
+            text_feat=config["experts"]["text_feat"],
             text_agg=config["experts"]["text_agg"],
             use_zeros_for_missing=config["experts"].get("use_zeros_for_missing", False),
             task=config.get("task", "retrieval"),
             eval_only=False,
+            distil_params=config.get("distil_params", None),
+            training_file=config.get("training_file", None),
+            caption_masks=config.get("caption_masks", None),
+            ce_shared_dim=config["experts"].get("ce_shared_dim", None),
         )
 
         if config.get("manual_linear_init", False):
@@ -143,6 +138,8 @@ def run_exp(config):
             disable_nan_checks=config["disable_nan_checks"],
             visualizer=visualizer,
             val_freq=config["trainer"].get("val_freq", 1),
+            distil_loss=config.get("distil_loss", False),
+            distil_params=config.get("distil_params", None),
             force_cpu_val=config.get("force_cpu_val", False),
             skip_first_n_saves=config["trainer"].get("skip_first_n_saves", 0),
             include_optim_in_ckpts=config["trainer"].get("include_optim_in_ckpts", 1),
