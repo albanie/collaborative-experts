@@ -1,4 +1,4 @@
-This repo provides code for learning and evaluating joint video-text embeddings for the task of video retrieval.  Our approach is described in the paper "Use What You Have: Video retrieval using representations from collaborative experts" ([paper](https://arxiv.org/abs/1907.13487), [project page](https://www.robots.ox.ac.uk/~vgg/research/collaborative-experts/))
+### Collaborative Experts
 
 ![CE diagram](figs/CE.png)
 
@@ -33,7 +33,6 @@ In the results reported below, the same model is used for both the t2v and v2t e
 
 
 **MSRVTT Benchmark**
-
 
 | Model | Split | Task | R@1 | R@5 | R@10 | R@50 | MdR | MnR | Links |
 | ----- | ------| ---- | --- | --- | ---- | ---- | --- | --- | ----- |

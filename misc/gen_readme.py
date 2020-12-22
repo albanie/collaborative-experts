@@ -91,6 +91,7 @@ def generate_url(root_url: str, target: str,
                  fnames: dict, seed_folders: dict) -> str:
     path_store = {
         "log": {"parent": "log", "fname": fnames[exp_name]},
+        "log_TT": {"parent": "logTT", "fname": fnames[exp_name]},
         "config": {"parent": "models", "fname": "config.json"},
         "model": {"parent": "models", "fname": "trained_model.pth"}
     }
@@ -108,6 +109,7 @@ def small_font_str(tokens):
 def sync_files(experiments, save_dir, webserver, web_dir):
     filetypes = {
         "log": ["summary-seed-1_seed-2_seed-3.json"],
+        "log_TT": ["summary-seed-1_seed-2_seed-3.json"],
         "models": ["trained_model.pth", "config.json"]
     }
     for key, (group_id, timestamp) in experiments.items():
@@ -325,7 +327,7 @@ def parse_log(log_path):
             std = np.nan
         else:
             std = np.std(geoms)
-        results[group]["geom"] = (np.mean(geoms), std)
+        results[group]["geom"] = (round(np.mean(geoms),1), round(std, 1))
     for row in log:
         if "Trainable parameters" in row:
             param_token = row.split(" ")[-1].replace("INFO:summary:", "")
@@ -334,26 +336,29 @@ def parse_log(log_path):
 
 @typechecked
 def multiprocessing_parsing(exp_name: str, meta: list,
-                            save_dir: Path, refresh_summaries: bool):
-    if os.path.exists(Path(save_dir) / 'pickle_files' / f'log_results_{exp_name}.pkl') is False:
+        save_dir: Path, refresh_summaries: bool, teachText: bool, pickle_files: str):
+    if os.path.exists(Path(save_dir) / pickle_files / f'log_results_{exp_name}.pkl') is False:
         group_id, timestamp = meta
+        _log_path = "log_old"
+        if teachText:
+            _log_path = "log"
         if timestamp.startswith("TODO"):
             log_results[exp_name] = {"timestamp": "TODO", "results": {}}
         else:
-            seed_folder = sorted(os.listdir(Path(save_dir) / "log" / Path(exp_name) / group_id))[0]
-            files_in_seed_folder = os.listdir(Path(save_dir) / "log" / Path(exp_name) / group_id / seed_folder /  Path(timestamp))
+            seed_folder = sorted(os.listdir(Path(save_dir) / _log_path / Path(exp_name) / group_id))[0]
+            files_in_seed_folder = os.listdir(Path(save_dir) / _log_path / Path(exp_name) / group_id / seed_folder /  Path(timestamp))
             for file in files_in_seed_folder:
                 if ".json" in file and ".bak" not in file:
                     fname = file
                     break
             rel_fname = Path(timestamp) / fname
             rel_path = Path(exp_name) / group_id / seed_folder / rel_fname
-            log_path = Path(save_dir) / "log" / rel_path
+            log_path = Path(save_dir) / _log_path / rel_path
             if refresh_summaries:
-                summarise(group_id=group_id, log_dir=Path(save_dir) / "log")
+                summarise(group_id=group_id, log_dir=Path(save_dir) / _log_path)
             results = parse_log(log_path)
             log_results = {"timestamp": timestamp, "results": results}
-        with open(Path(save_dir) / 'pickle_files' / f'log_results_{exp_name}.pkl', 'wb') as f:
+        with open(Path(save_dir) / pickle_files / f'log_results_{exp_name}.pkl', 'wb') as f:
             pickle.dump([log_results, fname, seed_folder], f)
             print(f"Saved experiment {exp_name}")
     else:
@@ -364,17 +369,21 @@ def parse_results(
         experiments: Dict[str, List[str]],
         save_dir: Path,
         refresh_summaries: bool,
+        teachText: bool,
 ) -> (Dict[str, Dict[str, Union[str, Dict]]],
       dict, dict):
     starttime = time.time()
     processes = []
     experiments_items = experiments.items()
-    if os.path.exists(Path(save_dir) / 'pickle_files') is False:
-        os.mkdir(Path(save_dir) / 'pickle_files')
+    pickle_files = "pickle_files"
+    if teachText:
+        pickle_files = "pickle_files_teachText"
+    if os.path.exists(Path(save_dir) / pickle_files) is False:
+        os.mkdir(Path(save_dir) / pickle_files)
     for exp_name, meta in experiments_items:
         p = multiprocessing.Process(target=multiprocessing_parsing,
                                     args=(exp_name, meta,
-                                          save_dir, refresh_summaries))
+                                          save_dir, refresh_summaries, teachText, pickle_files))
         processes.append(p)
         p.start()
     for process in processes:
@@ -384,14 +393,20 @@ def parse_results(
     fnames = {}
     seed_folders = {}
     for exp_name, _ in experiments_items:
-        with open(Path(save_dir) / 'pickle_files' / f'log_results_{exp_name}.pkl',
+        with open(Path(save_dir) / pickle_files / f'log_results_{exp_name}.pkl',
                   'rb') as f:
             log_results[exp_name],\
                 fnames[exp_name],\
                     seed_folders[exp_name] = pickle.load(f)
-        with open(Path(save_dir) / 'log_results2.pkl', 'wb') as f:
-            pickle.dump([log_results, fnames, seed_folders], f)
+        if not teachText:
+            with open(Path(save_dir) / 'log_results2.pkl', 'wb') as f:
+                pickle.dump([log_results, fnames, seed_folders], f)
+        else:
+            with open(Path(save_dir) / 'log_results_teachText.pkl', 'wb') as f:
+                pickle.dump([log_results, fnames, seed_folders], f)
     
+
+
     return log_results, fnames, seed_folders
 
 
@@ -425,16 +440,12 @@ def generate_readme(
     save_dir: Path,
     latexify: bool,
     keep_mnr: bool,
-    refresh_summaries: bool
+    refresh_summaries: bool,
+    results: Dict,
+    fnames: Dict,
+    seed_folders: Dict,
+    append_to_existing_readme: bool,
 ):
-
-    results, fnames, seed_folders = parse_results(experiments=experiments,
-                                                  save_dir=save_dir,
-                                                  refresh_summaries=refresh_summaries,
-                                                 )
-    with open(results_path, "w") as f:
-        json.dump(results, f, indent=4, sort_keys=False)
-
     for readme_template, readme_dest in zip(readme_templates, readme_dests):
         with open(readme_template, "r") as f:
             readme = f.read().splitlines()
@@ -491,17 +502,22 @@ def generate_readme(
                     token = f"[latex]({latex_link}) | | | | | | | |"
                 elif results[exp_name]["timestamp"] == "TODO":
                     token = "TODO"
-                elif target in {"config", "model", "log"}:
+                elif target in {"config", "model", "log", "log_TT"}:
                     token = generate_url(root_url, target, exp_name,
                                          experiments=experiments,
                                          fnames=fnames,
                                          seed_folders=seed_folders)
-                elif target in {"t2v", "v2t"}:
-                    token = generate_results_string(target, exp_name, results,
-                                                    latexify=latexify)
+                elif target in {"t2v", "v2t", "geomt2v", "geomv2t"}:
+                    if not "geom" in target:
+                        drop = {"geom"}
+                    else:
+                        drop = {}
+                    target_ = target.split("geom")[-1]
+                    token = generate_results_string(target_, exp_name, results,
+                                                    drop=drop, latexify=latexify)
                 elif target in {"short-t2v", "short-v2t"}:
                     if keep_mnr:
-                        drop = {"R50"}
+                        drop = {"R50", "geom"}
                     else:
                         drop = {"R50", "MeanR", "geom"}
                     target_ = target.split("-")[1]
@@ -524,8 +540,84 @@ def generate_readme(
 
             generated.append(row)
 
-        with open(readme_dest, "w") as f:
-            f.write("\n".join(generated))
+        if not append_to_existing_readme:
+            with open(readme_dest, "w") as f:
+                f.write("\n".join(generated))
+        else:
+            with open(readme_dest, "a") as f:
+                f.write("\n".join(generated))
+
+
+
+def parse_generate_readme(
+    experiments: Dict[str, List[str]],
+    root_url: str,
+    readme_templates: List[Path],
+    readme_dests: List[Path],
+    results_path: Path,
+    latex_table_dir: Path,
+    save_dir: Path,
+    latexify: bool,
+    keep_mnr: bool,
+    refresh_summaries: bool,
+    drop_experiments_hq: bool,
+    results_path_teachText: Path,
+    experiments_teachText: Dict[str, List[str]],
+    teachText_template: Path,
+):
+
+    results, fnames, seed_folders = parse_results(experiments=experiments,
+                                                  save_dir=save_dir,
+                                                  refresh_summaries=refresh_summaries,
+                                                  teachText=False,
+                                                 )
+   
+    append_to_existing_readme=False
+    with open(results_path, "w") as f:
+        json.dump(results, f, indent=4, sort_keys=False)
+
+    if not drop_experiments_hq:
+        results_teachText, fnames_teachText, seed_folders_teachText = parse_results(experiments=experiments_teachText,
+                                                  save_dir=save_dir,
+                                                  refresh_summaries=refresh_summaries,
+                                                  teachText=True,
+                                                 )
+        with open(results_path_teachText, "w") as f:
+            json.dump(results, f, indent=4, sort_keys=False)
+
+        generate_readme(experiments=experiments_teachText,
+            root_url=root_url,
+            readme_templates=[teachText_template],
+            readme_dests=readme_dests,
+            results_path=results_path_teachText,
+            latex_table_dir=latex_table_dir,
+            save_dir=save_dir,
+            latexify=latexify,
+            keep_mnr=keep_mnr,
+            refresh_summaries=refresh_summaries,
+            results=results_teachText,
+            fnames=fnames_teachText,
+            seed_folders=seed_folders_teachText,
+            append_to_existing_readme=False,
+            )
+
+        append_to_existing_readme=True
+    
+    generate_readme(experiments=experiments,
+            root_url=root_url,
+            readme_templates=readme_templates,
+            readme_dests=readme_dests,
+            results_path=results_path,
+            latex_table_dir=latex_table_dir,
+            save_dir=save_dir,
+            latexify=latexify,
+            keep_mnr=keep_mnr,
+            refresh_summaries=refresh_summaries,
+            results=results,
+            fnames=fnames,
+            seed_folders=seed_folders,
+            append_to_existing_readme=append_to_existing_readme,
+            )
 
 
 def main():
@@ -533,9 +625,13 @@ def main():
     parser.add_argument("--save_dir", default="data/saved", type=Path)
     parser.add_argument("--webserver", default="login.robots.ox.ac.uk")
     parser.add_argument("--results_path", default="misc/results.json", type=Path)
+    parser.add_argument("--results_path_teachText", default="misc/results_teachText.json", type=Path)
     parser.add_argument("--experiments_path", default="misc/experiments.json")
+    parser.add_argument("--experiments_teachText", default="misc/experiments_teachText.json")
     parser.add_argument("--readme_template", default="misc/README-template.md")
+    parser.add_argument("--teachText_template", default="misc/README-teachText.md")
     parser.add_argument("--latexify", action="store_true")
+    parser.add_argument("--drop_experiments_hq", action="store_true")
     parser.add_argument("--keep_mnr", action="store_true")
     parser.add_argument("--refresh_summaries", action="store_true")
     parser.add_argument("--readme_dest", default="README.md")
@@ -561,6 +657,9 @@ def main():
     with open(args.experiments_path, "r") as f:
         experiments = json.load(f)
 
+    with open(args.experiments_teachText, 'r') as f:
+        experiments_teachText = json.load(f)
+
     if args.task == "sync_files":
         sync_files(
             web_dir=args.web_dir,
@@ -579,7 +678,7 @@ def main():
             args.ablation_readme_template,
             args.challenge_readme_template,
         ]
-        generate_readme(
+        parse_generate_readme(
             root_url=args.root_url,
             save_dir=args.save_dir,
             latexify=args.latexify,
@@ -590,6 +689,10 @@ def main():
             results_path=args.results_path,
             readme_templates=readme_templates,
             refresh_summaries=args.refresh_summaries,
+            drop_experiments_hq=args.drop_experiments_hq,
+            results_path_teachText=args.results_path_teachText,
+            experiments_teachText=experiments_teachText,
+            teachText_template=args.teachText_template,
         )
 
 
