@@ -3,7 +3,7 @@ import itertools
 from pathlib import Path
 from typing import Dict, List, Union
 
-from base.base_dataset_queryd import BaseDataset
+from base.base_dataset import BaseDataset
 from typeguard import typechecked
 from utils import memory_summary
 from zsvision.zs_utils import concat_features, memcache
