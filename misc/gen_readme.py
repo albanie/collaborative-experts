@@ -91,9 +91,11 @@ def generate_url(root_url: str, target: str,
                  fnames: dict, seed_folders: dict) -> str:
     path_store = {
         "log": {"parent": "log", "fname": fnames[exp_name]},
-        "log_TT": {"parent": "logTT", "fname": fnames[exp_name]},
+        "log_TT": {"parent": "log", "fname": fnames[exp_name]},
         "config": {"parent": "models", "fname": "config.json"},
-        "model": {"parent": "models", "fname": "trained_model.pth"}
+        "config_TT": {"parent": "models", "fname": "config.json"},
+        "model": {"parent": "models", "fname": "trained_model.pth"},
+        "model_TT": {"parent": "models", "fname": "trained_model.pth"}
     }
     paths = path_store[target]
     group_id, timestamp = experiments[exp_name]
@@ -110,7 +112,8 @@ def sync_files(experiments, save_dir, webserver, web_dir):
     filetypes = {
         "log": ["summary-seed-1_seed-2_seed-3.json"],
         "log_TT": ["summary-seed-1_seed-2_seed-3.json"],
-        "models": ["trained_model.pth", "config.json"]
+        "models": ["trained_model.pth", "config.json"],
+        "models_TT": ["trained_model.pth", "config.json"]
     }
     for key, (group_id, timestamp) in experiments.items():
         # copy experiment artifacts
@@ -502,11 +505,17 @@ def generate_readme(
                     token = f"[latex]({latex_link}) | | | | | | | |"
                 elif results[exp_name]["timestamp"] == "TODO":
                     token = "TODO"
-                elif target in {"config", "model", "log", "log_TT"}:
+                elif target in {"config", "model", "log"}:
                     token = generate_url(root_url, target, exp_name,
                                          experiments=experiments,
                                          fnames=fnames,
                                          seed_folders=seed_folders)
+                elif target in {"config_TT", "model_TT", "log_TT"}:
+                    token = generate_url("http://www.robots.ox.ac.uk/~vgg/research/teachtext/data-hq", target, exp_name,
+                                         experiments=experiments,
+                                         fnames=fnames,
+                                         seed_folders=seed_folders)
+
                 elif target in {"t2v", "v2t", "geomt2v", "geomv2t"}:
                     if not "geom" in target:
                         drop = {"geom"}
