@@ -1,5 +1,5 @@
 This repo provides code:
-- TeachText which leverages complementary cues from multiple text encoders to provide an enhanced supervisory signal to the retrieval model using a generalize distillation setup ([project page](https://www.robots.ox.ac.uk/~vgg/research/teachtext/))
+- TeachText which leverages complementary cues from multiple text encoders to provide an enhanced supervisory signal to the retrieval model using a generalize distillation setup ([paper](http://arxiv.org/abs/2104.08271), [project page](https://www.robots.ox.ac.uk/~vgg/research/teachtext/))
 - Learning and evaluating joint video-text embeddings for the task of video retrieval. The approach is described in the paper "Use What You Have: Video retrieval using representations from collaborative experts" ([paper](https://arxiv.org/abs/1907.13487), [project page](https://www.robots.ox.ac.uk/~vgg/research/collaborative-experts/))
 - CVPR 2020 Pentathlon challenge
 
