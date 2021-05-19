@@ -28,7 +28,16 @@ It is worth being aware that there is a reasonable degree of label noise in the 
 
 **Tar contents**
 
-The compressed tar file (600 MiB) can be downloaded from:
+The high quality features used for TeachText can be downloaded from:
+
+
+```
+http:/www.robots.ox.ac.uk/~vgg/research/teachtext/data-hq/high-quality/high-quality-MSRVTT-experts.tar.gz
+sha1sum: 311529eeb17527a728a1b930f64415dc15a11298
+
+```
+
+For Collaborative Experts please download the following files:
 
 ```
 http:/www.robots.ox.ac.uk/~vgg/research/collaborative-experts/data/features-v2/MSRVTT-experts.tar.gz

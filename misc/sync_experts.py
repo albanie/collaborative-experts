@@ -24,6 +24,8 @@ from typeguard import typechecked
 def get_archive_name(dataset: str, release: str, archive_type: str) -> str:
     if release.startswith("challenge-release"):
         archive_name = f"{release}-{dataset}-experts.tar.gz"
+    elif release.startswith("high-quality"):
+        archive_name = f"{release}-{dataset}-experts.tar.gz"
     else:
         archive_name = f"{dataset}-experts.tar.gz"
     if archive_type == "features":
@@ -42,9 +44,11 @@ def upload_to_server(
     release: str,
     webserver: str,
     refresh: Dict[str, bool],
-    experiments: Path,
 ):
-    server_dir = web_dir / "data" / release
+    if release.startswith("high-quality"):
+        server_dir = web_dir / "data-hq" / release
+    else:
+        server_dir = web_dir / "data" / release
     subprocess.call(["ssh", webserver, "mkdir -p", str(server_dir)])
     if release.startswith("challenge-release"):
         dataset_dir = Path("misc/cvpr2020_challenge/datasets") / dataset
@@ -63,6 +67,15 @@ def upload_to_server(
             )
             compressed_path = Path(f"data/{dataset}/webserver-files") / compressed_file
             compressed_paths.append(compressed_path)
+    elif release.startswith("high-quality"):
+        tar_includes = [Path("misc/datasets") / dataset.lower() / "tar_include_hq.txt"]
+        compressed_file = get_archive_name(
+            dataset=dataset,
+            release=release,
+            archive_type="features",
+        )
+        #compressed_paths = [Path("data") / dataset / "webserver-files" / compressed_file]
+        compressed_paths = [Path("/scratch/shared/beegfs/ioana/webserver-files/") / compressed_file]
     else:
         tar_includes = [Path("misc/datasets") / dataset.lower() / "tar_include.txt"]
         compressed_file = get_archive_name(
@@ -201,7 +214,7 @@ def main():
     parser.add_argument("--save_dir", default="data/saved", type=Path)
     parser.add_argument("--release", default="features-v2",
                         choices=["features-v2", "challenge-release-1",
-                                 "challenge-release-2"],
+                                 "challenge-release-2", "high-quality"],
                         help=("The features to fetch (features-v2 refers to the features"
                               " that can be used to reproduce the collaborative experts"
                               "paper"))

@@ -70,6 +70,14 @@ Please note that the numbers are higher than in the original CE due to compressi
 | TeachText - CE    | Full  | t2v  | <sub><sup>22.7<sub>(0.8)</sub></sup></sub> | <sub><sup>56.2<sub>(0.1)</sub></sup></sub> | <sub><sup>71.6<sub>(0.8)</sub></sup></sub> | <sub><sup>95.3<sub>(0.1)</sub></sup></sub> | <sub><sup>4.0<sub>(0.0)</sub></sup></sub> | <sub><sup>15.8<sub>(0.1)</sub></sup></sub> | <sub><sup>45.0<sub>(0.6)</sub></sup></sub> | [config_TT](http:/www.robots.ox.ac.uk/~vgg/research/teachtext/data-hq/models/activity-net-train-ce-intra-mte/620ad6b4/seed-0/2020-11-06_19-12-39/config.json), [model_TT](http:/www.robots.ox.ac.uk/~vgg/research/teachtext/data-hq/models/activity-net-train-ce-intra-mte/620ad6b4/seed-0/2020-11-06_19-12-39/trained_model.pth), [log_TT](http:/www.robots.ox.ac.uk/~vgg/research/teachtext/data-hq/log/activity-net-train-ce-intra-mte/620ad6b4/seed-0/2020-11-06_19-12-39/summary-seed-0_seed-1_seed-2.json) |
 | TeachText - CE+    | Full  | t2v  | <sub><sup>23.5<sub>(0.2)</sub></sup></sub> | <sub><sup>57.2<sub>(0.6)</sub></sup></sub> | <sub><sup>73.6<sub>(0.2)</sub></sup></sub> | <sub><sup>96.1<sub>(0.1)</sub></sup></sub> | <sub><sup>4.0<sub>(0.0)</sub></sup></sub> | <sub><sup>13.7<sub>(0.1)</sub></sup></sub> | <sub><sup>46.3<sub>(0.2)</sub></sup></sub> | [config_TT](http:/www.robots.ox.ac.uk/~vgg/research/teachtext/data-hq/models/activity-net-train-gpt2-xl-finetuned-mte-adam/87d04a50/seed-0/2020-10-01_08-48-36/config.json), [model_TT](http:/www.robots.ox.ac.uk/~vgg/research/teachtext/data-hq/models/activity-net-train-gpt2-xl-finetuned-mte-adam/87d04a50/seed-0/2020-10-01_08-48-36/trained_model.pth), [log_TT](http:/www.robots.ox.ac.uk/~vgg/research/teachtext/data-hq/log/activity-net-train-gpt2-xl-finetuned-mte-adam/87d04a50/seed-0/2020-10-01_08-48-36/summary-seed-0_seed-1_seed-2.json) |
 
+You can download the high quality feature used for TeachText from:
+
+```
+For MSRVTT:
+http:/www.robots.ox.ac.uk/~vgg/research/teachtext/data-hq/high-quality/high-quality-MSRVTT-experts.tar.gz
+sha1sum: 311529eeb17527a728a1b930f64415dc15a11298
+
+```
 ### Collaborative Experts
 
 ![CE diagram](figs/CE.png)
