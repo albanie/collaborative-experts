@@ -1,0 +1,16 @@
+data/MSVD/high-quality/structured-symlinks/aggregated_imagenet_25fps_256px_stride1_offset0/resnext101_32x48d-avg.pickle
+data/MSVD/high-quality/structured-symlinks/aggregated_imagenet_25fps_256px_stride1_offset0/senet154-avg.pickle
+data/MSVD/high-quality/structured-symlinks/aggregated_r2p1d_30fps_256px_stride32_offset0_inner_stride1/r2p1d-ig65m-avg.pickle
+data/MSVD/high-quality/structured-symlinks/aggregated_r2p1d_30fps_256px_stride8_offset0_inner_stride1/r2p1d-ig65m-kinetics-avg.pickle
+data/MSVD/high-quality/structured-symlinks/aggregated_scene_25fps_256px_stride1_offset0/densenet161-avg.pickle
+data/MSVD/high-quality/structured-symlinks/aggregated_text_feats/gpt2-xl-finetune.pkl
+data/MSVD/high-quality/structured-symlinks/aggregated_text_feats/gpt2-xl.pkl
+data/MSVD/high-quality/structured-symlinks/aggregated_text_feats/w2v.pkl
+data/MSVD/high-quality/structured-symlinks/teachers/train-full-ce-refined-text-gpt2-xl-finetuned.pkl
+data/MSVD/high-quality/structured-symlinks/teachers/train-full-ce-refined-text-gpt2-xl.pkl
+data/MSVD/high-quality/structured-symlinks/teachers/train-full-ce-refined-text-w2v.pkl
+data/MSVD/high-quality/structured-symlinks/dict_youtube_mapping.pkl
+data/MSVD/high-quality/structured-symlinks/raw-captions.pkl
+data/MSVD/high-quality/structured-symlinks/test_list.txt
+data/MSVD/high-quality/structured-symlinks/train_list.txt
+data/MSVD/high-quality/structured-symlinks/val_list.txt

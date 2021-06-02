@@ -70,12 +70,24 @@ Please note that the numbers are higher than in the original CE due to compressi
 | TeachText - CE    | Full  | t2v  | {{activity-net-train-ce-intra-mte.geomt2v}} | [config_TT]({{activity-net-train-ce-intra-mte.config_TT}}), [model_TT]({{activity-net-train-ce-intra-mte.model_TT}}), [log_TT]({{activity-net-train-ce-intra-mte.log_TT}}) |
 | TeachText - CE+    | Full  | t2v  | {{activity-net-train-gpt2-xl-finetuned-mte-adam.geomt2v}} | [config_TT]({{activity-net-train-gpt2-xl-finetuned-mte-adam.config_TT}}), [model_TT]({{activity-net-train-gpt2-xl-finetuned-mte-adam.model_TT}}), [log_TT]({{activity-net-train-gpt2-xl-finetuned-mte-adam.log_TT}}) |
 
-You can download the high quality feature used for TeachText from:
+You can download the high quality features used for TeachText from:
 
 ```
 For MSRVTT:
 http:/www.robots.ox.ac.uk/~vgg/research/teachtext/data-hq/high-quality/high-quality-MSRVTT-experts.tar.gz
 sha1sum: 311529eeb17527a728a1b930f64415dc15a11298
+
+For MSVD:
+http:/www.robots.ox.ac.uk/~vgg/research/teachtext/data-hq/high-quality/high-quality-MSVD-experts.tar.gz
+sha1sum: c8eba8c5291dd6bb501757ed0cc327cd22217965
+
+For DiDeMo:
+http:/www.robots.ox.ac.uk/~vgg/research/teachtext/data-hq/high-quality/high-quality-DiDeMo-experts.tar.gz
+sha1sum: 8e128309f12cf3260fe538f82578b5ad91a46bd0
+
+For ActivityNet:
+http:/www.robots.ox.ac.uk/~vgg/research/teachtext/data-hq/high-quality/high-quality-activity-net-experts.tar.gz
+sha1sum: 2f3c7c2fe86bd6d0c6230464a940c429291a4012
 
 ```
 
