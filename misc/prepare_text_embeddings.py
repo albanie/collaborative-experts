@@ -100,15 +100,9 @@ def extract_embeddings_for_video(
         msg = (f"Expected descripton to be a list of string tokens, "
                f" but was {type(description)} instead for {key}")
         assert isinstance(description, List), msg
-        # msg2 = (f"for {key} description[0] gives index out of range")
-        try:
-            assert isinstance(description[0], str), msg
-            description_str = " ".join(description)
-            embedded, failed = model.text2vec(description_str)
-        except IndexError:
-            # import ipdb; ipdb.set_trace()
-            print(key)
-            embedded, failed = [], []
+        assert isinstance(description[0], str), msg
+        description_str = " ".join(description)
+        embedded, failed = model.text2vec(description_str)
         embeddings_for_video.append(embedded)
         failed_tokens.extend(failed)
     return embeddings_for_video, failed_tokens
@@ -133,22 +127,17 @@ def extract_embeddings(
             dest_name = f"{embedding_name}-limit{limit}"
         dest_path = dest_dir / f"{dest_name}.pkl"
 
-        # if dest_path.exists() and not refresh:
-        #     print(f"Found existing text embeddings at {dest_path}, skipping....")
-        #     return
+        if dest_path.exists() and not refresh:
+            print(f"Found existing text embeddings at {dest_path}, skipping....")
+            return
 
         dest_dir.mkdir(exist_ok=True, parents=True)
         # handle the activity-net exception
         if dataset == "activity-net":
             fname = "raw-captions-train-val_1.pkl"
-        elif dataset == "QuerYDSegments":
-            fname = "split_raw_captions_filtered.pkl"
-        elif dataset == "QuerYD":
-            fname = "raw_captions_combined_filtered.pkl"
         else:
             fname = "raw-captions.pkl"
         captions_path = data_dir / dataset / "structured-symlinks" / fname
-        # import ipdb; ipdb.set_trace()
         video_descriptions = memcache(captions_path)
         with open(text_embedding_config_path, "r") as f:
             text_embedding_config = json.load(f)
@@ -260,8 +249,7 @@ def main():
     parser.add_argument("--datasets", nargs="+",
                         default=["MSRVTT", "MSVD", "DiDeMo", "YouCook2", "activity-net",
                                  "LSMDC", "YouDescribe", "YouDescribeSegments",
-                                 "ActivityNetSegments", "DiDeMoSegments",
-                                 "QuerYD", "QuerYDSegments"],
+                                 "ActivityNetSegments", "DiDeMoSegments"],
                         help="The datasets to prepare text embeddings for")
     parser.add_argument("--rel_dest_dir", type=Path,
                         default="processing/text_embeddings",

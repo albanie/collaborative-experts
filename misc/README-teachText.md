@@ -75,7 +75,7 @@ You can download the high quality features used for TeachText from:
 ```
 For MSRVTT:
 http:/www.robots.ox.ac.uk/~vgg/research/teachtext/data-hq/high-quality/high-quality-MSRVTT-experts.tar.gz
-sha1sum: 311529eeb17527a728a1b930f64415dc15a11298
+sha1sum: 734650c3b98509996da75cdedc12101836624917
 
 For MSVD:
 http:/www.robots.ox.ac.uk/~vgg/research/teachtext/data-hq/high-quality/high-quality-MSVD-experts.tar.gz

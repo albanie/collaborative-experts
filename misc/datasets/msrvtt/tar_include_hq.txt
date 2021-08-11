@@ -6,11 +6,11 @@ data/MSRVTT/high-quality/structured-symlinks/aggregated_r2p1d_30fps_256px_stride
 data/MSRVTT/high-quality/structured-symlinks/aggregated_scene_25fps_256px_stride1_offset0/densenet161-avg.pickle
 data/MSRVTT/high-quality/structured-symlinks/aggregated_speech/speech-w2v.pickle
 data/MSRVTT/high-quality/structured-symlinks/antoine/audio_features.pickle
-data/MSRVTT/high-quality/structured-symlinks/aggregated_text_feats/gpt2-xl-finetuned.pkl
+data/MSRVTT/high-quality/structured-symlinks/aggregated_text_feats/gpt2-xl-finetune.pkl
 data/MSRVTT/high-quality/structured-symlinks/aggregated_text_feats/gpt2-xl.pkl
 data/MSRVTT/high-quality/structured-symlinks/aggregated_text_feats/w2v.pkl
 data/MSRVTT/high-quality/structured-symlinks/teachers/train-full-ce-refined-text-gpt2-xl.pkl
-data/MSRVTT/high-quality/structured-symlinks/teachers/train-full-ce-refined-text-gpt2-xl-finetune.pkl
+data/MSRVTT/high-quality/structured-symlinks/teachers/train-full-ce-refined-text-gpt2-xl-finetuned.pkl
 data/MSRVTT/high-quality/structured-symlinks/teachers/train-full-ce-refined-text-w2v.pkl
 data/MSRVTT/high-quality/structured-symlinks/antoine/facefeats-clone.pickle
 data/MSRVTT/high-quality/structured-symlinks/antoine/flow_features.pickle
@@ -23,3 +23,4 @@ data/MSRVTT/high-quality/structured-symlinks/train_list_jsfusion.txt
 data/MSRVTT/high-quality/structured-symlinks/train_list_miech.txt
 data/MSRVTT/high-quality/structured-symlinks/val_list_full.txt
 data/MSRVTT/high-quality/structured-symlinks/val_list_jsfusion.txt
+data/MSVRTT/high-quality/structured-symplinks/jsfusion_val_caption_idx.pkl
