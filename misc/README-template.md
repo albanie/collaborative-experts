@@ -189,6 +189,14 @@ Dependencies can be installed via `pip install -r requirements/pip-requirements.
 [1] If you find this code useful or use the extracted features, please consider citing:
 
 ```
+@inproceedings{croitoru2021teachtext,
+  title={Teachtext: Crossmodal generalized distillation for text-video retrieval},
+  author={Croitoru, I. and Bogolin, S. and Leordeanu, M. and Jin, H. and Zisserman, A. and Albanie, S. and Liu, Y.},
+  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
+  pages={11583--11593},
+  year={2021}
+}
+
 @inproceedings{Liu2019a,
   author    = {Liu, Y. and Albanie, S. and Nagrani, A. and Zisserman, A.},
   booktitle = {arXiv preprint arxiv:1907.13487},
