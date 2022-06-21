@@ -18,7 +18,7 @@ Markdown==3.1.1
 mccabe==0.6.1
 mkl-fft==1.0.12
 mkl-random==1.0.2
-numpy==1.16.4
+numpy==1.22.0
 objgraph==3.4.1
 olefile==0.46
 parso==0.5.0
