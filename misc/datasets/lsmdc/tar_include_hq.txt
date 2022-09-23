@@ -4,7 +4,7 @@ data/LSMDC/high-quality/structured-symlinks/aggregated_imagenet_25fps_256px_stri
 data/LSMDC/high-quality/structured-symlinks/aggregated_r2p1d_30fps_256px_stride32_offset0_inner_stride1/r2p1d-ig65m-avg.pickle
 data/LSMDC/high-quality/structured-symlinks/aggregated_r2p1d_30fps_256px_stride32_offset0_inner_stride1/r2p1d-ig65m-kinetics-avg.pickle
 data/LSMDC/high-quality/structured-symlinks/aggregated_scene_25fps_256px_stride1_offset0/densenet161-avg.pickle
-data/LSMDC/high-quality/structured-symlinks/aggregated_speech_feats/stt_w2v.pickle
+data/LSMDC/high-quality/structured-symlinks/aggregated_speech_feats/speech-w2v.pickle
 data/LSMDC/high-quality/structured-symlinks/aggregated_text_feats/gpt2-xl.pkl
 data/LSMDC/high-quality/structured-symlinks/aggregated_text_feats/gpt2-xl-finetune.pkl
 data/LSMDC/high-quality/structured-symlinks/aggregated_text_feats/w2v.pkl
